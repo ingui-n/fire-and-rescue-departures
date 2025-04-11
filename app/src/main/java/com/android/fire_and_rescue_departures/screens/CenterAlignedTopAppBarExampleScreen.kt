@@ -1,4 +1,4 @@
-package com.android.fire_and_rescue_departures.ui
+package com.android.fire_and_rescue_departures.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,14 +17,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.android.fire_and_rescue_departures.Navigation
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CenterAlignedTopAppBarExample() {
+fun CenterAlignedTopAppBarExampleScreen(
+    navController: NavHostController,
+    viewModel: DeparturesMapViewModel = viewModel()
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
@@ -64,6 +76,7 @@ fun CenterAlignedTopAppBarExample() {
         },
     ) { innerPadding ->
         ScrollContent(innerPadding)
+        Navigation(navController = navController, innerPadding = innerPadding)
     }
 }
 

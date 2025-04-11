@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -27,6 +29,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            val localProperties = gradleLocalProperties(rootDir, providers)
+            buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+        }
+        debug {
+            val localProperties = gradleLocalProperties(rootDir, providers)
+            buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
         }
     }
     compileOptions {
@@ -39,6 +48,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -94,4 +104,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
+
+    // MapCompose
+    implementation("ovh.plrapps:mapcompose:2.16.1")
 }
