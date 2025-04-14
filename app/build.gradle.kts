@@ -50,6 +50,9 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.1.1"
+    }
 }
 
 dependencies {
@@ -107,4 +110,10 @@ dependencies {
 
     // MapCompose
     implementation("ovh.plrapps:mapcompose:2.16.1")
+
+    implementation(libs.material3)
+    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
 }

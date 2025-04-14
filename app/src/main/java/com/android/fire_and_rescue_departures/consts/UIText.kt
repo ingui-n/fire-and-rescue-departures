@@ -10,5 +10,7 @@ enum class UIText(val value: String) {
     DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),
     DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),
 
+    BACK("Back"),
+    SEARCH_PLACEHOLDER("Search..."),
     //todo add all the app texts
 }

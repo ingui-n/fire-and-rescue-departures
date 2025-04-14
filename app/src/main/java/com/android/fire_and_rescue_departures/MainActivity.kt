@@ -5,9 +5,11 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.screens.CenterAlignedTopAppBarExampleScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesBookmarksScreen
+import com.android.fire_and_rescue_departures.screens.DeparturesListScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesMapScreen
 import com.android.fire_and_rescue_departures.screens.MainScreen
 import com.android.fire_and_rescue_departures.ui.theme.BaseAppTheme
@@ -49,8 +52,8 @@ fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
         startDestination = Routes.DEPARTURES_LIST,
         modifier = Modifier.padding(innerPadding)
     ) {
+        composable(Routes.DEPARTURES_LIST) { DeparturesListScreen(navController) }
         composable(Routes.DEPARTURES_MAP) { DeparturesMapScreen(navController) }
-        composable(Routes.DEPARTURES_LIST) { DeparturesBookmarksScreen(navController) }
         composable(Routes.DEPARTURES_BOOKMARKS) { DeparturesBookmarksScreen(navController) }
     }
 }
