@@ -27,19 +27,20 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.android.fire_and_rescue_departures.Navigation
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CenterAlignedTopAppBarExampleScreen(
     navController: NavHostController,
-    viewModel: DeparturesMapViewModel = viewModel()
+    viewModel: DeparturesMapViewModel = koinViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    Scaffold(
+    /*Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 
         topBar = {
@@ -76,8 +77,7 @@ fun CenterAlignedTopAppBarExampleScreen(
         },
     ) { innerPadding ->
         ScrollContent(innerPadding)
-        Navigation(navController = navController, innerPadding = innerPadding)
-    }
+    }*/
 }
 
 @Composable

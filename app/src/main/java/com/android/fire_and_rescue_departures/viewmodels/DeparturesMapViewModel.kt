@@ -4,6 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import com.android.fire_and_rescue_departures.BuildConfig
+import com.android.fire_and_rescue_departures.repository.DeparturesMapRepository
 import ovh.plrapps.mapcompose.api.addLayer
 import ovh.plrapps.mapcompose.api.enableRotation
 import ovh.plrapps.mapcompose.api.onLongPress
@@ -19,7 +20,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.math.pow
 
-class OsmVM : ViewModel() {
+class DeparturesMapViewModel(/*private val departuresMapRepository: DeparturesMapRepository*/) : ViewModel() {
     private val tileStreamProvider = makeTileStreamProvider()
 
     private val maxLevel = 19
@@ -44,7 +45,7 @@ private fun mapSizeAtLevel(wmtsLevel: Int, tileSize: Int): Int {
     return tileSize * 2.0.pow(wmtsLevel).toInt()
 }
 
-class DeparturesMapViewModel : ViewModel() {
+/*class DeparturesMapViewModel : ViewModel() {
     private val tileStreamProvider = makeTileStreamProvider()
 
     val state = MapState(
@@ -58,7 +59,7 @@ class DeparturesMapViewModel : ViewModel() {
         scale = 0f
         shouldLoopScale = true
     }
-}
+}*/
 
 /**
  * A [TileStreamProvider] which performs HTTP requests.
