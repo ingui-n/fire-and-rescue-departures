@@ -6,43 +6,86 @@ import androidx.lifecycle.viewModelScope
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureStatus
+import com.android.fire_and_rescue_departures.data.DepartureUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.android.fire_and_rescue_departures.data.DepartureTypes
 
 class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewModel() {
     private val _departuresList = MutableStateFlow<ApiResult<List<Departure>>>(ApiResult.Loading)
     val departuresList: StateFlow<ApiResult<List<Departure>>> = _departuresList.asStateFlow()
 
-    fun getDeparturesList() {
+    private val _departureUnits = MutableStateFlow<ApiResult<DepartureUnit>>(ApiResult.Loading)
+    val departureUnits: StateFlow<ApiResult<DepartureUnit>> = _departureUnits.asStateFlow()
+
+    fun getDeparturesList(
+        fromDateTime: String? = null,
+        toDateTime: String? = null,
+        status: List<Int>? = null,
+    ) {
         viewModelScope.launch {
             _departuresList.value = ApiResult.Loading
             try {
-                val response = departuresApi.getDepartures()//todo pass filters
+                val response = departuresApi.getDepartures(
+                    fromDateTime,
+                    toDateTime,
+                    status ?: DepartureStatus.getAllIds()
+                )
                 if (response.isSuccessful) {
                     val data = response.body()
                     if (data != null) {
                         _departuresList.value = ApiResult.Success(data)
-                        Log.d("DeparturesListViewModel", "getCryptoList: ${response.body()}")
+                        Log.d("DeparturesListViewModel", "getDeparturesList: ${response.body()}")
                     } else {
                         _departuresList.value = ApiResult.Error("Data is null")
                         Log.e("DeparturesListViewModel", "Data is null")
                     }
                 } else {
                     _departuresList.value =
-                        ApiResult.Error("Error fetching crypto list: ${response.message()}")
+                        ApiResult.Error("Error fetching departures list: ${response.message()}")
                     Log.e(
                         "DeparturesListViewModel",
-                        "Error fetching crypto list: ${response.message()}"
+                        "Error fetching departures list: ${response.message()}"
                     )
                 }
             } catch (e: Exception) {
                 _departuresList.value =
-                    ApiResult.Error("Exception fetching crypto list: ${e.message}")
-                Log.e("DeparturesListViewModel", "Exception fetching crypto list: ${e.message}")
+                    ApiResult.Error("Exception fetching departures list: ${e.message}")
+                Log.e("DeparturesListViewModel", "Exception fetching departures list: ${e.message}")
             }
         }
     }
 
+    fun getDepartureUnits(id: Long) {
+        viewModelScope.launch {
+            _departureUnits.value = ApiResult.Loading
+            try {
+                val response = departuresApi.getDepartureUnits(id)
+                if (response.isSuccessful) {
+                    val data = response.body()
+                    if (data != null) {
+                        _departureUnits.value = ApiResult.Success(data)
+                        Log.d("DeparturesListViewModel", "getDepartureUnits: ${response.body()}")
+                    } else {
+                        _departureUnits.value = ApiResult.Error("Data is null")
+                        Log.e("DeparturesListViewModel", "Data is null")
+                    }
+                } else {
+                    _departureUnits.value =
+                        ApiResult.Error("Error fetching departure units: ${response.message()}")
+                    Log.e(
+                        "DeparturesListViewModel",
+                        "Error fetching departure units: ${response.message()}"
+                    )
+                }
+            } catch (e: Exception) {
+                _departureUnits.value =
+                    ApiResult.Error("Exception fetching departure units: ${e.message}")
+                Log.e("DeparturesListViewModel", "Exception fetching departure units: ${e.message}")
+            }
+        }
+    }
 }

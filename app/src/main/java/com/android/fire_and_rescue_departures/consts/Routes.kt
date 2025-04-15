@@ -4,4 +4,8 @@ object Routes {
     const val DEPARTURES_MAP = "departuresMap"
     const val DEPARTURES_LIST = "departuresList"
     const val DEPARTURES_BOOKMARKS = "departuresBookmarks"
+
+    fun departureDetail(departureId: Long): String {
+        return "departureDetail/$departureId"
+    }
 }

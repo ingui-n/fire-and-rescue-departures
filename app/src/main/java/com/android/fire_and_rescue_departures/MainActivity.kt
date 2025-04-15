@@ -1,7 +1,9 @@
 package com.android.fire_and_rescue_departures
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
     NavHost(
@@ -55,6 +58,7 @@ fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
         composable(Routes.DEPARTURES_LIST) { DeparturesListScreen(navController) }
         composable(Routes.DEPARTURES_MAP) { DeparturesMapScreen(navController) }
         composable(Routes.DEPARTURES_BOOKMARKS) { DeparturesBookmarksScreen(navController) }
+        //todo add detail
     }
 }
 

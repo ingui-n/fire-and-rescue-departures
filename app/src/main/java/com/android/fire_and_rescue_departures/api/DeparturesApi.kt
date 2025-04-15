@@ -8,13 +8,15 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DeparturesApi {
-    @GET("")
+    @GET("api")
     suspend fun getDepartures(
         @Query("casOd") fromDateTime: String? = null,
         @Query("casDo") toDateTime: String? = null,
         @Query("stavIds") status: List<Int>? = null,
     ): Response<List<Departure>>
 
-    @GET("udalosti/{id}/technika")
-    suspend fun getDepartureUnits(@Path("id") id: Long): Response<List<DepartureUnit>>
+    @GET("api/udalosti/{id}/technika")
+    suspend fun getDepartureUnits(
+        @Path("id") id: Long
+    ): Response<DepartureUnit>
 }
