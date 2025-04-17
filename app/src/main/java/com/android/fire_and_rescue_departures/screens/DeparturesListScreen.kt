@@ -63,7 +63,6 @@ fun DeparturesListScreen(
         viewModel.getDeparturesList(
             LocalDateTime.now().minusHours(24).format(DateTimeFormatter.ISO_DATE_TIME),
             LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-            //todo all default statuses
         )
     }
 
@@ -78,22 +77,6 @@ fun DeparturesListScreen(
             )
         }
     ) { padding ->
-        /*Box(Modifier.fillMaxSize().padding(padding)) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val list = List(100) { "Text $it" }
-                items(count = list.size) {
-                    Text(
-                        text = list[it],
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                    )
-                }
-            }
-        }*/
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             Spacer(modifier = Modifier.height(16.dp))
             when (departuresList) {

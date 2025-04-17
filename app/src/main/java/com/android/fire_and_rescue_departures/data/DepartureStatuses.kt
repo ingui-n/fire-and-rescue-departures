@@ -60,4 +60,3 @@ sealed class DepartureStatus(val id: Int, val name: String) {
         fun getAllIds(): List<Int> = all.map { it.id }
     }
 }
-

@@ -1,6 +1,7 @@
 package com.android.fire_and_rescue_departures.items
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
+import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -31,9 +33,7 @@ fun DepartureCardItem(
     navController: NavHostController,
 ) {
     val czechLocale = Locale("cs", "CZ")
-    val formattedStartDateTime = DateTimeFormatter
-        .ofPattern("dd. MMMM HH:mm", czechLocale)
-        .format(LocalDateTime.parse((departure.reportedDateTime ?: departure.startDateTime).toString()))
+    val formattedStartDateTime = getFormattedDepartureStartDateTime(departure)
 
     val status = DepartureStatus.fromId(departure.state)
     val type = DepartureTypes.fromId(departure.type)
@@ -43,7 +43,10 @@ fun DepartureCardItem(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                navController.navigate(Routes.departureDetail(departure.id))
+                navController.navigate(Routes.departureDetail(
+                    departure.id,
+                    (departure.reportedDateTime ?: departure.startDateTime).toString()
+                ))
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {

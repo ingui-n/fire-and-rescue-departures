@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.screens.CenterAlignedTopAppBarExampleScreen
+import com.android.fire_and_rescue_departures.screens.DepartureDetailScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesBookmarksScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesListScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesMapScreen
@@ -58,7 +59,14 @@ fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
         composable(Routes.DEPARTURES_LIST) { DeparturesListScreen(navController) }
         composable(Routes.DEPARTURES_MAP) { DeparturesMapScreen(navController) }
         composable(Routes.DEPARTURES_BOOKMARKS) { DeparturesBookmarksScreen(navController) }
-        //todo add detail
+        composable(Routes.DEPARTURE_DETAIL) { navBackStackEntry -> //todo offline mode
+            val departureId = navBackStackEntry.arguments?.getString("departureId")
+            val departureDateTime = navBackStackEntry.arguments?.getString("departureDateTime")
+
+            if (departureId != null && departureDateTime != null) {
+                DepartureDetailScreen(navController, departureId.toLong(), departureDateTime)
+            }
+        }
     }
 }
 
