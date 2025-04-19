@@ -67,7 +67,7 @@ private fun mapSizeAtLevel(wmtsLevel: Int, tileSize: Int): Int {
 private fun makeTileStreamProvider() =
     TileStreamProvider { row, col, zoomLvl ->
         try {
-            val url = URL("https://api.mapy.cz/v1/maptiles/outdoor/256/$zoomLvl/$col/$row?apikey=${BuildConfig.MAPS_COM_API}")
+            val url = URL("${BuildConfig.MAPS_COM_API_URL}/maptiles/outdoor/256/$zoomLvl/$col/$row?apikey=${BuildConfig.MAPS_COM_API}")
             val connection = url.openConnection() as HttpURLConnection
             connection.doInput = true
             connection.connect()

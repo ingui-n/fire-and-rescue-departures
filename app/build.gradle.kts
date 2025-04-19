@@ -32,10 +32,20 @@ android {
 
             val localProperties = gradleLocalProperties(rootDir, providers)
             buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+            buildConfigField(
+                "String",
+                "MAPS_COM_API_URL",
+                localProperties.getProperty("MAPS_COM_API_URL")
+            )
         }
         debug {
             val localProperties = gradleLocalProperties(rootDir, providers)
             buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+            buildConfigField(
+                "String",
+                "MAPS_COM_API_URL",
+                localProperties.getProperty("MAPS_COM_API_URL")
+            )
         }
     }
     compileOptions {
@@ -116,4 +126,8 @@ dependencies {
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
+
+//    implementation(libs.proj4j.epsg)
+    implementation("org.locationtech.proj4j:proj4j:1.4.0")
+    implementation("org.locationtech.proj4j:proj4j-epsg:1.4.0")
 }

@@ -1,6 +1,10 @@
 package com.android.fire_and_rescue_departures
 
 import android.annotation.SuppressLint
+import android.content.Context
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.data.DeparturesMapEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
@@ -29,6 +33,10 @@ val networkModule = module {
     single { provideOkHttpClient() }
     single { provideRetrofit(get()) }
     single { provideDeparturesApi(get()) }
+}
+
+val imageModule = module {
+    single { provideImageLoader(androidContext()) }
 }
 
 val objectBoxModule = module {
@@ -87,4 +95,20 @@ fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
 
 fun provideDeparturesApi(retrofit: Retrofit): DeparturesApi {
     return retrofit.create(DeparturesApi::class.java)
+}
+
+fun provideImageLoader(androidContext: Context): ImageLoader {
+    return ImageLoader.Builder(androidContext)
+        .memoryCache {
+            MemoryCache.Builder(androidContext)
+                .maxSizePercent(0.25)
+                .build()
+        }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(androidContext.cacheDir.resolve("image_cache"))
+                .maxSizePercent(0.02)
+                .build()
+        }
+        .build()
 }

@@ -1,1 +1,2 @@
-MAPS_COM_API=
+MAPS_COM_API=""
+MAPS_COM_API_URL="https://api.mapy.cz/v1"

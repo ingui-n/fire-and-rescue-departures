@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             modules(
                 viewModelModule,
                 networkModule,
+                imageModule,
                 objectBoxModule
             )
         }
