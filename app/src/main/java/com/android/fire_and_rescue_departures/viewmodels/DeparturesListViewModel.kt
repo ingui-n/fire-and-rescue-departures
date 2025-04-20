@@ -24,8 +24,8 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
     private val _departure = MutableStateFlow<ApiResult<Departure>>(ApiResult.Loading)
     val departure: StateFlow<ApiResult<Departure>> = _departure.asStateFlow()
 
-    private val _departureUnits = MutableStateFlow<ApiResult<DepartureUnit>>(ApiResult.Loading)
-    val departureUnits: StateFlow<ApiResult<DepartureUnit>> = _departureUnits.asStateFlow()
+    private val _departureUnits = MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
+    val departureUnits: StateFlow<ApiResult<List<DepartureUnit>>> = _departureUnits.asStateFlow()
 
     fun getDeparturesList(
         fromDateTime: String? = null,

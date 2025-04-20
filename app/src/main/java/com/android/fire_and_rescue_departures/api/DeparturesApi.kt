@@ -18,5 +18,5 @@ interface DeparturesApi {
     @GET("api/udalosti/{id}/technika")
     suspend fun getDepartureUnits(
         @Path("id") id: Long
-    ): Response<DepartureUnit>
+    ): Response<List<DepartureUnit>>
 }

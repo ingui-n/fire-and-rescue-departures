@@ -3,6 +3,7 @@ package com.android.fire_and_rescue_departures.screens
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -31,7 +30,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.android.fire_and_rescue_departures.BuildConfig
 import com.android.fire_and_rescue_departures.R
 import com.android.fire_and_rescue_departures.api.ApiResult
@@ -55,191 +53,240 @@ fun DepartureDetailScreen(
     departureDateTime: String,
     viewModel: DeparturesListViewModel = koinViewModel()
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route //todo
-
-    val scrollState = rememberScrollState()
-    val departureDetailResult by viewModel.departure.collectAsState()
     val context = LocalContext.current
+    val departureDetailResult by viewModel.departure.collectAsState()
+    val departureUnitsResult by viewModel.departureUnits.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getDeparture(departureId, departureDateTime)
+        viewModel.getDepartureUnits(departureId)
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when (departureDetailResult) {
-            is ApiResult.Loading -> {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        item {
+            when (departureDetailResult) {
+                is ApiResult.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                }
+
+                is ApiResult.Success -> {
+                    val departure = (departureDetailResult as ApiResult.Success).data
+                    val departureStatus = DepartureStatus.fromId(departure.state)
+                    val departureType = DepartureTypes.fromId(departure.type)
+                    val departureSubtype = DepartureSubtypes.fromId(departure.subType)
+                    val departureStartDateTime = getFormattedDepartureStartDateTime(departure)
+                    val coordinates = convertSjtskToWgs(
+                        departure.gis1.toDouble(),
+                        departure.gis2.toDouble()
+                    )
+
+                    if (departureType !== null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = departureType.name,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    if (departureSubtype !== null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = departureSubtype.name,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    if (departureStatus !== null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = departureStatus.name,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = "Čas ohlášení:"
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = departureStartDateTime,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (departure.description !== null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = capitalizeFirstLetter(departure.description),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = "Obec:"
+                        )
+                        Text(text = departure.region.name)
+                        Text(text = departure.district.name)
+
+                        if (departure.municipality !== null)
+                            Text(text = departure.municipality)
+                        if (departure.municipalityPart !== null)
+                            Text(text = departure.municipalityPart)
+                        if (departure.municipalityWithExtendedCompetence !== null)
+                            Text(text = departure.municipalityWithExtendedCompetence)
+                        if (departure.street !== null)
+                            Text(text = departure.street)
+                        if (departure.road !== null)
+                            Text(text = departure.road)
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (departure.preplanned) {
+                        Text(text = "Předem naplánovaná")
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    OutlinedCard {
+                        val url =
+                            "${BuildConfig.MAPS_COM_API_URL}/static/map?lon=${coordinates.x}&lat=${coordinates.y}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${coordinates.x},${coordinates.y}&apikey=${BuildConfig.MAPS_COM_API}"
+
+                        FullScreenableImage(url)
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        val googleMapsUrl =
+                            "https://www.google.com/maps/place/${decimalToDMS(coordinates.x)}+${
+                                decimalToDMS(
+                                    coordinates.y,
+                                    true
+                                )
+                            }/@${coordinates.x},${coordinates.y}"
+
+                        IconButton(onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, googleMapsUrl.toUri())
+                            context.startActivity(intent)
+                        }) {
+                            Image(
+                                painter = painterResource(id = R.drawable.google_maps_icon),
+                                contentDescription = "Open on Google Maps"
+                            )
+                        }
+
+                        val mapyCzUrl =
+                            "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
+
+                        IconButton(onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, mapyCzUrl.toUri())
+                            context.startActivity(intent)
+                        }) {
+                            Image(
+                                painter = painterResource(id = R.drawable.mapy_com_icon),
+                                contentDescription = "Open on Mapy.com"
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedCard {
+                        val url =
+                            "${BuildConfig.MAPS_COM_API_URL}/static/pano?width=800&height=600&lon=${coordinates.x}&lat=${coordinates.y}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
+
+                        FullScreenableImage(url)
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                is ApiResult.Error -> {
+                    val errorMessage = (departureDetailResult as ApiResult.Error).message
+                    Text(text = "Error: $errorMessage", style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
 
-            is ApiResult.Success -> {
-                val departure = (departureDetailResult as ApiResult.Success).data
-                val departureStatus = DepartureStatus.fromId(departure.state)
-                val departureType = DepartureTypes.fromId(departure.type)
-                val departureSubtype = DepartureSubtypes.fromId(departure.subType)
-                val departureStartDateTime = getFormattedDepartureStartDateTime(departure)
-                val coordinates = convertSjtskToWgs(
-                    departure.gis1.toDouble(),
-                    departure.gis2.toDouble()
-                )
-                //todo get technika
-
-                if (departureType !== null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = departureType.name,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                if (departureStatus !== null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = departureStatus.name,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = "Čas ohlášení:"
-                    )
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = departureStartDateTime,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (departure.description !== null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = capitalizeFirstLetter(departure.description),
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = "Obec:"
-                    )
-                    Text(text = departure.region.name)
-                    Text(text = departure.district.name)
-
-                    if (departure.municipality !== null)
-                        Text(text = departure.municipality)
-                    if (departure.municipalityPart !== null)
-                        Text(text = departure.municipalityPart)
-                    if (departure.municipalityWithExtendedCompetence !== null)
-                        Text(text = departure.municipalityWithExtendedCompetence)
-                    if (departure.street !== null)
-                        Text(text = departure.street)
-                    if (departure.road !== null)
-                        Text(text = departure.road)
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (departure.preplanned) {
-                    Text(text = "Předem naplánovaná")
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                OutlinedCard {
-                    val url =
-                        "${BuildConfig.MAPS_COM_API_URL}/static/map?lon=${coordinates.x}&lat=${coordinates.y}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${coordinates.x},${coordinates.y}&apikey=${BuildConfig.MAPS_COM_API}"
-
-                    FullScreenableImage(url)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    val googleMapsUrl = "https://www.google.com/maps/place/${decimalToDMS(coordinates.x)}+${
-                        decimalToDMS(
-                            coordinates.y,
-                            true
-                        )
-                    }/@${coordinates.x},${coordinates.y}"
-
-                    IconButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, googleMapsUrl.toUri())
-                        context.startActivity(intent)
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.google_maps_icon),
-                            contentDescription = "Open on Google Maps"
-                        )
-                    }
-
-                    val mapyCzUrl = "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
-
-                    IconButton(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, mapyCzUrl.toUri())
-                        context.startActivity(intent)
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.mapy_com_icon),
-                            contentDescription = "Open on Mapy.com"
-                        )
+        item {
+            when (departureUnitsResult) {
+                is ApiResult.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                is ApiResult.Success -> {
+                    val departureUnits = (departureUnitsResult as ApiResult.Success).data
 
-                OutlinedCard {
-                    val url =
-                        "${BuildConfig.MAPS_COM_API_URL}/static/pano?width=800&height=600&lon=${coordinates.x}&lat=${coordinates.y}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
+                    departureUnits.forEach { unit ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (unit.type != null)
+                                Text(text = capitalizeFirstLetter(unit.type))
+                            if (unit.unit != null)
+                                Text(text = unit.unit)
+                            if (unit.count != null)
+                                Text(text = "Počet: ${unit.count}")
+                            if (unit.currentCount != null)
+                                Text(text = "Aktuálně zasahující: ${unit.currentCount}")
+                            if (unit.callDateTime != null)
+                                Text(text = "Čas ohlášení: ${unit.callDateTime}")
 
-                    FullScreenableImage(url)
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                //todo technika mapa + výpis jednotek
-            }
-
-            is ApiResult.Error -> {
-                val errorMessage = (departureDetailResult as ApiResult.Error).message
-                Text(text = "Error: $errorMessage", style = MaterialTheme.typography.bodyLarge)
+                is ApiResult.Error -> {
+                    val errorMessage = (departureUnitsResult as ApiResult.Error).message
+                    Text(text = "Error: $errorMessage", style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
     }
