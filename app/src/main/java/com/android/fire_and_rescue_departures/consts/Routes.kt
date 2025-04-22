@@ -1,12 +1,25 @@
 package com.android.fire_and_rescue_departures.consts
 
+import com.android.fire_and_rescue_departures.data.AppRoute
+
 object Routes {
-    const val DEPARTURES_MAP = "departuresMap"
-    const val DEPARTURES_LIST = "departuresList"
-    const val DEPARTURES_BOOKMARKS = "departuresBookmarks"
-    const val DEPARTURE_DETAIL = "departureDetail/{departureId}-{departureDateTime}"
+    val DepartureMap = AppRoute("departureMap", false, true)
+    val DeparturesList = AppRoute("departuresList", false, true)
+    val DeparturesBookmarks = AppRoute("departuresBookmarks", true, false)
+    val DepartureDetail = AppRoute("departureDetail/{departureId}-{departureDateTime}", true, false)
+
+    val all = listOf(
+        DepartureMap,
+        DeparturesList,
+        DeparturesBookmarks,
+        DepartureDetail
+    )
 
     fun departureDetail(departureId: Long, departureDateTime: String): String {
         return "departureDetail/$departureId-$departureDateTime"
+    }
+
+    fun getRoute(route: String?): AppRoute {
+        return all.find { it.route == route } ?: DeparturesList
     }
 }

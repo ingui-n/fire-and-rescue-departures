@@ -19,20 +19,20 @@ sealed class BottomNavItem(
         UIText.DEPARTURES_LIST_TITLE_SHORT.value,
         Icons.Filled.Search,
         Icons.Outlined.Search,
-        Routes.DEPARTURES_LIST
+        Routes.DeparturesList.route
     )
 
     object Map : BottomNavItem(
         UIText.DEPARTURES_MAP_TITLE_SHORT.value,
         Icons.Filled.LocationOn,
         Icons.Outlined.LocationOn,
-        Routes.DEPARTURES_MAP
+        Routes.DepartureMap.route
     )
 
     object Bookmarks : BottomNavItem(
         UIText.DEPARTURES_BOOKMARKS_TITLE_SHORT.value,
         Icons.Filled.Star,
         Icons.Outlined.Star,
-        Routes.DEPARTURES_BOOKMARKS
+        Routes.DeparturesBookmarks.route
     )
 }

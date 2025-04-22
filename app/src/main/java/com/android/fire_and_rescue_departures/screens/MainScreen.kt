@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.android.fire_and_rescue_departures.Navigation
 import com.android.fire_and_rescue_departures.consts.BottomNavItem
+import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -26,9 +27,12 @@ fun MainScreen(navController: NavHostController) {
     )
 
     Scaffold(
-
-        //todo show bottom bar only on some pages
-        bottomBar = { BottomBar(navController, currentRoute, items) }
+        //todo move top bar here
+        bottomBar = {
+            if (Routes.getRoute(currentRoute).showBottomBar) {
+                BottomBar(navController, currentRoute, items)
+            }
+        }
     ) { innerPadding ->
         Navigation(navController = navController, innerPadding = innerPadding)
     }

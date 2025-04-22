@@ -52,13 +52,13 @@ class MainActivity : AppCompatActivity() {
 fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
     NavHost(
         navController = navController,
-        startDestination = Routes.DEPARTURES_LIST,
+        startDestination = Routes.DeparturesList.route,
         modifier = Modifier.padding(innerPadding)
     ) {
-        composable(Routes.DEPARTURES_LIST) { DeparturesListScreen(navController) }
-        composable(Routes.DEPARTURES_MAP) { DeparturesMapScreen(navController) }
-        composable(Routes.DEPARTURES_BOOKMARKS) { DeparturesBookmarksScreen(navController) }
-        composable(Routes.DEPARTURE_DETAIL) { navBackStackEntry -> //todo offline mode
+        composable(Routes.DeparturesList.route) { DeparturesListScreen(navController) }
+        composable(Routes.DepartureMap.route) { DeparturesMapScreen(navController) }
+        composable(Routes.DeparturesBookmarks.route) { DeparturesBookmarksScreen(navController) }
+        composable(Routes.DepartureDetail.route) { navBackStackEntry -> //todo offline mode
             val departureId = navBackStackEntry.arguments?.getString("departureId")
             val departureDateTime = navBackStackEntry.arguments?.getString("departureDateTime")
 
