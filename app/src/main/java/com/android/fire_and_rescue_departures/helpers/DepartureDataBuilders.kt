@@ -2,10 +2,8 @@ package com.android.fire_and_rescue_departures.helpers
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.android.fire_and_rescue_departures.BuildConfig
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
-import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.locationtech.proj4j.ProjCoordinate

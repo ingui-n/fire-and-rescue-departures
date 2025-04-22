@@ -72,6 +72,11 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         toDateTime: String? = fromDateTime,
         yearsIteration: Long = 0,
     ) {
+        if (departure.value is ApiResult.Success &&
+            (departure.value as ApiResult.Success).data.id == id) {
+            return
+        }
+
         viewModelScope.launch {
             _departure.value = ApiResult.Loading
 

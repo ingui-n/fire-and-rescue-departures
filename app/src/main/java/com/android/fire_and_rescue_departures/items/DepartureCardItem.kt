@@ -20,7 +20,6 @@ import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
-import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +28,6 @@ fun DepartureCardItem(
     departure: Departure,
     navController: NavHostController,
 ) {
-    val czechLocale = Locale("cs", "CZ")
     val formattedStartDateTime = getFormattedDepartureStartDateTime(departure)
 
     val status = DepartureStatus.fromId(departure.state)

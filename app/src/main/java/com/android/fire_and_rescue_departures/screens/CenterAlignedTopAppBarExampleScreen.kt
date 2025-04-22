@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.android.fire_and_rescue_departures.Navigation
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import org.koin.androidx.compose.koinViewModel
 
