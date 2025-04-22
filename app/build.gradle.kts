@@ -32,6 +32,7 @@ android {
 
             val localProperties = gradleLocalProperties(rootDir, providers)
             buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+            buildConfigField("String", "HZS_API_URL", localProperties.getProperty("HZS_API_URL"))
             buildConfigField(
                 "String",
                 "MAPS_COM_API_URL",
@@ -41,6 +42,7 @@ android {
         debug {
             val localProperties = gradleLocalProperties(rootDir, providers)
             buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+            buildConfigField("String", "HZS_API_URL", localProperties.getProperty("HZS_API_URL"))
             buildConfigField(
                 "String",
                 "MAPS_COM_API_URL",

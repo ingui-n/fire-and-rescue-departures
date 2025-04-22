@@ -7,17 +7,14 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.fire_and_rescue_departures.consts.Routes
-import com.android.fire_and_rescue_departures.screens.CenterAlignedTopAppBarExampleScreen
 import com.android.fire_and_rescue_departures.screens.DepartureDetailScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesBookmarksScreen
 import com.android.fire_and_rescue_departures.screens.DeparturesListScreen
@@ -28,6 +25,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
 class MainActivity : AppCompatActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startKoin {
@@ -71,6 +69,7 @@ fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {

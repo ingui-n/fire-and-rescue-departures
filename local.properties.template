@@ -1,2 +1,3 @@
 MAPS_COM_API=""
 MAPS_COM_API_URL="https://api.mapy.cz/v1"
+HZS_API_URL="https://udalosti.hzsulk.cz/"
