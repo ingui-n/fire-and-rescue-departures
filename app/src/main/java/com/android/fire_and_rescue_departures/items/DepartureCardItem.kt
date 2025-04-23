@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
@@ -26,7 +26,7 @@ import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStart
 @Composable
 fun DepartureCardItem(
     departure: Departure,
-    navController: NavHostController,
+    navController: NavController,
 ) {
     val formattedStartDateTime = getFormattedDepartureStartDateTime(departure)
 

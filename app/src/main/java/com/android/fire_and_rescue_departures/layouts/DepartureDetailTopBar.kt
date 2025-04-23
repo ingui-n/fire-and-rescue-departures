@@ -5,6 +5,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,35 +27,49 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
+import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.buildDepartureShareText
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DepartureDetailTopBar(
     navController: NavHostController,
-    viewModel: DeparturesListViewModel
+    viewModel: DeparturesListViewModel,
+    bookmarksViewModel: DeparturesBookmarksViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val departureDetailResult by viewModel.departure.collectAsState()
+    val departureBookmarks by bookmarksViewModel.departureBookmarks.collectAsState()
 
     var topBarTitle by remember { mutableStateOf("") }
     var topBarShareText by remember { mutableStateOf("") }
+    var isInBookmarks by remember { mutableStateOf(false) }
+    var departure: Departure? by remember { mutableStateOf(null) }
 
     when (departureDetailResult) {
         is ApiResult.Loading -> {}
         is ApiResult.Success -> {
-            val departure = (departureDetailResult as ApiResult.Success).data
-            val departureType = DepartureTypes.fromId(departure.type)
+            val localDeparture = (departureDetailResult as ApiResult.Success).data
+            departure = localDeparture
+
+            val departureType = DepartureTypes.fromId(localDeparture.type)
 
             if (departureType !== null)
                 topBarTitle = departureType.name
-            topBarShareText = buildDepartureShareText(departure)
+            topBarShareText = buildDepartureShareText(localDeparture)
 
-            println("departure loaded")
+            isInBookmarks =
+                if (departureBookmarks is ApiResult.Success) {
+                    (departureBookmarks as ApiResult.Success).data.any { it.id == localDeparture.id }
+                } else {
+                    false
+                }
         }
 
         is ApiResult.Error -> {}
@@ -98,6 +115,24 @@ fun DepartureDetailTopBar(
                         imageVector = Icons.Outlined.Share,
                         contentDescription = "Share"
                     )
+                }
+            }
+
+            if (departure != null) {
+                if (isInBookmarks) {
+                    IconButton(onClick = { bookmarksViewModel.removeDepartureBookmark(departure!!.id) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Bookmark,
+                            contentDescription = "Remove from Bookmarks"
+                        )
+                    }
+                } else {
+                    IconButton(onClick = { bookmarksViewModel.addDepartureBookmark(departure!!) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.BookmarkBorder,
+                            contentDescription = "Add to Bookmarks"
+                        )
+                    }
                 }
             }
         },

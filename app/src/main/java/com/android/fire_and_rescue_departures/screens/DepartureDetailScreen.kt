@@ -53,7 +53,6 @@ import com.android.fire_and_rescue_departures.helpers.buildDepartureShareText
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DepartureDetailScreen(
-    navController: NavHostController,
     departureId: Long,
     departureDateTime: String,
     viewModel: DeparturesListViewModel

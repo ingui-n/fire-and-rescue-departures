@@ -132,4 +132,6 @@ dependencies {
 //    implementation(libs.proj4j.epsg)
     implementation("org.locationtech.proj4j:proj4j:1.4.0")
     implementation("org.locationtech.proj4j:proj4j-epsg:1.4.0")
+    implementation("io.objectbox:objectbox-kotlin:4.0.2")
+    kapt("io.objectbox:objectbox-processor:4.0.2")
 }

@@ -1,44 +1,63 @@
 package com.android.fire_and_rescue_departures.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import ovh.plrapps.mapcompose.ui.MapUI
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.UIText
-import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
+import com.android.fire_and_rescue_departures.items.DepartureCardItem
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import org.koin.androidx.compose.koinViewModel
-import ovh.plrapps.mapcompose.api.centroidX
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeparturesBookmarksScreen(//todo bookmarks
+fun DeparturesBookmarksScreen(
     navController: NavController,
-    modifier: Modifier = Modifier,
-    //viewModel: OsmVM = koinViewModel()
+    viewModel: DeparturesBookmarksViewModel = koinViewModel()
 ) {
+    val departureBookmarks by viewModel.departureBookmarks.collectAsState()
+    val listState = rememberLazyListState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(UIText.DEPARTURES_BOOKMARKS_TITLE.value) },
-            )
+    LaunchedEffect(Unit) {
+        viewModel.loadDepartureBookmarks()
+    }
+
+    when (departureBookmarks) {
+        is ApiResult.Loading -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
         }
-    ) { padding ->
-        Column(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.height(16.dp))
+
+        is ApiResult.Success -> {
+            val departuresList = (departureBookmarks as ApiResult.Success).data
+            LazyColumn(state = listState) {
+                items(departuresList) { departure ->
+                    DepartureCardItem(
+                        departure = departure,
+                        navController = navController,
+                    )
+                }
+            }
+        }
+
+        is ApiResult.Error -> {
+            Text(text = UIText.DEPARTURES_LIST_EMPTY_LIST.value)
         }
     }
 }

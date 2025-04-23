@@ -2,12 +2,17 @@ package com.android.fire_and_rescue_departures
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
+import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
 import com.android.fire_and_rescue_departures.data.DeparturesMapEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
+import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import io.objectbox.BoxStore
@@ -24,9 +29,15 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+val repositoryModule = module {
+    single { DepartureBookmarksRepository(get()) }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 val viewModelModule = module {
     viewModel { DeparturesMapViewModel(/*get()*/) }
     viewModel { DeparturesListViewModel(get()) }
+    viewModel { DeparturesBookmarksViewModel(get(), get()) }
 }
 
 val networkModule = module {
@@ -46,6 +57,7 @@ val objectBoxModule = module {
             .build()
     }
     single { get<BoxStore>().boxFor(DeparturesMapEntity::class.java) }
+    single { get<BoxStore>().boxFor(DepartureBookmarkEntity::class.java) }
 }
 
 fun provideOkHttpClient(): OkHttpClient {
@@ -53,9 +65,13 @@ fun provideOkHttpClient(): OkHttpClient {
         @SuppressLint("CustomX509TrustManager")
         object : X509TrustManager {
             @SuppressLint("TrustAllX509TrustManager")
-            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+            }
+
             @SuppressLint("TrustAllX509TrustManager")
-            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+            }
+
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         }
     )

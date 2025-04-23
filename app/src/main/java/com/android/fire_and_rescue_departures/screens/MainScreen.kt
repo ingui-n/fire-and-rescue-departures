@@ -71,7 +71,7 @@ fun MainScreen(navController: NavHostController) {
                 }
 
                 if (id != null && date != null) {
-                    DepartureDetailScreen(navController, id, date, departureListViewModel)
+                    DepartureDetailScreen(id, date, departureListViewModel)
                 }
             }
         }

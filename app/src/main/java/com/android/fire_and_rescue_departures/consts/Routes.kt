@@ -5,7 +5,7 @@ import com.android.fire_and_rescue_departures.data.AppRoute
 object Routes {
     val DepartureMap = AppRoute("departureMap", false, true)
     val DeparturesList = AppRoute("departuresList", false, true)
-    val DeparturesBookmarks = AppRoute("departuresBookmarks", true, false)
+    val DeparturesBookmarks = AppRoute("departuresBookmarks", false, true)
     val DepartureDetail = AppRoute("departureDetail/{departureId}-{departureDateTime}", true, false)
 
     val all = listOf(

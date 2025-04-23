@@ -7,7 +7,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
-import androidx.navigation.NavHostController
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +30,7 @@ import com.android.fire_and_rescue_departures.items.DepartureCardItem
 import com.android.fire_and_rescue_departures.items.DeparturesSearchItem
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.UIText
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeparturesListScreen(
-    navController: NavHostController,
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: DeparturesListViewModel = koinViewModel()
 ) {

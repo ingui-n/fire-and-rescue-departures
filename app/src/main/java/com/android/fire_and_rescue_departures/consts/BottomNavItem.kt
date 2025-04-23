@@ -1,12 +1,12 @@
 package com.android.fire_and_rescue_departures.consts
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomNavItem(
@@ -31,8 +31,8 @@ sealed class BottomNavItem(
 
     object Bookmarks : BottomNavItem(
         UIText.DEPARTURES_BOOKMARKS_TITLE_SHORT.value,
-        Icons.Filled.Star,
-        Icons.Outlined.Star,
+        Icons.Filled.Bookmark,
+        Icons.Outlined.BookmarkBorder,
         Routes.DeparturesBookmarks.route
     )
 }
