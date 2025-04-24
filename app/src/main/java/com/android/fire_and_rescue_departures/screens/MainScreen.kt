@@ -18,6 +18,7 @@ import com.android.fire_and_rescue_departures.consts.BottomNavItem
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 import com.android.fire_and_rescue_departures.layouts.DepartureDetailTopBar
+import com.android.fire_and_rescue_departures.layouts.TopBar
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -33,6 +34,7 @@ fun MainScreen(navController: NavHostController) {
         BottomNavItem.Departures,
         BottomNavItem.Map,
         BottomNavItem.Bookmarks,
+        BottomNavItem.QuestionsAndAnswers
     )
 
     val departureListViewModel: DeparturesListViewModel = koinViewModel()
@@ -42,6 +44,8 @@ fun MainScreen(navController: NavHostController) {
             if (Routes.getRoute(currentRoute).showTopBar) {
                 if (currentRoute?.startsWith(Routes.DepartureDetail.route) == true) {
                     DepartureDetailTopBar(navController, departureListViewModel)
+                } else {
+                    TopBar(navController, currentRoute)
                 }
             }
         },
@@ -74,6 +78,7 @@ fun MainScreen(navController: NavHostController) {
                     DepartureDetailScreen(id, date, departureListViewModel)
                 }
             }
+            composable(Routes.QuestionsAndAnswers.route) { QuestionsAndAnswersScreen() }
         }
     }
 }

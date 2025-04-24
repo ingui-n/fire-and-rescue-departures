@@ -3,16 +3,35 @@ package com.android.fire_and_rescue_departures.consts
 import com.android.fire_and_rescue_departures.data.AppRoute
 
 object Routes {
-    val DepartureMap = AppRoute("departureMap", false, true)
-    val DeparturesList = AppRoute("departuresList", false, true)
-    val DeparturesBookmarks = AppRoute("departuresBookmarks", false, true)
-    val DepartureDetail = AppRoute("departureDetail/{departureId}-{departureDateTime}", true, false)
+    val DepartureMap = AppRoute(
+        route = "departureMap",
+        showTopBarBackButton = false,
+        topBarTitle = UIText.DEPARTURES_MAP_TITLE.value
+    )
+    val DeparturesList = AppRoute(
+        route = "departuresList",
+        topBarTitle = UIText.DEPARTURES_LIST_TITLE.value
+    )
+    val DeparturesBookmarks = AppRoute(
+        route = "departuresBookmarks",
+        topBarTitle = UIText.DEPARTURES_BOOKMARKS_TITLE.value
+    )
+    val DepartureDetail = AppRoute(
+        route = "departureDetail/{departureId}-{departureDateTime}",
+        showTopBarBackButton = true,
+        topBarTitle = UIText.DEPARTURE_DETAIL_TITLE.value
+    )
+    val QuestionsAndAnswers = AppRoute(
+        route = "questionsAndAnswers",
+        topBarTitle = UIText.QUESTIONS_AND_ANSWERS_TITLE.value
+    )
 
     val all = listOf(
         DepartureMap,
         DeparturesList,
         DeparturesBookmarks,
-        DepartureDetail
+        DepartureDetail,
+        QuestionsAndAnswers
     )
 
     fun departureDetail(departureId: Long, departureDateTime: String): String {

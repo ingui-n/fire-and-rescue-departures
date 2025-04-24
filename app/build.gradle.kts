@@ -134,4 +134,5 @@ dependencies {
     implementation("org.locationtech.proj4j:proj4j-epsg:1.4.0")
     implementation("io.objectbox:objectbox-kotlin:4.0.2")
     kapt("io.objectbox:objectbox-processor:4.0.2")
+    implementation("com.composables:icons-lucide-android:1.1.0")
 }

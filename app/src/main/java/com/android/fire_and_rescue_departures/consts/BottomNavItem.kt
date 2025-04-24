@@ -3,9 +3,11 @@ package com.android.fire_and_rescue_departures.consts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -34,5 +36,12 @@ sealed class BottomNavItem(
         Icons.Filled.Bookmark,
         Icons.Outlined.BookmarkBorder,
         Routes.DeparturesBookmarks.route
+    )
+
+    object QuestionsAndAnswers : BottomNavItem(
+        UIText.QUESTIONS_AND_ANSWERS_TITLE_SHORT.value,
+        Icons.Filled.QuestionMark,
+        Icons.Outlined.QuestionMark,
+        Routes.QuestionsAndAnswers.route
     )
 }

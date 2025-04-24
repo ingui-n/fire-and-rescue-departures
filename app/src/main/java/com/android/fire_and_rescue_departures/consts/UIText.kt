@@ -11,7 +11,14 @@ enum class UIText(val value: String) {
     DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),
     DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),
 
+    DEPARTURE_DETAIL_TITLE("Departure detail"),
+    DEPARTURE_DETAIL_TITLE_SHORT("Departure detail"),
+
     BACK("Back"),
     SEARCH_PLACEHOLDER("Search..."),
+
+    QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
+    QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),
+
     //todo add all the app texts
 }

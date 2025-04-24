@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
+import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.buildDepartureShareText
@@ -91,7 +92,7 @@ fun DepartureDetailTopBar(
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Go back"
+                    contentDescription = UIText.BACK.value
                 )
             }
         },

@@ -31,6 +31,7 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.items.SearchResults
 import kotlinx.coroutines.launch
 
@@ -60,7 +61,7 @@ fun TestScreen(
                         IconButton(
                             onClick = { scope.launch { searchBarState.animateToCollapsed() } }
                         ) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = UIText.BACK.value)
                         }
                     } else {
                         Icon(Icons.Default.Search, contentDescription = null)
