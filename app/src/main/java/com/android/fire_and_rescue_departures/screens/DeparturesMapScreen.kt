@@ -6,14 +6,27 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -32,6 +45,14 @@ import org.osmdroid.views.overlay.Marker
 import com.android.fire_and_rescue_departures.R
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import com.android.fire_and_rescue_departures.consts.Routes
+import com.android.fire_and_rescue_departures.consts.UIText
+import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureStatus
+import com.android.fire_and_rescue_departures.data.DepartureSubtypes
+import com.android.fire_and_rescue_departures.data.DepartureTypes
+import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,13 +61,15 @@ fun DeparturesMapScreen(
     navController: NavHostController,
     departuresViewModel: DeparturesListViewModel = koinViewModel()
 ) {
-//    val navBackStackEntry by navController.currentBackStackEntryAsState()
-//    val currentRoute = navBackStackEntry?.destination?.route //todo
-
     Configuration.getInstance().userAgentValue = "Chrome/120.0.0.0 Safari/537.36"
     val context = LocalContext.current
 
     val departuresList by departuresViewModel.departuresList.collectAsState()
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var departureDetail: Departure? by remember { mutableStateOf(null) }
 
     val mapView = remember {
         MapView(context).apply {
@@ -86,6 +109,11 @@ fun DeparturesMapScreen(
                 marker.icon = getTypeIcon(context, departure.type)
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 marker.setInfoWindow(null)
+                marker.setOnMarkerClickListener { clickedMarker, mapView ->
+                    showBottomSheet = true
+                    departureDetail = departure
+                    true
+                }
 
                 mapView.overlays.add(marker)
                 mapView.invalidate()
@@ -96,6 +124,55 @@ fun DeparturesMapScreen(
     }
 
     AndroidView(factory = { mapView })
+
+    if (showBottomSheet && departureDetail != null) {
+        val departureStatus = DepartureStatus.fromId(departureDetail!!.state)
+        val departureType = DepartureTypes.fromId(departureDetail!!.type)
+        val departureSubtype = DepartureSubtypes.fromId(departureDetail!!.subType)
+        val departureStartDateTime = getFormattedDepartureStartDateTime(departureDetail!!)
+
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+            },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                if (departureStatus !== null)
+                    Text(text = departureStatus.name)
+                Text(text = departureStartDateTime)
+                if (departureType !== null)
+                    Text(text = departureType.name)
+                if (departureSubtype !== null)
+                    Text(text = departureSubtype.name)
+                if (departureDetail?.description !== null)
+                    Text(text = departureDetail!!.description!!)
+
+                Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet = false
+                                navController.navigate(
+                                    Routes.departureDetail(
+                                        departureDetail!!.id,
+                                        (departureDetail!!.reportedDateTime
+                                            ?: departureDetail!!.startDateTime).toString()
+                                    )
+                                )
+                            }
+                        }
+                    }) {
+                    Text(UIText.DEPARTURES_MAP_BOTTOM_SHEET_BUTTON.value)
+                }
+            }
+        }
+    }
 }
 
 fun getTypeIcon(context: Context, departureType: Int): Drawable {

@@ -7,6 +7,7 @@ enum class UIText(val value: String) {
 
     DEPARTURES_MAP_TITLE("Map of Departures"),
     DEPARTURES_MAP_TITLE_SHORT("Map"),
+    DEPARTURES_MAP_BOTTOM_SHEET_BUTTON("Open the departure detail"),
 
     DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),
     DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),
