@@ -1,11 +1,21 @@
 package com.android.fire_and_rescue_departures.viewmodels
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.android.fire_and_rescue_departures.BuildConfig
+import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
 import com.android.fire_and_rescue_departures.repository.DeparturesMapRepository
 import ovh.plrapps.mapcompose.api.addLayer
+import ovh.plrapps.mapcompose.api.addMarker
 import ovh.plrapps.mapcompose.api.enableRotation
 import ovh.plrapps.mapcompose.api.onLongPress
 import ovh.plrapps.mapcompose.api.onTap
@@ -20,15 +30,16 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.math.pow
 
-class DeparturesMapViewModel(/*private val departuresMapRepository: DeparturesMapRepository*/) : ViewModel() {
+class DeparturesMapViewModel() : ViewModel() {
     private val tileStreamProvider = makeTileStreamProvider()
 
     private val maxLevel = 19
     private val minLevel = 0
     private val mapSize = mapSizeAtLevel(maxLevel, tileSize = 256)
     val state = MapState(levelCount = maxLevel + 1, mapSize, mapSize, workerCount = 16) {
-        minimumScaleMode(Forced((1 / 2.0.pow(maxLevel - minLevel)).toFloat()))
-        scroll(0.5412764549255371, 0.33914846181869507)  // Czechia
+        //minimumScaleMode(Forced((1 / 2.0.pow(maxLevel - minLevel)).toFloat()))
+        //scroll(0.5412764549255371, 0.33914846181869507)  // Czechia
+        scroll(.0, 0.0)  // Czechia
         scale(0.0005f)
     }.apply {
         addLayer(tileStreamProvider)
@@ -38,6 +49,27 @@ class DeparturesMapViewModel(/*private val departuresMapRepository: DeparturesMa
         }
         enableRotation()
         //setScrollOffsetRatio(0.5f, 0.5f)
+    }
+
+    fun setMarkers(departures: List<Departure>) {
+
+
+
+        departures.forEach { departure ->
+            val coordinates = convertSjtskToWgs(
+                departure.gis1.toDouble(),
+                departure.gis2.toDouble()
+            )
+
+            state.addMarker("departure-${departure.id}", 0.5412764549255371, 0.33914846181869507) {
+                Icon(
+                    imageVector = Icons.Filled.LocationOn,
+                    contentDescription = "Marker",
+                    modifier = Modifier.size(500.dp),
+                    //tint = Color(0xCC2196F3)
+                )
+            }
+        }
     }
 }
 

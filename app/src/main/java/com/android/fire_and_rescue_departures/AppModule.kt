@@ -14,7 +14,6 @@ import com.android.fire_and_rescue_departures.data.MyObjectBox
 import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
-import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import io.objectbox.BoxStore
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,7 +34,6 @@ val repositoryModule = module {
 
 @RequiresApi(Build.VERSION_CODES.O)
 val viewModelModule = module {
-    viewModel { DeparturesMapViewModel(/*get()*/) }
     viewModel { DeparturesListViewModel(get()) }
     viewModel { DeparturesBookmarksViewModel(get(), get()) }
 }

@@ -31,7 +31,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.BuildConfig
 import com.android.fire_and_rescue_departures.R
 import com.android.fire_and_rescue_departures.api.ApiResult
