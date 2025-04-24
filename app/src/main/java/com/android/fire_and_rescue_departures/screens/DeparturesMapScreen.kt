@@ -34,7 +34,6 @@ import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
-import org.koin.androidx.compose.koinViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -52,6 +51,7 @@ import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DeparturesMapScreen(
     navController: NavHostController,
-    departuresViewModel: DeparturesListViewModel = koinViewModel()
+    departuresViewModel: DeparturesListViewModel
 ) {
     Configuration.getInstance().userAgentValue = "Chrome/120.0.0.0 Safari/537.36"
     val context = LocalContext.current
@@ -88,16 +88,21 @@ fun DeparturesMapScreen(
     }
 
     LaunchedEffect(Unit) {
-        departuresViewModel.getDeparturesList(
-            LocalDateTime.now().minusHours(24).format(DateTimeFormatter.ISO_DATE_TIME),
-            LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-        )
+        while (true) {
+            departuresViewModel.getDeparturesList(
+                LocalDateTime.now().minusHours(24).format(DateTimeFormatter.ISO_DATE_TIME),
+                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+            )
+            delay(60_000L)
+        }
     }
 
     when (departuresList) {
         is ApiResult.Loading -> {}
         is ApiResult.Success -> {
             val departuresList = (departuresList as ApiResult.Success).data
+            mapView.overlays.clear()
+
             departuresList.forEach { departure ->
                 val coordinates = convertSjtskToWgs(
                     departure.gis1.toDouble(),

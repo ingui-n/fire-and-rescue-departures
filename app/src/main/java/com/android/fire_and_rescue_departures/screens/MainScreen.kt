@@ -18,6 +18,7 @@ import com.android.fire_and_rescue_departures.consts.BottomNavItem
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 import com.android.fire_and_rescue_departures.layouts.DepartureDetailTopBar
+import com.android.fire_and_rescue_departures.layouts.DepartureMapTopBar
 import com.android.fire_and_rescue_departures.layouts.TopBar
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -44,6 +45,8 @@ fun MainScreen(navController: NavHostController) {
             if (Routes.getRoute(currentRoute).showTopBar) {
                 if (currentRoute?.startsWith(Routes.DepartureDetail.route) == true) {
                     DepartureDetailTopBar(navController, departureListViewModel)
+                } else if (currentRoute == Routes.DepartureMap.route) {
+                    DepartureMapTopBar(departureListViewModel)
                 } else {
                     TopBar(navController, currentRoute)
                 }
@@ -61,7 +64,9 @@ fun MainScreen(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.DeparturesList.route) { DeparturesListScreen(navController) }
-            composable(Routes.DepartureMap.route) { DeparturesMapScreen(navController) }
+            composable(Routes.DepartureMap.route) {
+                DeparturesMapScreen(navController, departureListViewModel)
+            }
             composable(Routes.DeparturesBookmarks.route) { DeparturesBookmarksScreen(navController) }
             composable(Routes.DepartureDetail.route) { navBackStackEntry ->
                 //todo offline mode

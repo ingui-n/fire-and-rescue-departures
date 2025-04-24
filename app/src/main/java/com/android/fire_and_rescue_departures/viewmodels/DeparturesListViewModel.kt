@@ -24,12 +24,15 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
     private val _departure = MutableStateFlow<ApiResult<Departure>>(ApiResult.Loading)
     val departure: StateFlow<ApiResult<Departure>> = _departure.asStateFlow()
 
-    private val _departureUnits = MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
+    private val _departureUnits =
+        MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
     val departureUnits: StateFlow<ApiResult<List<DepartureUnit>>> = _departureUnits.asStateFlow()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getDeparturesList(
-        fromDateTime: String? = null,
-        toDateTime: String? = null,
+        fromDateTime: String? = LocalDateTime.now().minusHours(24)
+            .format(DateTimeFormatter.ISO_DATE_TIME),
+        toDateTime: String? = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
         status: List<Int>? = null,
     ) {
         viewModelScope.launch {
@@ -73,7 +76,8 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         yearsIteration: Long = 0,
     ) {
         if (departure.value is ApiResult.Success &&
-            (departure.value as ApiResult.Success).data.id == id) {
+            (departure.value as ApiResult.Success).data.id == id
+        ) {
             return
         }
 
@@ -104,8 +108,10 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                             //todo change to get /technika and by sent date time use range
                             getDeparture(
                                 id,
-                                LocalDateTime.now().minusYears(yearsIteration + 1).format(DateTimeFormatter.ISO_DATE_TIME),
-                                LocalDateTime.now().minusYears(yearsIteration).format(DateTimeFormatter.ISO_DATE_TIME),
+                                LocalDateTime.now().minusYears(yearsIteration + 1)
+                                    .format(DateTimeFormatter.ISO_DATE_TIME),
+                                LocalDateTime.now().minusYears(yearsIteration)
+                                    .format(DateTimeFormatter.ISO_DATE_TIME),
                                 yearsIteration + 1
                             )
                         }

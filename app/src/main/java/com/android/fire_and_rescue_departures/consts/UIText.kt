@@ -16,6 +16,7 @@ enum class UIText(val value: String) {
     DEPARTURE_DETAIL_TITLE_SHORT("Departure detail"),
 
     BACK("Back"),
+    RENEW("Renew"),
     SEARCH_PLACEHOLDER("Search..."),
 
     QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
