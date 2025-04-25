@@ -86,7 +86,6 @@ fun QuestionsAndAnswersScreen() {
                     HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(),
                         thickness = 1.dp,
-                        //color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

@@ -37,6 +37,7 @@ import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePickerDialog
@@ -49,6 +50,7 @@ import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import com.android.fire_and_rescue_departures.consts.regions
 import com.android.fire_and_rescue_departures.data.DepartureStatus
@@ -70,7 +72,8 @@ import java.util.Locale
 )
 @Composable
 fun DepartureListTopBar(
-    viewModel: DeparturesListViewModel
+    viewModel: DeparturesListViewModel,
+    title: String,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -82,8 +85,10 @@ fun DepartureListTopBar(
     var showToDatePicker by remember { mutableStateOf(false) }
     var showToTimePicker by remember { mutableStateOf(false) }
 
-    var selectedRegions by remember { mutableStateOf(listOf<Int>()) }
-    var selectedType: Int? by remember { mutableStateOf(null) }
+    val selectedRegions by viewModel.filterRegions.collectAsState()
+    val selectedType: Int? by viewModel.filterType.collectAsState()
+    val fromDateTime by viewModel.filterFromDateTime.collectAsState()
+    val toDateTime by viewModel.filterToDateTime.collectAsState()
     var statusOpened by remember { mutableStateOf(true) }
     var statusClosed by remember { mutableStateOf(true) }
 
@@ -94,15 +99,15 @@ fun DepartureListTopBar(
         mutableStateOf(
             DatePickerState(
                 locale = Locale("cs", "CZ"),
-                initialSelectedDateMillis = System.currentTimeMillis(),
+                initialSelectedDateMillis = fromDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
             )
         )
     }
     var fromTimePickerState by remember {
         mutableStateOf(
             TimePickerState(
-                initialHour = 0,
-                initialMinute = 0,
+                initialHour = fromDateTime?.hour ?: 0,
+                initialMinute = fromDateTime?.minute ?: 0,
                 is24Hour = true
             )
         )
@@ -111,15 +116,15 @@ fun DepartureListTopBar(
         mutableStateOf(
             DatePickerState(
                 locale = Locale("cs", "CZ"),
-                initialSelectedDateMillis = System.currentTimeMillis(),
+                initialSelectedDateMillis = toDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
             )
         )
     }
     var toTimePickerState by remember {
         mutableStateOf(
             TimePickerState(
-                initialHour = 23,
-                initialMinute = 59,
+                initialHour = toDateTime?.hour ?: 23,
+                initialMinute = toDateTime?.minute ?: 59,
                 is24Hour = true
             )
         )
@@ -139,7 +144,7 @@ fun DepartureListTopBar(
             return utcTimeMillis in buildDateTimeFromPickers(
                 fromDatePickerState,
                 fromTimePickerState
-            ).toInstant(ZoneOffset.UTC).toEpochMilli()..LocalDateTime.now()
+            ).toInstant(ZoneOffset.UTC).toEpochMilli()..LocalDateTime.now().plusDays(1)
                 .toInstant(ZoneOffset.UTC).toEpochMilli()
         }
     }
@@ -172,8 +177,28 @@ fun DepartureListTopBar(
         )
     }
 
-    LaunchedEffect(fromDatePickerState.selectedDateMillis) {setDefaultToDatePickerState() }
-    LaunchedEffect(toDatePickerState.selectedDateMillis) { setDefaultFromDatePickerState() }
+    LaunchedEffect(fromDatePickerState.selectedDateMillis) {
+        setDefaultToDatePickerState()
+        viewModel.updateFilterFromDateTime(
+            buildDateTimeStringFromPickers(fromDatePickerState, fromTimePickerState)
+        )
+    }
+    LaunchedEffect(toDatePickerState.selectedDateMillis) {
+        setDefaultFromDatePickerState()
+        viewModel.updateFilterToDateTime(
+            buildDateTimeStringFromPickers(toDatePickerState, toTimePickerState)
+        )
+    }
+    LaunchedEffect(fromTimePickerState.hour, fromTimePickerState.minute) {
+        viewModel.updateFilterFromDateTime(
+            buildDateTimeStringFromPickers(fromDatePickerState, fromTimePickerState)
+        )
+    }
+    LaunchedEffect(toTimePickerState.hour, toTimePickerState.minute) {
+        viewModel.updateFilterToDateTime(
+            buildDateTimeStringFromPickers(toDatePickerState, toTimePickerState)
+        )
+    }
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -182,13 +207,23 @@ fun DepartureListTopBar(
         ),
         title = {
             Text(
-                text = UIText.DEPARTURES_LIST_TITLE.value,
+                text = title,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         },
         actions = {
             //todo add address search
+            IconButton(onClick = {
+                coroutineScope.launch {
+                    viewModel.updateDeparturesList()
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Outlined.Autorenew,
+                    contentDescription = UIText.RENEW.value
+                )
+            }
             IconButton(onClick = {
                 showBottomSheet = true
             }) {
@@ -211,13 +246,8 @@ fun DepartureListTopBar(
                     else null
 
                 coroutineScope.launch {
-                    viewModel.getDeparturesList(
-                        buildDateTimeStringFromPickers(fromDatePickerState, fromTimePickerState),
-                        buildDateTimeStringFromPickers(toDatePickerState, toTimePickerState),
-                        statuses,
-                        selectedType,
-                        selectedRegions
-                    )
+                    viewModel.updateFilterStatuses(statuses)
+                    viewModel.updateDeparturesList()
                 }
                 showBottomSheet = false
             },
@@ -452,11 +482,13 @@ fun DepartureListTopBar(
                         FilterChip(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = {
-                                selectedRegions = if (selectedRegions.contains(region.id)) {
-                                    selectedRegions.minus(region.id)
-                                } else {
-                                    selectedRegions.plus(region.id)
-                                }
+                                viewModel.updateFilterRegions(
+                                    if (selectedRegions.contains(region.id)) {
+                                        selectedRegions.minus(region.id)
+                                    } else {
+                                        selectedRegions.plus(region.id)
+                                    }
+                                )
                             },
                             label = {
                                 Text(region.name)
@@ -491,9 +523,7 @@ fun DepartureListTopBar(
                 ) {
                     FilterChip(
                         modifier = Modifier.padding(end = 8.dp),
-                        onClick = {
-                            selectedType = null
-                        },
+                        onClick = { viewModel.updateFilterType(null) },
                         label = {
                             Text(UIText.ALL.value)
                         },
@@ -514,9 +544,7 @@ fun DepartureListTopBar(
                     DepartureTypes.all.forEach { type ->
                         FilterChip(
                             modifier = Modifier.padding(end = 8.dp),
-                            onClick = {
-                                selectedType = type.id
-                            },
+                            onClick = { viewModel.updateFilterType(type.id) },
                             label = {
                                 Text(type.name)
                             },
@@ -547,8 +575,7 @@ fun DepartureListTopBar(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         coroutineScope.launch {
-                            selectedRegions = listOf<Int>()
-                            selectedType = null
+                            viewModel.resetFilters()
                             statusOpened = true
                             setDefaultFromDatePickerState()
                             fromTimePickerState = TimePickerState(

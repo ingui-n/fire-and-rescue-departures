@@ -8,5 +8,4 @@ data class DeparturesMapEntity(
     @Id var id: Long = 0,
     var type: String,
     var departureTime: String,
-    //todo add all the fields
 )

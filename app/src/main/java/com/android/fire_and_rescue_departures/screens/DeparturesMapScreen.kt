@@ -37,13 +37,12 @@ import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import org.osmdroid.config.Configuration
 import org.osmdroid.views.overlay.Marker
 import com.android.fire_and_rescue_departures.R
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.Departure
@@ -51,20 +50,30 @@ import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
-import kotlinx.coroutines.delay
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
+import com.android.fire_and_rescue_departures.viewmodels.MarkerData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.koin.androidx.compose.koinViewModel
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeparturesMapScreen(
     navController: NavHostController,
-    departuresViewModel: DeparturesListViewModel
+    departuresViewModel: DeparturesListViewModel,
+    departuresMapViewModel: DeparturesMapViewModel = koinViewModel()
 ) {
     Configuration.getInstance().userAgentValue = "Chrome/120.0.0.0 Safari/537.36"
     val context = LocalContext.current
 
     val departuresList by departuresViewModel.departuresList.collectAsState()
+    val zoomLevel by departuresMapViewModel.zoomLevel.collectAsState()
+    val mapCenter by departuresMapViewModel.mapCenter.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -75,8 +84,42 @@ fun DeparturesMapScreen(
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
-            controller.setZoom(8.0)
-            controller.setCenter(GeoPoint(49.8135236, 15.4353594))
+            controller.setZoom(zoomLevel)
+            controller.setCenter(mapCenter)
+        }
+    }
+
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { controller, destination, arguments ->
+            departuresMapViewModel.setZoomLevel(mapView.zoomLevelDouble)
+            departuresMapViewModel.setMapCenter(mapView.mapCenter as GeoPoint)
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
+    }
+
+    suspend fun renderMarkers() {
+        withContext(Dispatchers.Main) {
+            mapView.overlays.clear()
+
+            departuresMapViewModel.markers.value.forEach { marker ->
+                val marker1 = Marker(mapView).apply {
+                    position = marker.position
+                    icon = marker.icon
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    setInfoWindow(null)
+                    setOnMarkerClickListener { clickedMarker, mapView ->
+                        showBottomSheet = true
+                        departureDetail = marker.departure
+                        true
+                    }
+                }
+
+                mapView.overlays.add(marker1)
+            }
+            mapView.invalidate()
         }
     }
 
@@ -87,48 +130,63 @@ fun DeparturesMapScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            departuresViewModel.getDeparturesList(
-                LocalDateTime.now().minusHours(24).format(DateTimeFormatter.ISO_DATE_TIME),
-                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-            )
-            delay(60_000L)
+    LaunchedEffect(departuresList) {
+        if (departuresMapViewModel.markers.value.isNotEmpty()) {
+            renderMarkers()
         }
-    }
 
-    when (departuresList) {
-        is ApiResult.Loading -> {}
-        is ApiResult.Success -> {
-            val departuresList = (departuresList as ApiResult.Success).data
-            mapView.overlays.clear()
+        when (departuresList) {
+            is ApiResult.Loading -> {}
+            is ApiResult.Success -> {
+                withContext(Dispatchers.Default) {
+                    val departuresList = (departuresList as ApiResult.Success).data
+                    departuresMapViewModel.resetMarkers()
 
-            departuresList.forEach { departure ->
-                val coordinates = convertSjtskToWgs(
-                    departure.gis1.toDouble(),
-                    departure.gis2.toDouble()
-                )
+                    departuresList.map { departure ->
+                        val coordinates =
+                            convertSjtskToWgs(departure.gis1.toDouble(), departure.gis2.toDouble())
 
-                val marker = Marker(mapView)
-                marker.position = GeoPoint(coordinates.y, coordinates.x)
-                marker.icon = getTypeIcon(context, departure.type)
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                marker.setInfoWindow(null)
-                marker.setOnMarkerClickListener { clickedMarker, mapView ->
-                    showBottomSheet = true
-                    departureDetail = departure
-                    true
+                        departuresMapViewModel.addMarker(
+                            MarkerData(
+                                id = departure.id.toString(),
+                                position = GeoPoint(coordinates.y, coordinates.x),
+                                icon = getTypeIcon(context, departure.type),
+                                departure = departure
+                            )
+                        )
+                    }
+
+                    renderMarkers()
                 }
-
-                mapView.overlays.add(marker)
-                mapView.invalidate()
             }
-        }
 
-        is ApiResult.Error -> {}
+            is ApiResult.Error -> {}
+        }
     }
 
     AndroidView(factory = { mapView })
+
+    fun updateMarkersVisibility() {
+        val boundingBox = mapView.boundingBox
+        mapView.overlays.forEach { overlay ->
+            if (overlay is Marker) {
+                overlay.setVisible(boundingBox.contains(overlay.position))
+            }
+        }
+        mapView.invalidate()
+    }
+
+    mapView.addMapListener(object : MapListener {
+        override fun onZoom(event: ZoomEvent?): Boolean {
+            updateMarkersVisibility()
+            return true
+        }
+
+        override fun onScroll(event: ScrollEvent?): Boolean {
+            updateMarkersVisibility()
+            return true
+        }
+    })
 
     if (showBottomSheet && departureDetail != null) {
         val departureStatus = DepartureStatus.fromId(departureDetail!!.state)

@@ -100,11 +100,6 @@ fun DepartureDetailTopBar(
                 IconButton(onClick = {
                     val sendIntent = Intent().apply {
                         action = Intent.ACTION_SEND
-//                                val url = buildDeparturesUrl(
-//                                    BuildConfig.HZS_API_URL,
-//                                    fromDateTime = departureDateTime,
-//                                    toDateTime = departureDateTime,
-//                                )
                         putExtra(Intent.EXTRA_TEXT, topBarShareText)
                         type = "text/plain"
                     }

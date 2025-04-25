@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.UIText
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -54,19 +55,14 @@ fun DeparturesListScreen(
     val listState = rememberLazyListState()
     val departuresList by viewModel.departuresList.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.getDeparturesList(
-            LocalDateTime.now().minusHours(24).format(DateTimeFormatter.ISO_DATE_TIME),
-            LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-        )
-    }
-
     var refreshing by remember { mutableStateOf(false) }
 
     fun refreshData() {
-        refreshing = true
-        viewModel.getDeparturesList()
-        refreshing = false
+        scope.launch {
+            refreshing = true
+            viewModel.updateDeparturesList()
+            refreshing = false
+        }
     }
 
     PullToRefreshBox(

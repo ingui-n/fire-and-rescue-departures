@@ -16,12 +16,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.android.fire_and_rescue_departures.consts.BottomNavItem
 import com.android.fire_and_rescue_departures.consts.Routes
+import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 import com.android.fire_and_rescue_departures.layouts.DepartureDetailTopBar
 import com.android.fire_and_rescue_departures.layouts.DepartureListTopBar
-import com.android.fire_and_rescue_departures.layouts.DepartureMapTopBar
 import com.android.fire_and_rescue_departures.layouts.TopBar
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -41,15 +42,23 @@ fun MainScreen(navController: NavHostController) {
 
     val departureListViewModel: DeparturesListViewModel = koinViewModel()
 
+    // todo when running update call only departures with the opened status
+    LaunchedEffect(Unit) {
+        while (true) {
+            departureListViewModel.updateDeparturesList()
+            delay(60_000L)
+        }
+    }
+
     Scaffold(
         topBar = {
             if (Routes.getRoute(currentRoute).showTopBar) {
                 if (currentRoute?.startsWith(Routes.DepartureDetail.route) == true) {
                     DepartureDetailTopBar(navController, departureListViewModel)
                 } else if (currentRoute == Routes.DepartureMap.route) {
-                    DepartureMapTopBar(departureListViewModel)
+                    DepartureListTopBar(departureListViewModel, UIText.DEPARTURES_MAP_TITLE.value)
                 } else if (currentRoute == Routes.DeparturesList.route) {
-                    DepartureListTopBar(departureListViewModel)
+                    DepartureListTopBar(departureListViewModel, UIText.DEPARTURES_LIST_TITLE.value)
                 } else {
                     TopBar(navController, currentRoute)
                 }

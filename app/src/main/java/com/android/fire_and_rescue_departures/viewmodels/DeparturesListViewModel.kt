@@ -10,13 +10,17 @@ import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureUnit
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewModel() {
     private val _departuresList = MutableStateFlow<ApiResult<List<Departure>>>(ApiResult.Loading)
     val departuresList: StateFlow<ApiResult<List<Departure>>> = _departuresList.asStateFlow()
@@ -28,28 +32,71 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
     val departureUnits: StateFlow<ApiResult<List<DepartureUnit>>> = _departureUnits.asStateFlow()
 
+    private val _filterFromDateTime = MutableStateFlow<LocalDateTime?>(
+        LocalDateTime.now().with(LocalTime.MIDNIGHT)
+    )
+    val filterFromDateTime: StateFlow<LocalDateTime?> = _filterFromDateTime.asStateFlow()
+
+    private val _filterToDateTime = MutableStateFlow<LocalDateTime?>(
+        LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT)
+    )
+    val filterToDateTime: StateFlow<LocalDateTime?> = _filterToDateTime.asStateFlow()
+
+    //todo regions
+    private val _filterRegions = MutableStateFlow<List<Int>>(listOf<Int>())
+    val filterRegions: StateFlow<List<Int>> = _filterRegions.asStateFlow()
+
+    private val _filterType = MutableStateFlow<Int?>(null)
+    val filterType: StateFlow<Int?> = _filterType.asStateFlow()
+
+    private val _filterStatuses = MutableStateFlow<List<Int>?>(DepartureStatus.getAllIds())
+    val filterStatuses: StateFlow<List<Int>?> = _filterStatuses.asStateFlow()
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getDeparturesList(
-        fromDateTime: String? = LocalDateTime.now().minusHours(24)
-            .format(DateTimeFormatter.ISO_DATE_TIME),
-        toDateTime: String? = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-        status: List<Int>? = DepartureStatus.getAllIds(),
-        type: Int? = null,
-        regions: List<Int>? = null,//todo regions
-    ) {
-        viewModelScope.launch {
+    fun updateFilterFromDateTime(dateTime: String) {
+        _filterFromDateTime.value = LocalDateTime.parse(dateTime)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateFilterToDateTime(dateTime: String) {
+        _filterToDateTime.value = LocalDateTime.parse(dateTime)
+    }
+
+    fun updateFilterRegions(regions: List<Int>) {
+        _filterRegions.value = regions
+    }
+
+    fun updateFilterType(type: Int?) {
+        _filterType.value = type
+    }
+
+    fun updateFilterStatuses(statuses: List<Int>?) {
+        _filterStatuses.value = statuses
+    }
+
+    fun resetFilters() {
+        _filterRegions.value = listOf<Int>()
+        _filterType.value = null
+        _filterStatuses.value = DepartureStatus.getAllIds()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateDeparturesList() {
+        viewModelScope.launch(Dispatchers.IO) {
             _departuresList.value = ApiResult.Loading
             try {
                 val response = departuresApi.getDepartures(
-                    fromDateTime,
-                    toDateTime,
-                    status,
-                    type
+                    filterFromDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
+                    filterToDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
+                    filterStatuses.value,
+                    filterType.value,
                 )
                 if (response.isSuccessful) {
                     val data = response.body()
                     if (data != null) {
-                        _departuresList.value = ApiResult.Success(data)
+                        withContext(Dispatchers.Main) {
+                            _departuresList.value = ApiResult.Success(data)
+                        }
                         Log.d("DeparturesListViewModel", "getDeparturesList: ${response.body()}")
                     } else {
                         _departuresList.value = ApiResult.Error("Data is null")
