@@ -13,6 +13,7 @@ interface DeparturesApi {
         @Query("casOd") fromDateTime: String? = null,
         @Query("casDo") toDateTime: String? = null,
         @Query("stavIds") status: List<Int>? = null,
+        @Query("typId") type: Int? = null,
     ): Response<List<Departure>>
 
     @GET("api/udalosti/{id}/technika")

@@ -18,6 +18,7 @@ import com.android.fire_and_rescue_departures.consts.BottomNavItem
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 import com.android.fire_and_rescue_departures.layouts.DepartureDetailTopBar
+import com.android.fire_and_rescue_departures.layouts.DepartureListTopBar
 import com.android.fire_and_rescue_departures.layouts.DepartureMapTopBar
 import com.android.fire_and_rescue_departures.layouts.TopBar
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
@@ -47,6 +48,8 @@ fun MainScreen(navController: NavHostController) {
                     DepartureDetailTopBar(navController, departureListViewModel)
                 } else if (currentRoute == Routes.DepartureMap.route) {
                     DepartureMapTopBar(departureListViewModel)
+                } else if (currentRoute == Routes.DeparturesList.route) {
+                    DepartureListTopBar(departureListViewModel)
                 } else {
                     TopBar(navController, currentRoute)
                 }
@@ -63,7 +66,9 @@ fun MainScreen(navController: NavHostController) {
             startDestination = Routes.DeparturesList.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Routes.DeparturesList.route) { DeparturesListScreen(navController) }
+            composable(Routes.DeparturesList.route) {
+                DeparturesListScreen(navController, departureListViewModel)
+            }
             composable(Routes.DepartureMap.route) {
                 DeparturesMapScreen(navController, departureListViewModel)
             }

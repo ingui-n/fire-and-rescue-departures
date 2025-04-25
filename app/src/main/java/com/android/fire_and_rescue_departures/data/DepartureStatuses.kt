@@ -58,5 +58,8 @@ sealed class DepartureStatus(val id: Int, val name: String) {
 
         fun fromId(id: Int): DepartureStatus? = all.find { it.id == id }
         fun getAllIds(): List<Int> = all.map { it.id }
+        fun getOpened(): List<Int> = listOf(100, 110, 130, 200, 210, 400, 410, 420, 430, 440, 500)
+        fun getClosed(): List<Int> =
+            listOf(120, 300, 450, 510, 520, 600, 610, 620, 700, 710, 750, 760, 780, 800)
     }
 }

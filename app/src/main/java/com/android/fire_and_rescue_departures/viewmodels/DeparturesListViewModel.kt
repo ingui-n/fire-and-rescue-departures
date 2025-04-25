@@ -33,7 +33,9 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         fromDateTime: String? = LocalDateTime.now().minusHours(24)
             .format(DateTimeFormatter.ISO_DATE_TIME),
         toDateTime: String? = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-        status: List<Int>? = null,
+        status: List<Int>? = DepartureStatus.getAllIds(),
+        type: Int? = null,
+        regions: List<Int>? = null,//todo regions
     ) {
         viewModelScope.launch {
             _departuresList.value = ApiResult.Loading
@@ -41,7 +43,8 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                 val response = departuresApi.getDepartures(
                     fromDateTime,
                     toDateTime,
-                    status ?: DepartureStatus.getAllIds()
+                    status,
+                    type
                 )
                 if (response.isSuccessful) {
                     val data = response.body()

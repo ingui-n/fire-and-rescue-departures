@@ -188,7 +188,7 @@ fun getTypeIcon(context: Context, departureType: Int): Drawable {
         3200 -> DrawableIcon(R.drawable.car, Color.BLUE)
         3400 -> DrawableIcon(R.drawable.water, Color.GREEN)
         3500 -> DrawableIcon(R.drawable.axe, Color.rgb(139, 69, 19))
-        3550 -> DrawableIcon(R.drawable.person_standing, Color.rgb(245, 222, 179))
+        3550 -> DrawableIcon(R.drawable.person_standing, Color.rgb(191, 143, 17))
         3700 -> DrawableIcon(R.drawable.circle_alert, Color.MAGENTA)
         3600 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
         3900 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)

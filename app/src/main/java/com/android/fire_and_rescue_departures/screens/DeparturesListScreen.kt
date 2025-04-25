@@ -30,6 +30,11 @@ import com.android.fire_and_rescue_departures.items.DepartureCardItem
 import com.android.fire_and_rescue_departures.items.DeparturesSearchItem
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.UIText
 import java.time.LocalDateTime
@@ -40,8 +45,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DeparturesListScreen(
     navController: NavController,
-    modifier: Modifier = Modifier,
-    viewModel: DeparturesListViewModel = koinViewModel()
+    viewModel: DeparturesListViewModel
 ) {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -57,19 +61,27 @@ fun DeparturesListScreen(
         )
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            DeparturesSearchItem(
-                modifier = Modifier,
-                searchBarState = searchBarState,
-                textFieldState = textFieldState,
-                scope = scope,
-            )
-        }
-    ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Spacer(modifier = Modifier.height(16.dp))
+    var refreshing by remember { mutableStateOf(false) }
+
+    fun refreshData() {
+        refreshing = true
+        viewModel.getDeparturesList()
+        refreshing = false
+    }
+
+    PullToRefreshBox(
+        isRefreshing = refreshing,
+        onRefresh = { refreshData() },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        /*DeparturesSearchItem(
+            modifier = Modifier,
+            searchBarState = searchBarState,
+            textFieldState = textFieldState,
+            scope = scope,
+        )*/
+
+        Column(modifier = Modifier.fillMaxSize()) {
             when (departuresList) {
                 is ApiResult.Loading -> {
                     Box(modifier = Modifier.fillMaxSize()) {
