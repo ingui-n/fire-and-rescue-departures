@@ -21,6 +21,7 @@ enum class UIText(val value: String) {
     FILTER("Filter"),
     CANCEL("Cancel"),
     ALL("All"),
+    FILTERS("Filters"),
 
     REGIONS("Regions"),
     STATUS("Status"),

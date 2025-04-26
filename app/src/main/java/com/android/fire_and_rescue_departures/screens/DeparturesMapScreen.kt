@@ -1,6 +1,8 @@
 package com.android.fire_and_rescue_departures.screens
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -18,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -67,6 +71,7 @@ import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import com.android.fire_and_rescue_departures.viewmodels.MarkerData
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,6 +79,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import androidx.core.graphics.createBitmap
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,12 +174,14 @@ fun DeparturesMapScreen(
                         val coordinates =
                             convertSjtskToWgs(departure.gis1.toDouble(), departure.gis2.toDouble())
 
+                        val icon = getTypeIcon(context, departure.type, 96)
+
                         departuresMapViewModel.addMarker(
                             MarkerData(
                                 id = departure.id.toString(),
                                 position = GeoPoint(coordinates.y, coordinates.x),
-                                icon = getDepartureIcon(context, departure.type),
-                                departure = departure
+                                icon = icon,
+                                departure = departure,
                             )
                         )
                     }
@@ -221,7 +229,9 @@ fun DeparturesMapScreen(
             onDismissRequest = {
                 showBottomSheet = false
             },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
             Row(
                 modifier = Modifier
@@ -254,12 +264,11 @@ fun DeparturesMapScreen(
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val icon = getTypeIcon(departureDetail!!.type)
+                    val icon = getTypeIcon(context, departureDetail!!.type)
 
                     Image(
-                        painter = painterResource(id = icon.drawable),
+                        painter = rememberDrawablePainter(icon),
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(UIColor(icon.tint)),
                         modifier = Modifier.size(48.dp)
                     )
                 }
@@ -418,10 +427,10 @@ fun DeparturesMapScreen(
     }
 }
 
-data class DrawableIcon(val drawable: Int, val tint: Int)
+fun getTypeIcon(context: Context, type: Int, size: Int = 48): Drawable {
+    data class DrawableIcon(val drawable: Int, val tint: Int)
 
-fun getTypeIcon(type: Int): DrawableIcon {
-    return when (type) {
+    val icon = when (type) {
         3100 -> DrawableIcon(R.drawable.fire, Color.RED)
         3200 -> DrawableIcon(R.drawable.car, Color.BLUE)
         3400 -> DrawableIcon(R.drawable.water, Color.GREEN)
@@ -434,20 +443,15 @@ fun getTypeIcon(type: Int): DrawableIcon {
         5000 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
         else -> DrawableIcon(R.drawable.siren, Color.RED)
     }
+
+    val drawable = ContextCompat.getDrawable(context, icon.drawable)?.mutate()
+    val bitmap = createBitmap(size, size)
+    val canvas = Canvas(bitmap)
+
+    drawable?.setTint(icon.tint)
+    drawable?.setBounds(0, 0, size, size)
+    drawable?.draw(canvas)
+
+    return bitmap.toDrawable(context.resources)
 }
 
-fun getDepartureIcon(context: Context, departureType: Int): Drawable {
-    val drawableIcon = getTypeIcon(departureType)
-
-    var icon = ContextCompat.getDrawable(context, drawableIcon.drawable)!!.mutate()
-
-    val sizePx = (15 * context.resources.displayMetrics.density).toInt()
-
-    val bitmap = (icon as BitmapDrawable).bitmap
-    val scaledBitmap = bitmap.scale(sizePx, sizePx)
-
-    icon = scaledBitmap.toDrawable(context.resources)
-    DrawableCompat.setTint(icon, drawableIcon.tint)
-
-    return icon
-}

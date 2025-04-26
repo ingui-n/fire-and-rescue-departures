@@ -48,7 +48,7 @@ fun buildDepartureAddress(departure: Departure): String {
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun buildDepartureShareText(departure: Departure): String {
-    val departureStatus = DepartureStatus.fromId(departure.state)
+    val isOpened = DepartureStatus.getOpened().contains(departure.state)
     val departureType = DepartureTypes.fromId(departure.type)
     val departureAddress = buildDepartureAddress(departure)
     val departureStartDateTime =
@@ -66,9 +66,7 @@ fun buildDepartureShareText(departure: Departure): String {
     }
 
     text += "na místě: $departureAddress ($addressLink) ohlášen: $departureStartDateTime."
-
-    if (departureStatus != null)
-        text += " Stav události: ${departureStatus.name}"
+    text += " Stav události: ${if (isOpened) "otevřená" else "uzavřená"}"
 
     return text
 }

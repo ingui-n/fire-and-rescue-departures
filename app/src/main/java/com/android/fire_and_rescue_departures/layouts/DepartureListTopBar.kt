@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +43,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerState
@@ -52,9 +53,11 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -80,10 +83,10 @@ import java.util.Locale
 )
 @Composable
 fun DepartureListTopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
     viewModel: DeparturesListViewModel,
     title: String,
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
@@ -195,12 +198,18 @@ fun DepartureListTopBar(
     }
 
     LaunchedEffect(fromDatePickerState.selectedDateMillis) {
+        if (toDatePickerState.selectedDateMillis == null || fromDatePickerState.selectedDateMillis == null)
+            return@LaunchedEffect
+
         resetToDatePickerState(toDatePickerState.selectedDateMillis)
         viewModel.updateFilterFromDateTime(
             buildDateTimeStringFromPickers(fromDatePickerState, fromTimePickerState)
         )
     }
     LaunchedEffect(toDatePickerState.selectedDateMillis) {
+        if (toDatePickerState.selectedDateMillis == null || fromDatePickerState.selectedDateMillis == null)
+            return@LaunchedEffect
+
         resetFromDatePickerState(fromDatePickerState.selectedDateMillis)
         viewModel.updateFilterToDateTime(
             buildDateTimeStringFromPickers(toDatePickerState, toTimePickerState)
@@ -220,13 +229,16 @@ fun DepartureListTopBar(
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         title = {
             Text(
                 text = title,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge
             )
         },
         actions = {
@@ -268,6 +280,8 @@ fun DepartureListTopBar(
                 }
                 showBottomSheet = false
             },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             sheetState = sheetState
         ) {
             Column(
@@ -276,12 +290,28 @@ fun DepartureListTopBar(
                     .padding(8.dp)
                     .verticalScroll(bottomSheetScrollState)
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        UIText.FILTERS.value,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    Text(UIText.STATUS.value)
+                    Text(
+                        UIText.STATUS.value,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     Row(
                         modifier = Modifier
@@ -291,10 +321,19 @@ fun DepartureListTopBar(
                             ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(UIText.STATUS_ACTIVE_CHECKBOX.value)
+                        Text(
+                            UIText.STATUS_ACTIVE_CHECKBOX.value,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                         Checkbox(
                             checked = statusOpened,
-                            onCheckedChange = { statusOpened = it }
+                            onCheckedChange = { statusOpened = it },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.primary,
+                                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         )
                     }
 
@@ -306,10 +345,19 @@ fun DepartureListTopBar(
                             ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(UIText.STATUS_CLOSED_CHECKBOX.value)
+                        Text(
+                            UIText.STATUS_CLOSED_CHECKBOX.value,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Checkbox(
                             checked = statusClosed,
-                            onCheckedChange = { statusClosed = it }
+                            onCheckedChange = { statusClosed = it },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.primary,
+                                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         )
                     }
                 }
@@ -320,7 +368,11 @@ fun DepartureListTopBar(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    Text(UIText.DATE_AND_TIME.value)
+                    Text(
+                        UIText.DATE_AND_TIME.value,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     // from
                     Row(
@@ -328,14 +380,14 @@ fun DepartureListTopBar(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "${UIText.DATE_FROM.value}:",
+                            text = UIText.DATE_FROM.value,
                             modifier = Modifier.padding(end = 8.dp)
                         )
                         if (fromDatePickerState.selectedDateMillis != null) {
                             val date =
                                 getFormattedDateTime(
                                     fromDatePickerState.selectedDateMillis!!,
-                                    "dd. MMMM yyyy"
+                                    "d. MMMM yyyy"
                                 )
                             val time =
                                 String.format(
@@ -357,13 +409,27 @@ fun DepartureListTopBar(
                         Button(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = { showFromDatePicker = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
-                            Text(UIText.DATE_FROM_SELECT_BUTTON.value)
+                            Text(
+                                UIText.DATE_FROM_SELECT_BUTTON.value,
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                         Button(
                             onClick = { showFromTimePicker = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
-                            Text(UIText.TIME_FROM_SELECT_BUTTON.value)
+                            Text(
+                                UIText.TIME_FROM_SELECT_BUTTON.value,
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                         if (showFromDatePicker) {
                             DatePickerDialog(
@@ -412,14 +478,14 @@ fun DepartureListTopBar(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "${UIText.DATE_TO.value}:",
+                            text = UIText.DATE_TO.value,
                             modifier = Modifier.padding(end = 8.dp)
                         )
                         if (toDatePickerState.selectedDateMillis != null) {
                             val date =
                                 getFormattedDateTime(
                                     toDatePickerState.selectedDateMillis!!,
-                                    "dd. MMMM yyyy"
+                                    "d. MMMM yyyy"
                                 )
                             val time =
                                 String.format(
@@ -441,13 +507,27 @@ fun DepartureListTopBar(
                         Button(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = { showToDatePicker = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
-                            Text(UIText.DATE_FROM_SELECT_BUTTON.value)
+                            Text(
+                                UIText.DATE_FROM_SELECT_BUTTON.value,
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                         Button(
                             onClick = { showToTimePicker = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
-                            Text(UIText.TIME_FROM_SELECT_BUTTON.value)
+                            Text(
+                                UIText.TIME_FROM_SELECT_BUTTON.value,
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                         if (showToDatePicker) {
                             DatePickerDialog(
@@ -496,7 +576,11 @@ fun DepartureListTopBar(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    Text(UIText.REGIONS.value)
+                    Text(
+                        UIText.REGIONS.value,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -514,7 +598,10 @@ fun DepartureListTopBar(
                                     )
                                 },
                                 label = {
-                                    Text(region.name)
+                                    Text(
+                                        region.name,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
                                 },
                                 enabled = region.available,
                                 selected = selectedRegions.contains(region.id),
@@ -529,6 +616,12 @@ fun DepartureListTopBar(
                                 } else {
                                     null
                                 },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             )
                         }
                     }
@@ -539,11 +632,27 @@ fun DepartureListTopBar(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    Text(UIText.DEPARTURE_ADDRESS_SEARCH.value)
+                    Text(
+                        UIText.DEPARTURE_ADDRESS_SEARCH.value,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     OutlinedTextField(
                         state = addressState,
                         lineLimits = TextFieldLineLimits.SingleLine,
-                        label = { Text(UIText.DEPARTURE_ADDRESS_LABEL.value) },
+                        label = {
+                            Text(
+                                UIText.DEPARTURE_ADDRESS_LABEL.value,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
 
@@ -553,7 +662,11 @@ fun DepartureListTopBar(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    Text(UIText.DEPARTURE_TYPE.value)
+                    Text(
+                        UIText.DEPARTURE_TYPE.value,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -562,7 +675,10 @@ fun DepartureListTopBar(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = { viewModel.updateFilterType(null) },
                             label = {
-                                Text(UIText.ALL.value)
+                                Text(
+                                    UIText.ALL.value,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             },
                             selected = selectedType == null,
                             leadingIcon = if (selectedType == null) {
@@ -576,6 +692,12 @@ fun DepartureListTopBar(
                             } else {
                                 null
                             },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         )
 
                         DepartureTypes.all.forEach { type ->
@@ -583,7 +705,10 @@ fun DepartureListTopBar(
                                 modifier = Modifier.padding(end = 8.dp),
                                 onClick = { viewModel.updateFilterType(type.id) },
                                 label = {
-                                    Text(type.name)
+                                    Text(
+                                        type.name,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
                                 },
                                 selected = selectedType == type.id,
                                 leadingIcon = if (selectedType == type.id) {
@@ -597,6 +722,12 @@ fun DepartureListTopBar(
                                 } else {
                                     null
                                 },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             )
                         }
                     }
@@ -629,7 +760,11 @@ fun DepartureListTopBar(
                                     is24Hour = true
                                 )
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
                     ) {
                         Text(UIText.RESET.value)
                     }

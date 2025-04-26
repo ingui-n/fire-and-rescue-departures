@@ -8,9 +8,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -32,6 +35,7 @@ import org.koin.androidx.compose.koinViewModel
 fun MainScreen(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     val items = listOf(
         BottomNavItem.Departures,
@@ -51,16 +55,17 @@ fun MainScreen(navController: NavHostController) {
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (Routes.getRoute(currentRoute).showTopBar) {
                 if (currentRoute?.startsWith(Routes.DepartureDetail.route) == true) {
-                    DepartureDetailTopBar(navController, departureListViewModel)
+                    DepartureDetailTopBar(navController, scrollBehavior, departureListViewModel)
                 } else if (currentRoute == Routes.DepartureMap.route) {
-                    DepartureListTopBar(departureListViewModel, UIText.DEPARTURES_MAP_TITLE.value)
+                    DepartureListTopBar(scrollBehavior, departureListViewModel, UIText.DEPARTURES_MAP_TITLE.value)
                 } else if (currentRoute == Routes.DeparturesList.route) {
-                    DepartureListTopBar(departureListViewModel, UIText.DEPARTURES_LIST_TITLE.value)
+                    DepartureListTopBar(scrollBehavior, departureListViewModel, UIText.DEPARTURES_LIST_TITLE.value)
                 } else {
-                    TopBar(navController, currentRoute)
+                    TopBar(navController, scrollBehavior, currentRoute)
                 }
             }
         },

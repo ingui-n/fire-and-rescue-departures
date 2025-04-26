@@ -15,7 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,11 +39,11 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun DepartureDetailTopBar(
     navController: NavHostController,
+    scrollBehavior: TopAppBarScrollBehavior,
     viewModel: DeparturesListViewModel,
     bookmarksViewModel: DeparturesBookmarksViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val departureDetailResult by viewModel.departure.collectAsState()
     val departureBookmarks by bookmarksViewModel.departureBookmarks.collectAsState()
 
@@ -77,14 +77,18 @@ fun DepartureDetailTopBar(
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                alpha = 1f - scrollBehavior.state.collapsedFraction
+            ),
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         title = {
             Text(
                 text = topBarTitle,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge
             )
         },
         navigationIcon = {

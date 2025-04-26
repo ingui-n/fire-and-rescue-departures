@@ -137,4 +137,5 @@ dependencies {
     implementation("com.composables:icons-lucide-android:1.1.0")
 
     implementation("org.osmdroid:osmdroid-android:6.1.20")
+    implementation("com.google.accompanist:accompanist-drawablepainter:0.37.2")
 }
