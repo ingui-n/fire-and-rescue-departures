@@ -6,11 +6,18 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -25,7 +32,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -42,6 +55,7 @@ import org.osmdroid.views.overlay.Marker
 import com.android.fire_and_rescue_departures.R
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import androidx.compose.ui.graphics.Color as UIColor
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
@@ -49,6 +63,7 @@ import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
+import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import com.android.fire_and_rescue_departures.viewmodels.MarkerData
@@ -70,6 +85,7 @@ fun DeparturesMapScreen(
 ) {
     Configuration.getInstance().userAgentValue = "Chrome/120.0.0.0 Safari/537.36"
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
 
     val departuresList by departuresViewModel.departuresList.collectAsState()
     val zoomLevel by departuresMapViewModel.zoomLevel.collectAsState()
@@ -90,14 +106,20 @@ fun DeparturesMapScreen(
     }
 
     DisposableEffect(navController) {
-        val listener = NavController.OnDestinationChangedListener { controller, destination, arguments ->
-            departuresMapViewModel.setZoomLevel(mapView.zoomLevelDouble)
-            departuresMapViewModel.setMapCenter(mapView.mapCenter as GeoPoint)
-        }
+        val listener =
+            NavController.OnDestinationChangedListener { controller, destination, arguments ->
+                departuresMapViewModel.setZoomLevel(mapView.zoomLevelDouble)
+                departuresMapViewModel.setMapCenter(mapView.mapCenter as GeoPoint)
+            }
         navController.addOnDestinationChangedListener(listener)
         onDispose {
             navController.removeOnDestinationChangedListener(listener)
         }
+    }
+
+    LaunchedEffect(configuration.orientation) {
+        departuresMapViewModel.setZoomLevel(mapView.zoomLevelDouble)
+        departuresMapViewModel.setMapCenter(mapView.mapCenter as GeoPoint)
     }
 
     suspend fun renderMarkers() {
@@ -150,7 +172,7 @@ fun DeparturesMapScreen(
                             MarkerData(
                                 id = departure.id.toString(),
                                 position = GeoPoint(coordinates.y, coordinates.x),
-                                icon = getTypeIcon(context, departure.type),
+                                icon = getDepartureIcon(context, departure.type),
                                 departure = departure
                             )
                         )
@@ -193,6 +215,7 @@ fun DeparturesMapScreen(
         val departureType = DepartureTypes.fromId(departureDetail!!.type)
         val departureSubtype = DepartureSubtypes.fromId(departureDetail!!.subType)
         val departureStartDateTime = getFormattedDepartureStartDateTime(departureDetail!!)
+        val isOpened = DepartureStatus.getOpened().contains(departureStatus!!.id)
 
         ModalBottomSheet(
             onDismissRequest = {
@@ -200,48 +223,205 @@ fun DeparturesMapScreen(
             },
             sheetState = sheetState
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = 8.dp
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    if (departureType != null) {
+                        Text(
+                            text = departureType.name,
+                            fontSize = TextUnit(28f, TextUnitType.Sp),
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (departureSubtype != null) {
+                        Text(
+                            text = departureSubtype.name,
+                            fontSize = TextUnit(18f, TextUnitType.Sp)
+                        )
+                    }
+                }
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    val icon = getTypeIcon(departureDetail!!.type)
+
+                    Image(
+                        painter = painterResource(id = icon.drawable),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(UIColor(icon.tint)),
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row {
+                    Text(
+                        text = UIText.DISPATCHED_DATE.value,
+                        fontSize = TextUnit(16f, TextUnitType.Sp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = departureStartDateTime,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = TextUnit(16f, TextUnitType.Sp)
+                    )
+                }
+
+                Text(
+                    text = if (isOpened) UIText.DEPARTURE_STATUS_OPENED.value else UIText.DEPARTURE_STATUS_CLOSED.value,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = TextUnit(16f, TextUnitType.Sp)
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = 8.dp
+                    ),
             ) {
-                if (departureStatus !== null)
-                    Text(text = departureStatus.name)
-                Text(text = departureStartDateTime)
-                if (departureType !== null)
-                    Text(text = departureType.name)
-                if (departureSubtype !== null)
-                    Text(text = departureSubtype.name)
-                if (departureDetail?.description !== null)
-                    Text(text = departureDetail!!.description!!)
+                Text(
+                    text = UIText.DEPARTURE_ADDRESS_LABEL.value,
+                )
 
-                Button(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                                navController.navigate(
-                                    Routes.departureDetail(
-                                        departureDetail!!.id,
-                                        (departureDetail!!.reportedDateTime
-                                            ?: departureDetail!!.startDateTime).toString()
-                                    )
-                                )
-                            }
-                        }
-                    }) {
-                    Text(UIText.DEPARTURES_MAP_BOTTOM_SHEET_BUTTON.value)
+                if (departureDetail!!.region.name != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row {
+                        Text(UIText.ADDRESS_REGION.value)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = departureDetail!!.region.name!!,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
+                if (departureDetail!!.district.name != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row {
+                        Text(UIText.ADDRESS_DISTRICT.value)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = departureDetail!!.district.name!!,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                if (departureDetail!!.municipality != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row {
+                        Text(UIText.ADDRESS_MUNICIPALITY.value)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = departureDetail!!.municipality!!,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                if (departureDetail!!.municipalityPart != null && departureDetail!!.municipality != departureDetail!!.municipalityPart) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row {
+                        Text(UIText.ADDRESS_MUNICIPALITY_PART.value)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = departureDetail!!.municipalityPart!!,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                if (departureDetail!!.street != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row {
+                        Text(UIText.ADDRESS_STREET.value)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = departureDetail!!.street!!,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                if (departureDetail!!.road != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row {
+                        Text(UIText.ADDRESS_ROAD.value)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = departureDetail!!.road!!,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
+
+            if (departureDetail?.description != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 8.dp,
+                            end = 8.dp,
+                            bottom = 16.dp
+                        ),
+                ) {
+                    Text(
+                        text = capitalizeFirstLetter(departureDetail!!.description!!),
+                        fontSize = TextUnit(18f, TextUnitType.Sp),
+                    )
+                }
+            }
+
+            Button(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showBottomSheet = false
+                            navController.navigate(
+                                Routes.departureDetail(
+                                    departureDetail!!.id,
+                                    (departureDetail!!.reportedDateTime
+                                        ?: departureDetail!!.startDateTime).toString()
+                                )
+                            )
+                        }
+                    }
+                }) {
+                Text(UIText.DEPARTURES_MAP_BOTTOM_SHEET_BUTTON.value)
             }
         }
     }
 }
 
-fun getTypeIcon(context: Context, departureType: Int): Drawable {
-    data class DrawableIcon(val drawable: Int, val tint: Int)
+data class DrawableIcon(val drawable: Int, val tint: Int)
 
-    val drawableIcon = when (departureType) {
+fun getTypeIcon(type: Int): DrawableIcon {
+    return when (type) {
         3100 -> DrawableIcon(R.drawable.fire, Color.RED)
         3200 -> DrawableIcon(R.drawable.car, Color.BLUE)
         3400 -> DrawableIcon(R.drawable.water, Color.GREEN)
@@ -254,6 +434,10 @@ fun getTypeIcon(context: Context, departureType: Int): Drawable {
         5000 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
         else -> DrawableIcon(R.drawable.siren, Color.RED)
     }
+}
+
+fun getDepartureIcon(context: Context, departureType: Int): Drawable {
+    val drawableIcon = getTypeIcon(departureType)
 
     var icon = ContextCompat.getDrawable(context, drawableIcon.drawable)!!.mutate()
 

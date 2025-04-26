@@ -60,7 +60,7 @@ fun DepartureDetailTopBar(
 
             val departureType = DepartureTypes.fromId(localDeparture.type)
 
-            if (departureType !== null)
+            if (departureType != null)
                 topBarTitle = departureType.name
             topBarShareText = buildDepartureShareText(localDeparture)
 

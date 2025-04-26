@@ -107,11 +107,11 @@ fun DepartureDetailScreen(
                             departure.gis2.toDouble()
                         )
 
-                        if (departureType !== null)
+                        if (departureType != null)
                             topBarTitle = departureType.name
                         topBarShareText = buildDepartureShareText(departure)
 
-                        if (departureSubtype !== null) {
+                        if (departureSubtype != null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
@@ -126,7 +126,7 @@ fun DepartureDetailScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
 
-                        if (departureStatus !== null) {
+                        if (departureStatus != null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
@@ -157,7 +157,7 @@ fun DepartureDetailScreen(
                         }
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        if (departure.description !== null) {
+                        if (departure.description != null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
@@ -178,18 +178,18 @@ fun DepartureDetailScreen(
                             Text(
                                 text = "Obec:"
                             )
-                            Text(text = departure.region.name)
-                            Text(text = departure.district.name)
+                            Text(text = departure.region.name.toString())
+                            Text(text = departure.district.name.toString())
 
-                            if (departure.municipality !== null)
+                            if (departure.municipality != null)
                                 Text(text = departure.municipality)
-                            if (departure.municipalityPart !== null)
+                            if (departure.municipalityPart != null)
                                 Text(text = departure.municipalityPart)
-                            if (departure.municipalityWithExtendedCompetence !== null)
+                            if (departure.municipalityWithExtendedCompetence != null)
                                 Text(text = departure.municipalityWithExtendedCompetence)
-                            if (departure.street !== null)
+                            if (departure.street != null)
                                 Text(text = departure.street)
-                            if (departure.road !== null)
+                            if (departure.road != null)
                                 Text(text = departure.road)
                         }
                         Spacer(modifier = Modifier.height(16.dp))

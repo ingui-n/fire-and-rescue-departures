@@ -35,6 +35,17 @@ enum class UIText(val value: String) {
     TIME_FROM_SELECT_BUTTON("Select time"),
     DATE_TO("To"),
 
+    DISPATCHED_DATE("Dispatched date"),//ohlášena
+    DEPARTURE_STATUS_OPENED("Opened"),//otevřená
+    DEPARTURE_STATUS_CLOSED("Closed"),//uzavřená
+
+    ADDRESS_REGION("Region"),//kraj
+    ADDRESS_DISTRICT("District"),//okres
+    ADDRESS_MUNICIPALITY("Municipality"),//obec
+    ADDRESS_MUNICIPALITY_PART("Municipality part"),//část obce
+    ADDRESS_STREET("Street"),//ulice
+    ADDRESS_ROAD("Road"),//silnice
+
     QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
     QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),
 }

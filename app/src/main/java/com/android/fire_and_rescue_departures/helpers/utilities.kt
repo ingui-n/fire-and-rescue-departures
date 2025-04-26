@@ -27,8 +27,16 @@ fun getFormattedDepartureStartDateTime(departure: Departure): String {
 @RequiresApi(Build.VERSION_CODES.O)
 fun getFormattedDateTime(dateTime: String): String {
     val czechLocale = Locale("cs", "CZ")
+    var pattern = "dd. MMMM HH:mm"
+
+    val convertedDateTime = LocalDateTime.parse(dateTime)
+
+    if (convertedDateTime.year != LocalDateTime.now().year) {
+        pattern = "dd. MMMM yyyy HH:mm"
+    }
+
     return DateTimeFormatter
-        .ofPattern("dd. MMMM HH:mm", czechLocale)
+        .ofPattern(pattern, czechLocale)
         .format(
             LocalDateTime.parse(
                 dateTime
