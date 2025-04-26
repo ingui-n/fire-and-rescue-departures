@@ -2,44 +2,31 @@ package com.android.fire_and_rescue_departures.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
-import org.koin.androidx.compose.koinViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.items.DepartureCardItem
-import com.android.fire_and_rescue_departures.items.DeparturesSearchItem
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.UIText
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,8 +35,6 @@ fun DeparturesListScreen(
     navController: NavController,
     viewModel: DeparturesListViewModel
 ) {
-    val textFieldState = rememberTextFieldState()
-    val searchBarState = rememberSearchBarState()
     val scope = rememberCoroutineScope()
 
     val listState = rememberLazyListState()
@@ -70,13 +55,6 @@ fun DeparturesListScreen(
         onRefresh = { refreshData() },
         modifier = Modifier.fillMaxSize()
     ) {
-        /*DeparturesSearchItem(
-            modifier = Modifier,
-            searchBarState = searchBarState,
-            textFieldState = textFieldState,
-            scope = scope,
-        )*/
-
         Column(modifier = Modifier.fillMaxSize()) {
             when (departuresList) {
                 is ApiResult.Loading -> {

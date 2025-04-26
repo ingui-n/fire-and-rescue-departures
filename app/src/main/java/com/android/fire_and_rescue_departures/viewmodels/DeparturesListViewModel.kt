@@ -42,6 +42,9 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
     )
     val filterToDateTime: StateFlow<LocalDateTime?> = _filterToDateTime.asStateFlow()
 
+    private val _filterAddress = MutableStateFlow<String>("")
+    val filterAddress: StateFlow<String> = _filterAddress.asStateFlow()
+
     //todo regions
     private val _filterRegions = MutableStateFlow<List<Int>>(listOf<Int>())
     val filterRegions: StateFlow<List<Int>> = _filterRegions.asStateFlow()
@@ -62,6 +65,10 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         _filterToDateTime.value = LocalDateTime.parse(dateTime)
     }
 
+    fun updateFilterAddress(address: String) {
+        _filterAddress.value = address
+    }
+
     fun updateFilterRegions(regions: List<Int>) {
         _filterRegions.value = regions
     }
@@ -75,6 +82,9 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
     }
 
     fun resetFilters() {
+        _filterFromDateTime.value = LocalDateTime.now().with(LocalTime.MIDNIGHT)
+        _filterToDateTime.value = LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT)
+        _filterAddress.value = ""
         _filterRegions.value = listOf<Int>()
         _filterType.value = null
         _filterStatuses.value = DepartureStatus.getAllIds()
@@ -90,6 +100,7 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                     filterToDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
                     filterStatuses.value,
                     filterType.value,
+                    filterAddress.value,
                 )
                 if (response.isSuccessful) {
                     val data = response.body()

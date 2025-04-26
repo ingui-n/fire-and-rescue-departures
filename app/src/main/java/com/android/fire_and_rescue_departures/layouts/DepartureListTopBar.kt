@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material3.Button
@@ -36,6 +37,10 @@ import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material3.AlertDialog
@@ -46,12 +51,14 @@ import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.TextRange
 import com.android.fire_and_rescue_departures.consts.regions
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
@@ -60,6 +67,7 @@ import com.android.fire_and_rescue_departures.helpers.buildDateTimeStringFromPic
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Locale
@@ -79,6 +87,7 @@ fun DepartureListTopBar(
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
+    val bottomSheetScrollState = rememberScrollState()
 
     var showFromDatePicker by remember { mutableStateOf(false) }
     var showFromTimePicker by remember { mutableStateOf(false) }
@@ -89,11 +98,19 @@ fun DepartureListTopBar(
     val selectedType: Int? by viewModel.filterType.collectAsState()
     val fromDateTime by viewModel.filterFromDateTime.collectAsState()
     val toDateTime by viewModel.filterToDateTime.collectAsState()
+    val address by viewModel.filterAddress.collectAsState()
+    val addressState = rememberTextFieldState(address, TextRange(0, 50))
+
     var statusOpened by remember { mutableStateOf(true) }
     var statusClosed by remember { mutableStateOf(true) }
 
     val minYear = 2005
     val minDateMillis = Instant.parse("$minYear-01-01T00:00:00Z").toEpochMilli()
+    val defaultFromDateMillis =
+        LocalDateTime.now().with(LocalTime.MIDNIGHT).toInstant(ZoneOffset.UTC)?.toEpochMilli()
+    val defaultToDateMillis =
+        LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT).toInstant(ZoneOffset.UTC)
+            ?.toEpochMilli()
 
     var fromDatePickerState by remember {
         mutableStateOf(
@@ -149,10 +166,10 @@ fun DepartureListTopBar(
         }
     }
 
-    fun setDefaultFromDatePickerState() {
+    fun resetFromDatePickerState(millis: Long? = defaultFromDateMillis) {
         fromDatePickerState = DatePickerState(
             locale = Locale("cs", "CZ"),
-            initialSelectedDateMillis = fromDatePickerState.selectedDateMillis,
+            initialSelectedDateMillis = millis,
             yearRange =
                 IntRange(
                     minYear,
@@ -163,10 +180,10 @@ fun DepartureListTopBar(
         )
     }
 
-    fun setDefaultToDatePickerState() {
+    fun resetToDatePickerState(millis: Long? = defaultToDateMillis) {
         toDatePickerState = DatePickerState(
             locale = Locale("cs", "CZ"),
-            initialSelectedDateMillis = toDatePickerState.selectedDateMillis,
+            initialSelectedDateMillis = millis,
             yearRange =
                 IntRange(
                     Instant.ofEpochMilli(fromDatePickerState.selectedDateMillis!!)
@@ -178,13 +195,13 @@ fun DepartureListTopBar(
     }
 
     LaunchedEffect(fromDatePickerState.selectedDateMillis) {
-        setDefaultToDatePickerState()
+        resetToDatePickerState(toDatePickerState.selectedDateMillis)
         viewModel.updateFilterFromDateTime(
             buildDateTimeStringFromPickers(fromDatePickerState, fromTimePickerState)
         )
     }
     LaunchedEffect(toDatePickerState.selectedDateMillis) {
-        setDefaultFromDatePickerState()
+        resetFromDatePickerState(fromDatePickerState.selectedDateMillis)
         viewModel.updateFilterToDateTime(
             buildDateTimeStringFromPickers(toDatePickerState, toTimePickerState)
         )
@@ -213,7 +230,6 @@ fun DepartureListTopBar(
             )
         },
         actions = {
-            //todo add address search
             IconButton(onClick = {
                 coroutineScope.launch {
                     viewModel.updateDeparturesList()
@@ -247,6 +263,7 @@ fun DepartureListTopBar(
 
                 coroutineScope.launch {
                     viewModel.updateFilterStatuses(statuses)
+                    viewModel.updateFilterAddress(addressState.text.toString())
                     viewModel.updateDeparturesList()
                 }
                 showBottomSheet = false
@@ -257,299 +274,298 @@ fun DepartureListTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
+                    .verticalScroll(bottomSheetScrollState)
             ) {
-                Text(UIText.STATUS.value)
-
-                Row(
-                    modifier = Modifier
-                        .toggleable(
-                            value = statusOpened,
-                            onValueChange = { statusOpened = it }
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(UIText.STATUS_ACTIVE_CHECKBOX.value)
-                    Checkbox(
-                        checked = statusOpened,
-                        onCheckedChange = { statusOpened = it }
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .toggleable(
-                            value = statusClosed,
-                            onValueChange = { statusClosed = it }
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(UIText.STATUS_CLOSED_CHECKBOX.value)
-                    Checkbox(
-                        checked = statusClosed,
-                        onCheckedChange = { statusClosed = it }
-                    )
-                }
-            }
-
-            // date and time
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(UIText.DATE_AND_TIME.value)
-
-                // from
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "${UIText.DATE_FROM.value}:",
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    if (fromDatePickerState.selectedDateMillis != null) {
-                        val date =
-                            getFormattedDateTime(
-                                fromDatePickerState.selectedDateMillis!!,
-                                "dd. MMMM yyyy"
-                            )
-                        val time =
-                            String.format(
-                                "%02d:%02d",
-                                fromTimePickerState.hour,
-                                fromTimePickerState.minute
-                            )
-
-                        Text(
-                            text = "$date $time",
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Button(
-                        modifier = Modifier.padding(end = 8.dp),
-                        onClick = { showFromDatePicker = true },
-                    ) {
-                        Text(UIText.DATE_FROM_SELECT_BUTTON.value)
-                    }
-                    Button(
-                        onClick = { showFromTimePicker = true },
-                    ) {
-                        Text(UIText.TIME_FROM_SELECT_BUTTON.value)
-                    }
-                    if (showFromDatePicker) {
-                        DatePickerDialog(
-                            onDismissRequest = { showFromDatePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    showFromDatePicker = false
-                                }) {
-                                    Text(UIText.OK.value)
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showFromDatePicker = false }) {
-                                    Text(UIText.CANCEL.value)
-                                }
-                            }
-                        ) {
-                            DatePicker(state = fromDatePickerState)
-                        }
-                    }
-                    if (showFromTimePicker) {
-                        AlertDialog(
-                            onDismissRequest = { showFromTimePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    showFromTimePicker = false
-                                }) {
-                                    Text(UIText.OK.value)
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showFromTimePicker = false }) {
-                                    Text(UIText.CANCEL.value)
-                                }
-                            },
-                            text = {
-                                TimePicker(state = fromTimePickerState)
-                            }
-                        )
-                    }
-                }
-
-                // to
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "${UIText.DATE_TO.value}:",
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    if (toDatePickerState.selectedDateMillis != null) {
-                        val date =
-                            getFormattedDateTime(
-                                toDatePickerState.selectedDateMillis!!,
-                                "dd. MMMM yyyy"
-                            )
-                        val time =
-                            String.format(
-                                "%02d:%02d",
-                                toTimePickerState.hour,
-                                toTimePickerState.minute
-                            )
-
-                        Text(
-                            text = "$date $time",
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Button(
-                        modifier = Modifier.padding(end = 8.dp),
-                        onClick = { showToDatePicker = true },
-                    ) {
-                        Text(UIText.DATE_FROM_SELECT_BUTTON.value)
-                    }
-                    Button(
-                        onClick = { showToTimePicker = true },
-                    ) {
-                        Text(UIText.TIME_FROM_SELECT_BUTTON.value)
-                    }
-                    if (showToDatePicker) {
-                        DatePickerDialog(
-                            onDismissRequest = { showToDatePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    showToDatePicker = false
-                                }) {
-                                    Text(UIText.OK.value)
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showToDatePicker = false }) {
-                                    Text(UIText.CANCEL.value)
-                                }
-                            }
-                        ) {
-                            DatePicker(state = toDatePickerState)
-                        }
-                    }
-                    if (showToTimePicker) {
-                        AlertDialog(
-                            onDismissRequest = { showToTimePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    showToTimePicker = false
-                                }) {
-                                    Text(UIText.OK.value)
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showToTimePicker = false }) {
-                                    Text(UIText.CANCEL.value)
-                                }
-                            },
-                            text = {
-                                TimePicker(state = toTimePickerState)
-                            }
-                        )
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(UIText.REGIONS.value)
-                FlowRow(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    regions.forEach { region ->
-                        FilterChip(
+                    Text(UIText.STATUS.value)
+
+                    Row(
+                        modifier = Modifier
+                            .toggleable(
+                                value = statusOpened,
+                                onValueChange = { statusOpened = it }
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(UIText.STATUS_ACTIVE_CHECKBOX.value)
+                        Checkbox(
+                            checked = statusOpened,
+                            onCheckedChange = { statusOpened = it }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .toggleable(
+                                value = statusClosed,
+                                onValueChange = { statusClosed = it }
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(UIText.STATUS_CLOSED_CHECKBOX.value)
+                        Checkbox(
+                            checked = statusClosed,
+                            onCheckedChange = { statusClosed = it }
+                        )
+                    }
+                }
+
+                // date and time
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(UIText.DATE_AND_TIME.value)
+
+                    // from
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "${UIText.DATE_FROM.value}:",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        if (fromDatePickerState.selectedDateMillis != null) {
+                            val date =
+                                getFormattedDateTime(
+                                    fromDatePickerState.selectedDateMillis!!,
+                                    "dd. MMMM yyyy"
+                                )
+                            val time =
+                                String.format(
+                                    "%02d:%02d",
+                                    fromTimePickerState.hour,
+                                    fromTimePickerState.minute
+                                )
+
+                            Text(
+                                text = "$date $time",
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Button(
                             modifier = Modifier.padding(end = 8.dp),
-                            onClick = {
-                                viewModel.updateFilterRegions(
-                                    if (selectedRegions.contains(region.id)) {
-                                        selectedRegions.minus(region.id)
-                                    } else {
-                                        selectedRegions.plus(region.id)
+                            onClick = { showFromDatePicker = true },
+                        ) {
+                            Text(UIText.DATE_FROM_SELECT_BUTTON.value)
+                        }
+                        Button(
+                            onClick = { showFromTimePicker = true },
+                        ) {
+                            Text(UIText.TIME_FROM_SELECT_BUTTON.value)
+                        }
+                        if (showFromDatePicker) {
+                            DatePickerDialog(
+                                onDismissRequest = { showFromDatePicker = false },
+                                confirmButton = {
+                                    Button(onClick = {
+                                        showFromDatePicker = false
+                                    }) {
+                                        Text(UIText.OK.value)
                                     }
-                                )
-                            },
-                            label = {
-                                Text(region.name)
-                            },
-                            enabled = region.available,
-                            selected = selectedRegions.contains(region.id),
-                            leadingIcon = if (selectedRegions.contains(region.id)) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Filled.Done,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                    )
+                                },
+                                dismissButton = {
+                                    Button(onClick = { showFromDatePicker = false }) {
+                                        Text(UIText.CANCEL.value)
+                                    }
                                 }
-                            } else {
-                                null
-                            },
+                            ) {
+                                DatePicker(state = fromDatePickerState)
+                            }
+                        }
+                        if (showFromTimePicker) {
+                            AlertDialog(
+                                onDismissRequest = { showFromTimePicker = false },
+                                confirmButton = {
+                                    Button(onClick = {
+                                        showFromTimePicker = false
+                                    }) {
+                                        Text(UIText.OK.value)
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { showFromTimePicker = false }) {
+                                        Text(UIText.CANCEL.value)
+                                    }
+                                },
+                                text = {
+                                    TimePicker(state = fromTimePickerState)
+                                }
+                            )
+                        }
+                    }
+
+                    // to
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "${UIText.DATE_TO.value}:",
+                            modifier = Modifier.padding(end = 8.dp)
                         )
+                        if (toDatePickerState.selectedDateMillis != null) {
+                            val date =
+                                getFormattedDateTime(
+                                    toDatePickerState.selectedDateMillis!!,
+                                    "dd. MMMM yyyy"
+                                )
+                            val time =
+                                String.format(
+                                    "%02d:%02d",
+                                    toTimePickerState.hour,
+                                    toTimePickerState.minute
+                                )
+
+                            Text(
+                                text = "$date $time",
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Button(
+                            modifier = Modifier.padding(end = 8.dp),
+                            onClick = { showToDatePicker = true },
+                        ) {
+                            Text(UIText.DATE_FROM_SELECT_BUTTON.value)
+                        }
+                        Button(
+                            onClick = { showToTimePicker = true },
+                        ) {
+                            Text(UIText.TIME_FROM_SELECT_BUTTON.value)
+                        }
+                        if (showToDatePicker) {
+                            DatePickerDialog(
+                                onDismissRequest = { showToDatePicker = false },
+                                confirmButton = {
+                                    Button(onClick = {
+                                        showToDatePicker = false
+                                    }) {
+                                        Text(UIText.OK.value)
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { showToDatePicker = false }) {
+                                        Text(UIText.CANCEL.value)
+                                    }
+                                }
+                            ) {
+                                DatePicker(state = toDatePickerState)
+                            }
+                        }
+                        if (showToTimePicker) {
+                            AlertDialog(
+                                onDismissRequest = { showToTimePicker = false },
+                                confirmButton = {
+                                    Button(onClick = {
+                                        showToTimePicker = false
+                                    }) {
+                                        Text(UIText.OK.value)
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { showToTimePicker = false }) {
+                                        Text(UIText.CANCEL.value)
+                                    }
+                                },
+                                text = {
+                                    TimePicker(state = toTimePickerState)
+                                }
+                            )
+                        }
                     }
                 }
-            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(UIText.DEPARTURE_TYPE.value)
-                FlowRow(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    FilterChip(
-                        modifier = Modifier.padding(end = 8.dp),
-                        onClick = { viewModel.updateFilterType(null) },
-                        label = {
-                            Text(UIText.ALL.value)
-                        },
-                        selected = selectedType == null,
-                        leadingIcon = if (selectedType == null) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Filled.Done,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                )
-                            }
-                        } else {
-                            null
-                        },
-                    )
+                    Text(UIText.REGIONS.value)
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        regions.forEach { region ->
+                            FilterChip(
+                                modifier = Modifier.padding(end = 8.dp),
+                                onClick = {
+                                    viewModel.updateFilterRegions(
+                                        if (selectedRegions.contains(region.id)) {
+                                            selectedRegions.minus(region.id)
+                                        } else {
+                                            selectedRegions.plus(region.id)
+                                        }
+                                    )
+                                },
+                                label = {
+                                    Text(region.name)
+                                },
+                                enabled = region.available,
+                                selected = selectedRegions.contains(region.id),
+                                leadingIcon = if (selectedRegions.contains(region.id)) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Filled.Done,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                        )
+                                    }
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                    }
+                }
 
-                    DepartureTypes.all.forEach { type ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(UIText.DEPARTURE_ADDRESS_SEARCH.value)
+                    OutlinedTextField(
+                        state = addressState,
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        label = { Text(UIText.DEPARTURE_ADDRESS_LABEL.value) },
+                    )
+                }
+
+                // type
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(UIText.DEPARTURE_TYPE.value)
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
                         FilterChip(
                             modifier = Modifier.padding(end = 8.dp),
-                            onClick = { viewModel.updateFilterType(type.id) },
+                            onClick = { viewModel.updateFilterType(null) },
                             label = {
-                                Text(type.name)
+                                Text(UIText.ALL.value)
                             },
-                            selected = selectedType == type.id,
-                            leadingIcon = if (selectedType == type.id) {
+                            selected = selectedType == null,
+                            leadingIcon = if (selectedType == null) {
                                 {
                                     Icon(
                                         imageVector = Icons.Filled.Done,
@@ -561,66 +577,64 @@ fun DepartureListTopBar(
                                 null
                             },
                         )
-                    }
-                }
-            }
 
-            // reset button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-            ) {
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        coroutineScope.launch {
-                            viewModel.resetFilters()
-                            statusOpened = true
-                            setDefaultFromDatePickerState()
-                            fromTimePickerState = TimePickerState(
-                                initialHour = 0,
-                                initialMinute = 0,
-                                is24Hour = true
-                            )
-                            setDefaultToDatePickerState()
-                            toTimePickerState = TimePickerState(
-                                initialHour = 0,
-                                initialMinute = 0,
-                                is24Hour = true
+                        DepartureTypes.all.forEach { type ->
+                            FilterChip(
+                                modifier = Modifier.padding(end = 8.dp),
+                                onClick = { viewModel.updateFilterType(type.id) },
+                                label = {
+                                    Text(type.name)
+                                },
+                                selected = selectedType == type.id,
+                                leadingIcon = if (selectedType == type.id) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Filled.Done,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                        )
+                                    }
+                                } else {
+                                    null
+                                },
                             )
                         }
                     }
+                }
+
+                // reset button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                 ) {
-                    Text(UIText.RESET.value)
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            coroutineScope.launch {
+                                viewModel.resetFilters()
+                                statusOpened = true
+                                statusClosed = true
+                                addressState.clearText()
+                                resetFromDatePickerState()
+                                fromTimePickerState = TimePickerState(
+                                    initialHour = 0,
+                                    initialMinute = 0,
+                                    is24Hour = true
+                                )
+                                resetToDatePickerState()
+                                toTimePickerState = TimePickerState(
+                                    initialHour = 0,
+                                    initialMinute = 0,
+                                    is24Hour = true
+                                )
+                            }
+                        }
+                    ) {
+                        Text(UIText.RESET.value)
+                    }
                 }
             }
-            /*Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        coroutineScope.launch {
-                            sheetState.hide()
-                            showBottomSheet = false
-                        }
-                    }
-                ) {
-                    Text(UIText.CANCEL.value)
-                }
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        println("selectedRegions: $selectedRegions, selectedTypes: $selectedTypes, statusOpened: $statusOpened, fromDatePickerState: $fromDatePickerState, fromTimePickerState: $fromTimePickerState, toDatePickerState: $toDatePickerState, toTimePickerState: $toTimePickerState")
-                    }
-                ) {
-                    Text(UIText.FILTER.value)
-                }
-            }*/
         }
     }
 }

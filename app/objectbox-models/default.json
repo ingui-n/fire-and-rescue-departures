@@ -4,30 +4,6 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:6898237962659339180",
-      "lastPropertyId": "3:5886383157932750453",
-      "name": "DeparturesMapEntity",
-      "properties": [
-        {
-          "id": "1:3108699376312164572",
-          "name": "id",
-          "type": 6,
-          "flags": 1
-        },
-        {
-          "id": "2:5479809288460529076",
-          "name": "type",
-          "type": 9
-        },
-        {
-          "id": "3:5886383157932750453",
-          "name": "departureTime",
-          "type": 9
-        }
-      ],
-      "relations": []
-    },
-    {
       "id": "2:4959759699261513224",
       "lastPropertyId": "3:4753625929170073758",
       "name": "DepartureBookmarkEntity",
@@ -58,9 +34,15 @@
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [],
+  "retiredEntityUids": [
+    6898237962659339180
+  ],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    3108699376312164572,
+    5479809288460529076,
+    5886383157932750453
+  ],
   "retiredRelationUids": [],
   "version": 1
 }
