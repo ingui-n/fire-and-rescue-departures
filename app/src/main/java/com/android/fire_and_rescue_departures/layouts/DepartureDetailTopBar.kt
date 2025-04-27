@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.UIText
@@ -78,18 +79,19 @@ fun DepartureDetailTopBar(
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
-                alpha = 1f - scrollBehavior.state.collapsedFraction
+                alpha = scrollBehavior.state.collapsedFraction
             ),
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         title = {
-            Text(
+            /*Text(
                 text = topBarTitle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleLarge
-            )
+            )*/
         },
         navigationIcon = {
             IconButton(onClick = { navController.popBackStack() }) {

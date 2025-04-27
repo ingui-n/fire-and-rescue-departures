@@ -47,6 +47,14 @@ enum class UIText(val value: String) {
     ADDRESS_STREET("Street"),//ulice
     ADDRESS_ROAD("Road"),//silnice
 
+    DETAIL_DISPATCHED_UNITS("Dispatched units"),//Zasahující jednotky
+    DETAIL_DISPATCHED_UNITS_DATE("Date of dispatch"),//Čas ohlášení
+    DETAIL_DISPATCHED_UNITS_COUNT("Quantity"),//Počet
+    DETAIL_DISPATCHED_UNITS_CURRENT("Currently dispatched"),//Aktuálně zasahující
+    DETAIL_OPEN_ON_GOOGLE("Open on Google Maps"),//Otevřít na Google Maps
+    DETAIL_OPEN_ON_MAPY("Open on Mapy.com"),//Otevřít na Mapy.com
+    DEPARTURE_PREPLANNED("Preplanned"),//Předem naplánovaná
+
     QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
     QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),
 }

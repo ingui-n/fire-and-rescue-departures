@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -78,7 +79,11 @@ fun MainScreen(navController: NavHostController) {
         NavHost(
             navController = navController,
             startDestination = Routes.DeparturesList.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = if (currentRoute?.startsWith(Routes.DepartureDetail.route) == false) {
+                Modifier.padding(innerPadding)
+            } else {
+                Modifier
+            }
         ) {
             composable(Routes.DeparturesList.route) {
                 DeparturesListScreen(navController, departureListViewModel)

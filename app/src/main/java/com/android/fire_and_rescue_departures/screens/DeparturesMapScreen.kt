@@ -1,10 +1,8 @@
 package com.android.fire_and_rescue_departures.screens
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -14,13 +12,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -36,17 +34,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
@@ -57,9 +50,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.config.Configuration
 import org.osmdroid.views.overlay.Marker
 import com.android.fire_and_rescue_departures.R
-import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
-import androidx.compose.ui.graphics.Color as UIColor
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
@@ -236,19 +227,15 @@ fun DeparturesMapScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        start = 8.dp,
-                        end = 8.dp,
-                        bottom = 8.dp
-                    ),
+                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
                     if (departureType != null) {
                         Text(
                             text = departureType.name,
-                            fontSize = TextUnit(28f, TextUnitType.Sp),
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
 
@@ -257,7 +244,8 @@ fun DeparturesMapScreen(
                     if (departureSubtype != null) {
                         Text(
                             text = departureSubtype.name,
-                            fontSize = TextUnit(18f, TextUnitType.Sp)
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.secondary
                         )
                     }
                 }
@@ -279,110 +267,134 @@ fun DeparturesMapScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        start = 8.dp,
-                        end = 8.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    ),
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row {
                     Text(
                         text = UIText.DISPATCHED_DATE.value,
-                        fontSize = TextUnit(16f, TextUnitType.Sp)
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = departureStartDateTime,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = TextUnit(16f, TextUnitType.Sp)
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
                 Text(
                     text = if (isOpened) UIText.DEPARTURE_STATUS_OPENED.value else UIText.DEPARTURE_STATUS_CLOSED.value,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = TextUnit(16f, TextUnitType.Sp)
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        start = 8.dp,
-                        end = 8.dp,
-                        bottom = 8.dp
-                    ),
+                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
             ) {
                 Text(
                     text = UIText.DEPARTURE_ADDRESS_LABEL.value,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 if (departureDetail!!.region.name != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(UIText.ADDRESS_REGION.value)
+                        Text(
+                            UIText.ADDRESS_REGION.value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = departureDetail!!.region.name!!,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 if (departureDetail!!.district.name != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(UIText.ADDRESS_DISTRICT.value)
+                        Text(
+                            UIText.ADDRESS_DISTRICT.value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = departureDetail!!.district.name!!,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 if (departureDetail!!.municipality != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(UIText.ADDRESS_MUNICIPALITY.value)
+                        Text(
+                            UIText.ADDRESS_MUNICIPALITY.value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = departureDetail!!.municipality!!,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 if (departureDetail!!.municipalityPart != null && departureDetail!!.municipality != departureDetail!!.municipalityPart) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(UIText.ADDRESS_MUNICIPALITY_PART.value)
+                        Text(
+                            UIText.ADDRESS_MUNICIPALITY_PART.value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = departureDetail!!.municipalityPart!!,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 if (departureDetail!!.street != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(UIText.ADDRESS_STREET.value)
+                        Text(
+                            UIText.ADDRESS_STREET.value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = departureDetail!!.street!!,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 if (departureDetail!!.road != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(UIText.ADDRESS_ROAD.value)
+                        Text(
+                            UIText.ADDRESS_ROAD.value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = departureDetail!!.road!!,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -392,15 +404,12 @@ fun DeparturesMapScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            start = 8.dp,
-                            end = 8.dp,
-                            bottom = 16.dp
-                        ),
+                        .padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
                 ) {
                     Text(
                         text = capitalizeFirstLetter(departureDetail!!.description!!),
-                        fontSize = TextUnit(18f, TextUnitType.Sp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -421,7 +430,11 @@ fun DeparturesMapScreen(
                         }
                     }
                 }) {
-                Text(UIText.DEPARTURES_MAP_BOTTOM_SHEET_BUTTON.value)
+                Text(
+                    UIText.DEPARTURES_MAP_BOTTOM_SHEET_BUTTON.value,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     }
