@@ -11,6 +11,26 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
+fun formatDescription(description: String): String {
+    var description = description.trim()
+
+    description = description.replace("DN", "dopravní nehoda")
+    description = description.replace("OA", "osobní automobil")
+    description = description.replace("NA", "nákladní automobil")
+    description = description.replace("DOD", "dodávka")
+    description = description.replace("VB", "výšková budova")
+    description = description.replace("EPS", "elektronická požární signalizace")
+    description = description.replace("TM", "tiskový mluvčí")
+    description = description.replace("ZZS", "záchranná služba")
+
+    description = description.replace(" .", ".")
+    description = description.replace(" ,", ",")
+    description = description.replaceFirst("P ", "Požár ")
+    description = description.trimEnd('.')
+
+    return capitalizeFirstLetter(description)
+}
+
 fun capitalizeFirstLetter(string: String): String {
     return if (string.isEmpty()) {
         string

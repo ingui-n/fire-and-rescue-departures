@@ -46,6 +46,21 @@ fun buildDepartureAddress(departure: Departure): String {
     return text
 }
 
+fun buildDepartureSmallAddress(departure: Departure): String {
+    val listOfText = mutableListOf<String>()
+
+    if (departure.region.name != null)
+        listOfText.add(departure.region.name)
+    if (departure.municipality != null)
+        listOfText.add(departure.municipality)
+    if (departure.street != null)
+        listOfText.add(departure.street)
+    if (departure.road != null)
+        listOfText.add(departure.road)
+
+    return listOfText.joinToString(" • ")
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun buildDepartureShareText(departure: Departure): String {
     val isOpened = DepartureStatus.getOpened().contains(departure.state)

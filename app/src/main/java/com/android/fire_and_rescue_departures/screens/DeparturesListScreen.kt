@@ -7,7 +7,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,12 +23,17 @@ import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.items.DepartureCardItem
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.UIText
+import com.android.fire_and_rescue_departures.data.Departure
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -41,6 +49,7 @@ fun DeparturesListScreen(
     val departuresList by viewModel.departuresList.collectAsState()
 
     var refreshing by remember { mutableStateOf(false) }
+    var departures: List<Departure>? by remember { mutableStateOf(null) }
 
     fun refreshData() {
         scope.launch {
@@ -50,33 +59,57 @@ fun DeparturesListScreen(
         }
     }
 
+    when (departuresList) {
+        is ApiResult.Loading -> {
+            Box(modifier = Modifier.fillMaxSize().zIndex(1f)) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(96.dp)
+                )
+            }
+        }
+
+        is ApiResult.Success -> {
+            departures = (departuresList as ApiResult.Success).data
+        }
+
+        is ApiResult.Error -> {
+            departures = null
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = UIText.DEPARTURES_LIST_EMPTY_LIST.value,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
     PullToRefreshBox(
         isRefreshing = refreshing,
         onRefresh = { refreshData() },
         modifier = Modifier.fillMaxSize()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            when (departuresList) {
-                is ApiResult.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            if (departures != null) {
+                LazyColumn(
+                    state = listState,
+                ) {
+                    items(departures!!) { departure ->
+                        DepartureCardItem(
+                            departure = departure,
+                            navController = navController,
+                        )
                     }
-                }
-
-                is ApiResult.Success -> {
-                    val departuresList = (departuresList as ApiResult.Success).data
-                    LazyColumn(state = listState) {
-                        items(departuresList) { departure ->
-                            DepartureCardItem(
-                                departure = departure,
-                                navController = navController,
-                            )
-                        }
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                }
-
-                is ApiResult.Error -> {
-                    Text(text = UIText.DEPARTURES_LIST_EMPTY_LIST.value)
                 }
             }
         }

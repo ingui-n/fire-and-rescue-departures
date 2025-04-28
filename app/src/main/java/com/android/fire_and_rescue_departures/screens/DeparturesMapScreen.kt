@@ -71,6 +71,7 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import androidx.core.graphics.createBitmap
+import com.android.fire_and_rescue_departures.helpers.formatDescription
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -409,7 +410,7 @@ fun DeparturesMapScreen(
                         .padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
                 ) {
                     Text(
-                        text = capitalizeFirstLetter(departureDetail!!.description!!),
+                        text = formatDescription(departureDetail!!.description!!),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )

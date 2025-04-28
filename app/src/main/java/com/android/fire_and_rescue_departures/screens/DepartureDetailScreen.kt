@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.DepartureUnit
+import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import kotlinx.coroutines.launch
@@ -250,7 +251,7 @@ fun DepartureDetailScreen(
                             if (departure.description != null) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = capitalizeFirstLetter(departure.description),
+                                    text = formatDescription(departure.description),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold
                                     ),

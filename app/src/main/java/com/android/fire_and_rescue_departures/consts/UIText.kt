@@ -12,6 +12,9 @@ enum class UIText(val value: String) {
     DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),
     DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),
 
+    BOOKMARK_ADD("Add to Bookmarks"),//Přidat do záložek
+    BOOKMARK_REMOVE("Remove from Bookmarks"),//Odebrat ze záložek
+
     DEPARTURE_DETAIL_TITLE("Departure detail"),
 
     OK("OK"),
@@ -22,6 +25,7 @@ enum class UIText(val value: String) {
     CANCEL("Cancel"),
     ALL("All"),
     FILTERS("Filters"),
+    SHARE("Share"),//Sdílet
 
     REGIONS("Regions"),
     STATUS("Status"),
