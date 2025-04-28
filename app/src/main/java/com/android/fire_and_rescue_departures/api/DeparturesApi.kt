@@ -22,4 +22,9 @@ interface DeparturesApi {
     suspend fun getDepartureUnits(
         @Url url: String,
     ): Response<List<DepartureUnit>>
+
+    @GET
+    suspend fun test(
+        @Url url: String,
+    ): Response<String>
 }

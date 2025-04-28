@@ -10,6 +10,7 @@ import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
+import com.android.fire_and_rescue_departures.helpers.ApiTester
 import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
@@ -37,6 +38,7 @@ val viewModelModule = module {
     viewModel { DeparturesListViewModel(get()) }
     viewModel { DeparturesBookmarksViewModel(get(), get()) }
     viewModel { DeparturesMapViewModel() }
+    viewModel { ApiTester(get()) }
 }
 
 val networkModule = module {

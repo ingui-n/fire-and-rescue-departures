@@ -20,6 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.android.fire_and_rescue_departures.consts.BottomNavItem
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
+import com.android.fire_and_rescue_departures.helpers.ApiTester
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 import com.android.fire_and_rescue_departures.layouts.DepartureDetailTopBar
 import com.android.fire_and_rescue_departures.layouts.DepartureListTopBar
@@ -45,6 +46,7 @@ fun MainScreen(navController: NavHostController) {
     )
 
     val departureListViewModel: DeparturesListViewModel = koinViewModel()
+    val apiTester: ApiTester = koinViewModel()
 
     // todo when running update call only departures with the opened status
     LaunchedEffect(Unit) {
@@ -54,6 +56,10 @@ fun MainScreen(navController: NavHostController) {
         }
     }
 
+    LaunchedEffect(Unit) {
+        apiTester.test()
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -61,9 +67,17 @@ fun MainScreen(navController: NavHostController) {
                 if (currentRoute?.startsWith(Routes.DepartureDetail.route) == true) {
                     DepartureDetailTopBar(navController, scrollBehavior, departureListViewModel)
                 } else if (currentRoute == Routes.DepartureMap.route) {
-                    DepartureListTopBar(scrollBehavior, departureListViewModel, UIText.DEPARTURES_MAP_TITLE.value)
+                    DepartureListTopBar(
+                        scrollBehavior,
+                        departureListViewModel,
+                        UIText.DEPARTURES_MAP_TITLE.value
+                    )
                 } else if (currentRoute == Routes.DeparturesList.route) {
-                    DepartureListTopBar(scrollBehavior, departureListViewModel, UIText.DEPARTURES_LIST_TITLE.value)
+                    DepartureListTopBar(
+                        scrollBehavior,
+                        departureListViewModel,
+                        UIText.DEPARTURES_LIST_TITLE.value
+                    )
                 } else {
                     TopBar(navController, scrollBehavior, currentRoute)
                 }
