@@ -13,11 +13,13 @@ class DepartureBookmarksRepository(private val departureBookmarksBox: Box<Depart
             .build().findFirst()
 
         if (existingEntry != null) {
+            existingEntry.regionId = departure.regionId!!
             existingEntry.departureId = departure.id.toString()
             existingEntry.dateTime = (departure.startDateTime ?: departure.reportedDateTime).toString()
             departureBookmarksBox.put(existingEntry)
         } else {
             val departureBookmarkEntity = DepartureBookmarkEntity(
+                regionId = departure.regionId!!,
                 departureId = departure.id.toString(),
                 dateTime = (departure.startDateTime ?: departure.reportedDateTime).toString()
             )

@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.api.DeparturesApi
+import com.android.fire_and_rescue_departures.consts.getRegionById
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
 import com.android.fire_and_rescue_departures.data.DepartureStatus
+import com.android.fire_and_rescue_departures.helpers.getDateTimeFromString
 import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,11 +64,13 @@ class DeparturesBookmarksViewModel(
                     for (departureBookmark in departureBookmarks) {
                         val departure =
                             getDeparture(
+                                departureBookmark.regionId.toInt(),
                                 departureBookmark.departureId.toLong(),
                                 departureBookmark.dateTime
                             )
 
                         if (departure != null) {
+                            departure.regionId = departureBookmark.regionId
                             departures.add(departure)
                         }
                     }
@@ -83,17 +87,25 @@ class DeparturesBookmarksViewModel(
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getDeparture(
+        regionId: Int,
         id: Long,
         fromDateTime: String,
         toDateTime: String? = fromDateTime,
         yearsIteration: Long = 0,
     ): Departure? {
-        if (LocalDateTime.parse(fromDateTime).year < 2007) {
+        if (getDateTimeFromString(fromDateTime).year < 2007) {
             return null
         }
 
         try {
+            val region = getRegionById(regionId)
+
+            if (region == null) {
+                return null
+            }
+
             val response = departuresApi.getDepartures(
+                region.url + "/api",
                 fromDateTime,
                 toDateTime,
                 DepartureStatus.getAllIds()
@@ -106,6 +118,7 @@ class DeparturesBookmarksViewModel(
                     return departure
                         ?: //todo change to get /technika and by sent date time use range
                         getDeparture(
+                            regionId,
                             id,
                             LocalDateTime.now().minusYears(yearsIteration + 1)
                                 .format(DateTimeFormatter.ISO_DATE_TIME),

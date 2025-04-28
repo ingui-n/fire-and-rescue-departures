@@ -38,7 +38,10 @@ fun DepartureCardItem(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
+                if (departure.regionId == null) return@clickable
+
                 navController.navigate(Routes.departureDetail(
+                    departure.regionId!!,
                     departure.id,
                     (departure.reportedDateTime ?: departure.startDateTime).toString()
                 ))

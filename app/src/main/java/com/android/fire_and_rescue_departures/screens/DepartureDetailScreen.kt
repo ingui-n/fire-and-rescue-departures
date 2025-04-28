@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DepartureDetailScreen(
+    regionId: Int,
     departureId: Long,
     departureDateTime: String,
     viewModel: DeparturesListViewModel
@@ -90,15 +91,15 @@ fun DepartureDetailScreen(
     val fullScreenImageUrl = remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        viewModel.getDepartureUnits(departureId)
+        viewModel.getDepartureUnits(regionId, departureId)
     }
 
     var refreshing by remember { mutableStateOf(false) }
 
     fun refreshData() {
         refreshing = true
-        viewModel.getDeparture(departureId, departureDateTime)
-        viewModel.getDepartureUnits(departureId)
+        viewModel.getDeparture(regionId, departureId, departureDateTime)
+        viewModel.getDepartureUnits(regionId, departureId)
         refreshing = false
     }
 
@@ -127,9 +128,7 @@ fun DepartureDetailScreen(
                 when (departureDetailResult) {
                     is ApiResult.Loading -> {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 16.dp),
+                            modifier = Modifier.fillParentMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
@@ -150,10 +149,17 @@ fun DepartureDetailScreen(
                             departure.gis2.toDouble()
                         )
 
+                        val departureStatusState =
+                            if (DepartureStatus.getOpened().contains(departureStatus!!.id)) {
+                                UIText.DEPARTURE_STATUS_OPENED.value
+                            } else {
+                                UIText.DEPARTURE_STATUS_CLOSED.value
+                            }
+
                         val mapUrl =
-                            "${BuildConfig.MAPS_COM_API_URL}/static/map?lon=${coordinates.x}&lat=${coordinates.y}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${coordinates.x},${coordinates.y}&apikey=${BuildConfig.MAPS_COM_API}"
+                            "https://api.mapy.cz/v1/static/map?lon=${coordinates.x}&lat=${coordinates.y}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${coordinates.x},${coordinates.y}&apikey=${BuildConfig.MAPS_COM_API}"
                         val streetUrl =
-                            "${BuildConfig.MAPS_COM_API_URL}/static/pano?width=800&height=600&lon=${coordinates.x}&lat=${coordinates.y}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
+                            "https://api.mapy.cz/v1/static/pano?width=800&height=600&lon=${coordinates.x}&lat=${coordinates.y}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
 
                         val backgroundColor = MaterialTheme.colorScheme.background
 
@@ -232,17 +238,15 @@ fun DepartureDetailScreen(
                                 color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center
                             )
-                            if (departureStatus != null) {
-                                Text(
-                                    text = departureStatus.name,
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "${departureStatus.name} (${departureStatusState})",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
                             if (departure.description != null) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
@@ -378,135 +382,135 @@ fun DepartureDetailScreen(
                                     }
                                 }
                             }
+                        }
 
-                            // Address
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                        // Address
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            // Section Header
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Section Header
+                                Text(
+                                    text = UIText.DEPARTURE_ADDRESS_LABEL.value,
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                    ),
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.padding(end = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = UIText.DEPARTURE_ADDRESS_LABEL.value,
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.SemiBold,
-                                        ),
-                                        color = MaterialTheme.colorScheme.primary,
-                                    )
-                                    Row(
-                                        modifier = Modifier.padding(end = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        val googleMapsUrl =
-                                            "https://www.google.com/maps/place/${
-                                                decimalToDMS(
-                                                    coordinates.x
-                                                )
-                                            }+${
-                                                decimalToDMS(
-                                                    coordinates.y,
-                                                    true
-                                                )
-                                            }/@${coordinates.x},${coordinates.y}"
-
-                                        val mapyCzUrl =
-                                            "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
-
-                                        IconButton(onClick = {
-                                            val intent =
-                                                Intent(Intent.ACTION_VIEW, googleMapsUrl.toUri())
-                                            context.startActivity(intent)
-                                        }) {
-                                            Image(
-                                                painter = painterResource(id = R.drawable.google_maps_icon),
-                                                contentDescription = UIText.DETAIL_OPEN_ON_GOOGLE.value
+                                    val googleMapsUrl =
+                                        "https://www.google.com/maps/place/${
+                                            decimalToDMS(
+                                                coordinates.x
                                             )
-                                        }
-
-                                        Spacer(modifier = Modifier.width(16.dp))
-
-                                        IconButton(onClick = {
-                                            val intent =
-                                                Intent(Intent.ACTION_VIEW, mapyCzUrl.toUri())
-                                            context.startActivity(intent)
-                                        }) {
-                                            Image(
-                                                painter = painterResource(id = R.drawable.mapy_com_icon),
-                                                contentDescription = UIText.DETAIL_OPEN_ON_MAPY.value
+                                        }+${
+                                            decimalToDMS(
+                                                coordinates.y,
+                                                true
                                             )
-                                        }
+                                        }/@${coordinates.x},${coordinates.y}"
+
+                                    val mapyCzUrl =
+                                        "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
+
+                                    IconButton(onClick = {
+                                        val intent =
+                                            Intent(Intent.ACTION_VIEW, googleMapsUrl.toUri())
+                                        context.startActivity(intent)
+                                    }) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.google_maps_icon),
+                                            contentDescription = UIText.DETAIL_OPEN_ON_GOOGLE.value
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    IconButton(onClick = {
+                                        val intent =
+                                            Intent(Intent.ACTION_VIEW, mapyCzUrl.toUri())
+                                        context.startActivity(intent)
+                                    }) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.mapy_com_icon),
+                                            contentDescription = UIText.DETAIL_OPEN_ON_MAPY.value
+                                        )
                                     }
                                 }
+                            }
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                                // Address Items
-                                val addressComponents = listOfNotNull(
-                                    departure.region.name?.let {
-                                        Pair(UIText.ADDRESS_REGION.value, it)
+                            // Address Items
+                            val addressComponents = listOfNotNull(
+                                departure.region.name?.let {
+                                    Pair(UIText.ADDRESS_REGION.value, it)
+                                },
+                                departure.district.name?.let {
+                                    Pair(UIText.ADDRESS_DISTRICT.value, it)
+                                },
+                                departure.municipality?.let {
+                                    Pair(UIText.ADDRESS_MUNICIPALITY.value, it)
+                                },
+                                departure.municipalityPart?.takeIf { it != departure.municipality }
+                                    ?.let {
+                                        Pair(UIText.ADDRESS_MUNICIPALITY_PART.value, it)
                                     },
-                                    departure.district.name?.let {
-                                        Pair(UIText.ADDRESS_DISTRICT.value, it)
-                                    },
-                                    departure.municipality?.let {
-                                        Pair(UIText.ADDRESS_MUNICIPALITY.value, it)
-                                    },
-                                    departure.municipalityPart?.takeIf { it != departure.municipality }
-                                        ?.let {
-                                            Pair(UIText.ADDRESS_MUNICIPALITY_PART.value, it)
-                                        },
-                                    departure.street?.let {
-                                        Pair(UIText.ADDRESS_STREET.value, it)
-                                    },
-                                    departure.road?.let {
-                                        Pair(UIText.ADDRESS_ROAD.value, it)
-                                    }
-                                )
+                                departure.street?.let {
+                                    Pair(UIText.ADDRESS_STREET.value, it)
+                                },
+                                departure.road?.let {
+                                    Pair(UIText.ADDRESS_ROAD.value, it)
+                                }
+                            )
 
-                                Card(
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                shape = MaterialTheme.shapes.medium,
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                        alpha = 0.4f
+                                    )
+                                ),
+                                onClick = {}
+                            ) {
+                                Column(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
-                                    shape = MaterialTheme.shapes.medium,
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                            alpha = 0.4f
-                                        )
-                                    ),
-                                    onClick = {}
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
                                 ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp)
-                                    ) {
-                                        addressComponents.forEach { (label, value) ->
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.padding(vertical = 4.dp)
-                                            ) {
-                                                Text(
-                                                    text = label,
-                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                            alpha = 0.9f
-                                                        )
-                                                    ),
-                                                    modifier = Modifier.widthIn(min = 140.dp)
-                                                )
-                                                Spacer(Modifier.width(8.dp))
-                                                Text(
-                                                    text = value,
-                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                        fontWeight = FontWeight.SemiBold,
-                                                    ),
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                            }
+                                    addressComponents.forEach { (label, value) ->
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(vertical = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = label,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                        alpha = 0.9f
+                                                    )
+                                                ),
+                                                modifier = Modifier.widthIn(min = 140.dp)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(
+                                                text = value,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                    fontWeight = FontWeight.SemiBold,
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
                                         }
                                     }
                                 }
@@ -533,7 +537,17 @@ fun DepartureDetailScreen(
                     }
 
                     is ApiResult.Error -> {
-                        Text("Cannot load departure")
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = UIText.NETWORK_CONNECTION_ERROR.value,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }

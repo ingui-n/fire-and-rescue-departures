@@ -71,6 +71,7 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import androidx.core.graphics.createBitmap
+import androidx.compose.ui.graphics.Color as ComposeColor
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -223,6 +224,7 @@ fun DeparturesMapScreen(
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
+            scrimColor = ComposeColor.Transparent,
         ) {
             Row(
                 modifier = Modifier
@@ -422,6 +424,7 @@ fun DeparturesMapScreen(
                             showBottomSheet = false
                             navController.navigate(
                                 Routes.departureDetail(
+                                    departureDetail!!.regionId!!,
                                     departureDetail!!.id,
                                     (departureDetail!!.reportedDateTime
                                         ?: departureDetail!!.startDateTime).toString()

@@ -8,4 +8,5 @@ data class DepartureUnit(
     @SerializedName("pocet") val count: Int?,
     @SerializedName("aktualniPocet") val currentCount: Int?,
     @SerializedName("casOhlaseni") val callDateTime: String?,
+    @SerializedName("regionId") var regionId: Int?,
 )

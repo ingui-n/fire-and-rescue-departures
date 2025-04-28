@@ -5,8 +5,10 @@ import androidx.annotation.RequiresApi
 import com.android.fire_and_rescue_departures.data.Departure
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.Locale
 
 fun capitalizeFirstLetter(string: String): String {
@@ -29,7 +31,20 @@ fun getFormattedDateTime(dateTime: String): String {
     val czechLocale = Locale("cs", "CZ")
     var pattern = "d. MMMM HH:mm"
 
-    val convertedDateTime = LocalDateTime.parse(dateTime)
+    var convertedDateTime: LocalDateTime
+
+    val trimmedDateTime = dateTime.trim()
+    try {
+        val instant = Instant.parse(trimmedDateTime)
+        convertedDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    } catch (_: DateTimeParseException) {
+        try {
+            convertedDateTime = OffsetDateTime.parse(trimmedDateTime).toLocalDateTime()
+        } catch (_: DateTimeParseException) {
+            convertedDateTime = LocalDateTime.parse(trimmedDateTime)
+        }
+    }
+
 
     if (convertedDateTime.year != LocalDateTime.now().year) {
         pattern = "d. MMMM yyyy HH:mm"
@@ -37,11 +52,22 @@ fun getFormattedDateTime(dateTime: String): String {
 
     return DateTimeFormatter
         .ofPattern(pattern, czechLocale)
-        .format(
-            LocalDateTime.parse(
-                dateTime
-            )
-        )
+        .format(convertedDateTime)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun getDateTimeFromString(dateTime: String): LocalDateTime {
+    val trimmedDateTime = dateTime.trim()
+    try {
+        val instant = Instant.parse(trimmedDateTime)
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    } catch (_: DateTimeParseException) {
+        return try {
+            OffsetDateTime.parse(trimmedDateTime).toLocalDateTime()
+        } catch (_: DateTimeParseException) {
+            LocalDateTime.parse(trimmedDateTime)
+        }
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

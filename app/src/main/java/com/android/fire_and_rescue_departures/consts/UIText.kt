@@ -57,4 +57,6 @@ enum class UIText(val value: String) {
 
     QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
     QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),
+
+    NETWORK_CONNECTION_ERROR("Cannot load\nMake sure you are connected to the internet"),//Nelze načíst\nOvěřte, že jste připojeni k internetu
 }

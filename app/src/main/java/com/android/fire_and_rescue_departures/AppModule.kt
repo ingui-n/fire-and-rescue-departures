@@ -41,7 +41,7 @@ val viewModelModule = module {
 
 val networkModule = module {
     single { provideOkHttpClient() }
-    single { provideRetrofit(get()) }
+    single { provideRetrofit() }
     single { provideDeparturesApi(get()) }
 }
 
@@ -99,9 +99,37 @@ fun provideOkHttpClient(): OkHttpClient {
         .build()*/
 }
 
-fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+fun getUnsafeOkHttpClient(): OkHttpClient {
+    try {
+        val trustAllCerts = arrayOf<TrustManager>(@SuppressLint("CustomX509TrustManager")
+        object : X509TrustManager {
+            @SuppressLint("TrustAllX509TrustManager")
+            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+            @SuppressLint("TrustAllX509TrustManager")
+            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+        })
+
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+
+        val sslSocketFactory = sslContext.socketFactory
+
+        return OkHttpClient.Builder()
+            .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+            .hostnameVerifier { _, _ -> true }
+            .build()
+
+    } catch (e: Exception) {
+        throw RuntimeException(e)
+    }
+}
+
+fun provideRetrofit(): Retrofit {
+    val okHttpClient = getUnsafeOkHttpClient()
+
     return Retrofit.Builder()
-        .baseUrl(BuildConfig.HZS_API_URL)
+        .baseUrl("https://no-base-url-used.do-not-remove.nonexistent")
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

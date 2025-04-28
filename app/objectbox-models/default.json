@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:4959759699261513224",
-      "lastPropertyId": "3:4753625929170073758",
+      "lastPropertyId": "4:8264466825751590236",
       "name": "DepartureBookmarkEntity",
       "properties": [
         {
@@ -23,6 +23,11 @@
           "id": "3:4753625929170073758",
           "name": "dateTime",
           "type": 9
+        },
+        {
+          "id": "4:8264466825751590236",
+          "name": "regionId",
+          "type": 5
         }
       ],
       "relations": []

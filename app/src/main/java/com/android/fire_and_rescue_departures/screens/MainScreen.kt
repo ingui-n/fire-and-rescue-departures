@@ -14,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -94,17 +93,18 @@ fun MainScreen(navController: NavHostController) {
             composable(Routes.DeparturesBookmarks.route) { DeparturesBookmarksScreen(navController) }
             composable(Routes.DepartureDetail.route) { navBackStackEntry ->
                 //todo offline mode
+                val regionId = navBackStackEntry.arguments?.getString("regionId")?.toIntOrNull()
                 val id = navBackStackEntry.arguments?.getString("departureId")?.toLongOrNull()
                 val date = navBackStackEntry.arguments?.getString("departureDateTime")
 
                 LaunchedEffect(Unit) {
-                    if (id != null && date != null) {
-                        departureListViewModel.getDeparture(id, date)
+                    if (id != null && date != null && regionId != null) {
+                        departureListViewModel.getDeparture(regionId, id, date)
                     }
                 }
 
-                if (id != null && date != null) {
-                    DepartureDetailScreen(id, date, departureListViewModel)
+                if (id != null && date != null && regionId != null) {
+                    DepartureDetailScreen(regionId, id, date, departureListViewModel)
                 }
             }
             composable(Routes.QuestionsAndAnswers.route) { QuestionsAndAnswersScreen() }

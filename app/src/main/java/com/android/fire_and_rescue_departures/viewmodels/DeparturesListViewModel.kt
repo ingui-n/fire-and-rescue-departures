@@ -7,9 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.api.DeparturesApi
+import com.android.fire_and_rescue_departures.consts.getRegionById
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureUnit
+import com.android.fire_and_rescue_departures.helpers.getDateTimeFromString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,8 +47,7 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
     private val _filterAddress = MutableStateFlow<String>("")
     val filterAddress: StateFlow<String> = _filterAddress.asStateFlow()
 
-    //todo regions
-    private val _filterRegions = MutableStateFlow<List<Int>>(listOf<Int>())
+    private val _filterRegions = MutableStateFlow<List<Int>>(listOf<Int>(1))//todo add to settings
     val filterRegions: StateFlow<List<Int>> = _filterRegions.asStateFlow()
 
     private val _filterType = MutableStateFlow<Int?>(null)
@@ -57,12 +58,12 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateFilterFromDateTime(dateTime: String) {
-        _filterFromDateTime.value = LocalDateTime.parse(dateTime)
+        _filterFromDateTime.value = getDateTimeFromString(dateTime)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateFilterToDateTime(dateTime: String) {
-        _filterToDateTime.value = LocalDateTime.parse(dateTime)
+        _filterToDateTime.value = getDateTimeFromString(dateTime)
     }
 
     fun updateFilterAddress(address: String) {
@@ -94,43 +95,63 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
     fun updateDeparturesList() {
         viewModelScope.launch(Dispatchers.IO) {
             _departuresList.value = ApiResult.Loading
-            try {
-                val response = departuresApi.getDepartures(
-                    filterFromDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
-                    filterToDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
-                    filterStatuses.value,
-                    filterType.value,
-                    filterAddress.value,
-                )
-                if (response.isSuccessful) {
-                    val data = response.body()
-                    if (data != null) {
-                        withContext(Dispatchers.Main) {
-                            _departuresList.value = ApiResult.Success(data)
-                        }
-                        Log.d("DeparturesListViewModel", "getDeparturesList: ${response.body()}")
-                    } else {
-                        _departuresList.value = ApiResult.Error("Data is null")
-                        Log.e("DeparturesListViewModel", "Data is null")
-                    }
-                } else {
-                    _departuresList.value =
-                        ApiResult.Error("Error fetching departures list: ${response.message()}")
-                    Log.e(
-                        "DeparturesListViewModel",
-                        "Error fetching departures list: ${response.message()}"
+
+            val mergedResults = mutableListOf<Departure>()
+            var hadError = false
+            var errorMessage: String? = null
+
+            filterRegions.value.forEach { regionId ->
+                val region = getRegionById(regionId)
+                if (region == null) return@forEach
+
+                try {
+                    val response = departuresApi.getDepartures(
+                        region.url + "/api",
+                        filterFromDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
+                        filterToDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
+                        filterStatuses.value,
+                        filterType.value,
+                        filterAddress.value,
                     )
+
+                    if (response.isSuccessful) {
+                        val data = response.body()
+                        if (data != null) {
+                            data.forEach { departure -> departure.regionId = regionId }
+                            mergedResults.addAll(data)
+                            Log.d("DeparturesListViewModel", "Fetched departures for region $regionId: $data")
+                        } else {
+                            hadError = true
+                            errorMessage = "Data is null for region $regionId"
+                            Log.e("DeparturesListViewModel", errorMessage)
+                        }
+                    } else {
+                        hadError = true
+                        errorMessage = "Error fetching departures for region $regionId: ${response.message()}"
+                        Log.e("DeparturesListViewModel", errorMessage)
+                    }
+                } catch (e: Exception) {
+                    hadError = true
+                    errorMessage = "Exception fetching departures for region $regionId: ${e.message}"
+                    Log.e("DeparturesListViewModel", errorMessage)
                 }
-            } catch (e: Exception) {
-                _departuresList.value =
-                    ApiResult.Error("Exception fetching departures list: ${e.message}")
-                Log.e("DeparturesListViewModel", "Exception fetching departures list: ${e.message}")
+            }
+
+            withContext(Dispatchers.Main) {
+                if (mergedResults.isNotEmpty()) {
+                    _departuresList.value = ApiResult.Success(mergedResults)
+                } else if (hadError) {
+                    _departuresList.value = ApiResult.Error(errorMessage ?: "Unknown error")
+                } else {
+                    _departuresList.value = ApiResult.Error("No data found")
+                }
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getDeparture(
+        regionId: Int,
         id: Long,
         fromDateTime: String,
         toDateTime: String? = fromDateTime,
@@ -145,14 +166,23 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         viewModelScope.launch {
             _departure.value = ApiResult.Loading
 
-            if (LocalDateTime.parse(fromDateTime).year < 2007) {
+            if (getDateTimeFromString(fromDateTime).year < 2007) {
                 _departure.value = ApiResult.Error("Departure not found")
                 Log.e("DeparturesListViewModel", "Departure not found")
                 return@launch
             }
 
             try {
+                val region = getRegionById(regionId)
+
+                if (region == null) {
+                    _departure.value = ApiResult.Error("Region not found")
+                    Log.e("DeparturesListViewModel", "Region not found")
+                    return@launch
+                }
+
                 val response = departuresApi.getDepartures(
+                    region.url + "/api",
                     fromDateTime,
                     toDateTime,
                     DepartureStatus.getAllIds()
@@ -163,11 +193,13 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                         val departure = data.find { it.id == id }
 
                         if (departure != null) {
+                            departure.regionId = regionId
                             _departure.value = ApiResult.Success(departure)
                             Log.d("DeparturesListViewModel", "getDeparture: ${response.body()}")
                         } else {
                             //todo change to get /technika and by sent date time use range
                             getDeparture(
+                                regionId,
                                 id,
                                 LocalDateTime.now().minusYears(yearsIteration + 1)
                                     .format(DateTimeFormatter.ISO_DATE_TIME),
@@ -196,11 +228,20 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         }
     }
 
-    fun getDepartureUnits(id: Long) {
+    fun getDepartureUnits(regionId: Int, id: Long) {
         viewModelScope.launch {
             _departureUnits.value = ApiResult.Loading
             try {
-                val response = departuresApi.getDepartureUnits(id)
+                val region = getRegionById(regionId)
+
+                if (region == null) {
+                    _departureUnits.value = ApiResult.Error("Region not found")
+                    Log.e("DeparturesListViewModel", "Region not found")
+                    return@launch
+                }
+
+                val response = departuresApi.getDepartureUnits("${region.url}/api/udalosti/$id/technika")
+
                 if (response.isSuccessful) {
                     val data = response.body()
                     if (data != null) {

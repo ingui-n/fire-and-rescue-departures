@@ -17,7 +17,7 @@ object Routes {
         topBarTitle = UIText.DEPARTURES_BOOKMARKS_TITLE.value
     )
     val DepartureDetail = AppRoute(
-        route = "departureDetail/{departureId}-{departureDateTime}",
+        route = "departureDetail/{regionId}-{departureId}-{departureDateTime}",
         showTopBarBackButton = true,
         topBarTitle = UIText.DEPARTURE_DETAIL_TITLE.value
     )
@@ -34,8 +34,8 @@ object Routes {
         QuestionsAndAnswers
     )
 
-    fun departureDetail(departureId: Long, departureDateTime: String): String {
-        return "departureDetail/$departureId-$departureDateTime"
+    fun departureDetail(regionId: Int, departureId: Long, departureDateTime: String): String {
+        return "departureDetail/$regionId-$departureId-$departureDateTime"
     }
 
     fun getRoute(route: String?): AppRoute {
