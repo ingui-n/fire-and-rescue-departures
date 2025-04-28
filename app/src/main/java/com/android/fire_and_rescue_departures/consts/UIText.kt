@@ -1,44 +1,44 @@
 package com.android.fire_and_rescue_departures.consts
 
 enum class UIText(val value: String) {
-    DEPARTURES_LIST_TITLE("Departures"),
-    DEPARTURES_LIST_TITLE_SHORT("Departures"),
-    DEPARTURES_LIST_EMPTY_LIST("No departures found"),
+    DEPARTURES_LIST_TITLE("Departures"),//Výjezdy
+    DEPARTURES_LIST_TITLE_SHORT("Departures"),//Výjezdy
+    DEPARTURES_LIST_EMPTY_LIST("No departures found"),//Nenalezeny žádné výjezdy
 
-    DEPARTURES_MAP_TITLE("Map of Departures"),
-    DEPARTURES_MAP_TITLE_SHORT("Map"),
-    DEPARTURES_MAP_BOTTOM_SHEET_BUTTON("Open the departure detail"),
+    DEPARTURES_MAP_TITLE("Map of Departures"),//Mapa výjezdů
+    DEPARTURES_MAP_TITLE_SHORT("Map"),//Mapa
+    DEPARTURES_MAP_BOTTOM_SHEET_BUTTON("Open the departure detail"),//Otevřít podrobnosti o výjezdu
 
-    DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),
-    DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),
+    DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),//Záložky
+    DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),//Záložky
 
     BOOKMARK_ADD("Add to Bookmarks"),//Přidat do záložek
     BOOKMARK_REMOVE("Remove from Bookmarks"),//Odebrat ze záložek
 
-    DEPARTURE_DETAIL_TITLE("Departure detail"),
+    DEPARTURE_DETAIL_TITLE("Departure detail"),//Podrobnosti o výjezdu
 
-    OK("OK"),
-    BACK("Back"),
-    RENEW("Renew"),
-    RESET("Reset"),
-    FILTER("Filter"),
-    CANCEL("Cancel"),
-    ALL("All"),
-    FILTERS("Filters"),
+    OK("OK"),//OK
+    BACK("Back"),//Zpět
+    RENEW("Renew"),//Obnovit
+    RESET("Reset"),//Resetovat
+    FILTER("Filter"),//Filtry
+    CANCEL("Cancel"),//Zrušit
+    ALL("All"),//Vše
+    FILTERS("Filters"),//Filtry
     SHARE("Share"),//Sdílet
 
-    REGIONS("Regions"),
-    STATUS("Status"),
-    STATUS_ACTIVE_CHECKBOX("Active departures"),
-    STATUS_CLOSED_CHECKBOX("Closed departures"),
-    DEPARTURE_ADDRESS_SEARCH("Departure address"),
-    DEPARTURE_ADDRESS_LABEL("Address"),
-    DEPARTURE_TYPE("Departure type"),
-    DATE_AND_TIME("Date and time"),
-    DATE_FROM("From"),
-    DATE_FROM_SELECT_BUTTON("Select date"),
-    TIME_FROM_SELECT_BUTTON("Select time"),
-    DATE_TO("To"),
+    REGIONS("Regions"),//Kraje
+    STATUS("Status"),//Stav
+    STATUS_ACTIVE_CHECKBOX("Active departures"),//Aktivní výjezdy
+    STATUS_CLOSED_CHECKBOX("Closed departures"),//Uzavřené výjezdy
+    DEPARTURE_ADDRESS_SEARCH("Departure address"),//Adresa výjezdu
+    DEPARTURE_ADDRESS_LABEL("Address"),//Adresa
+    DEPARTURE_TYPE("Departure type"),//Typ výjezdu
+    DATE_AND_TIME("Date and time"),//Datum a čas
+    DATE_FROM("From"),//Od
+    DATE_FROM_SELECT_BUTTON("Select date"),//Vybrat datum
+    TIME_FROM_SELECT_BUTTON("Select time"),//Vybrat čas
+    DATE_TO("To"),//Do
 
     DISPATCHED_DATE("Dispatched date"),//ohlášena
     DEPARTURE_STATUS_OPENED("Opened"),//otevřená
@@ -59,8 +59,8 @@ enum class UIText(val value: String) {
     DETAIL_OPEN_ON_MAPY("Open on Mapy.com"),//Otevřít na Mapy.com
     DEPARTURE_PREPLANNED("Preplanned"),//Předem naplánovaná
 
-    QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
-    QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),
+    QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),//Časté dotazy
+    QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),//Časté dotazy
 
     NETWORK_CONNECTION_ERROR("Cannot load\nMake sure you are connected to the internet"),//Nelze načíst\nOvěřte, že jste připojeni k internetu
 }

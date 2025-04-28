@@ -2,7 +2,7 @@ package com.android.fire_and_rescue_departures.consts
 
 data class Region(val id: Int, val name: String, var available: Boolean, val url: String)
 
-val regions = listOf(//todo test connection and update active
+val regions = listOf(
     Region(1, "Jihomoravský", true, "https://udalosti.firebrno.cz"),
     Region(2, "Královéhradecký", true, "https://udalostikhk.hzscr.cz"),
     Region(3, "Moravskoslezský", true, "http://webohled.hzsmsk.cz"),

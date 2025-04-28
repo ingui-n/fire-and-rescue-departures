@@ -15,11 +15,18 @@ This is the list of regions supported regions, but not all of them are available
 - [Vysočina](https://webohled.hasici-vysocina.cz/udalosti)
 - [Zlínský](https://webohledzlk.hzscr.cz/udalosti)
 
+## Download
+
+The app can be downloaded
+from [latest release](https://github.com/ingui-n/fire-and-rescue-departures/releases/latest) in
+Czech or partially translated in English.
+
 ## Setup
 
 1. Clone the repository
 2. Copy `local.properties.template` to `local.properties`
-3. Fill in the `MAPS_COM_API` property with your [Mapy.com](https://developer.mapy.cz/rest-api/jak-zacit/) API key
+3. Fill in the `MAPS_COM_API` property with
+   your [Mapy.com](https://developer.mapy.cz/rest-api/jak-zacit/) API key
 4. Build the project
 
 ## Screenshots
