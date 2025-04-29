@@ -22,6 +22,9 @@ fun formatDescription(description: String): String {
     description = description.replace("EPS", "elektronická požární signalizace")
     description = description.replace("TM", "tiskový mluvčí")
     description = description.replace("ZZS", "záchranná služba")
+    description = description.replace("AED", "automatizovaný externí defibrilátor")
+    description = description.replace("PPO", "protipožární opatření")
+    description = description.replace("PHM", "pohonné hmoty")
 
     description = description.replace(" .", ".")
     description = description.replace(" ,", ",")

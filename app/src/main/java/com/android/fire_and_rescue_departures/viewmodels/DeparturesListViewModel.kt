@@ -8,16 +8,19 @@ import androidx.lifecycle.viewModelScope
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.consts.getRegionById
+import com.android.fire_and_rescue_departures.consts.regions
 import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureUnit
 import com.android.fire_and_rescue_departures.helpers.getDateTimeFromString
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -119,7 +122,10 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                         if (data != null) {
                             data.forEach { departure -> departure.regionId = regionId }
                             mergedResults.addAll(data)
-                            Log.d("DeparturesListViewModel", "Fetched departures for region $regionId: $data")
+                            Log.d(
+                                "DeparturesListViewModel",
+                                "Fetched departures for region $regionId: $data"
+                            )
                         } else {
                             hadError = true
                             errorMessage = "Data is null for region $regionId"
@@ -127,18 +133,27 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                         }
                     } else {
                         hadError = true
-                        errorMessage = "Error fetching departures for region $regionId: ${response.message()}"
+                        errorMessage =
+                            "Error fetching departures for region $regionId: ${response.message()}"
                         Log.e("DeparturesListViewModel", errorMessage)
                     }
                 } catch (e: Exception) {
                     hadError = true
-                    errorMessage = "Exception fetching departures for region $regionId: ${e.message}"
+                    errorMessage =
+                        "Exception fetching departures for region $regionId: ${e.message}"
                     Log.e("DeparturesListViewModel", errorMessage)
                 }
             }
 
             withContext(Dispatchers.Main) {
                 if (mergedResults.isNotEmpty()) {
+                    mergedResults.sortWith(
+                        compareByDescending<Departure> { departure ->
+                            getDateTimeFromString(
+                                departure.reportedDateTime ?: departure.startDateTime ?: ""
+                            )
+                        }
+                    )
                     _departuresList.value = ApiResult.Success(mergedResults)
                 } else if (hadError) {
                     _departuresList.value = ApiResult.Error(errorMessage ?: "Unknown error")
@@ -240,7 +255,8 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                     return@launch
                 }
 
-                val response = departuresApi.getDepartureUnits("${region.url}/api/udalosti/$id/technika")
+                val response =
+                    departuresApi.getDepartureUnits("${region.url}/api/udalosti/$id/technika")
 
                 if (response.isSuccessful) {
                     val data = response.body()
@@ -263,6 +279,21 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                 _departureUnits.value =
                     ApiResult.Error("Exception fetching departure units: ${e.message}")
                 Log.e("DeparturesListViewModel", "Exception fetching departure units: ${e.message}")
+            }
+        }
+    }
+
+    fun testApi() {
+        regions.forEach { region ->
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    withTimeout(5_000L) {
+                        departuresApi.test("${region.url}/api")
+                    }
+                } catch (_: Exception) {
+                    region.available = false
+                    _filterRegions.value = _filterRegions.value.filter { it != region.id }
+                }
             }
         }
     }

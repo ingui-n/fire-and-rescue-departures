@@ -2,6 +2,7 @@ package com.android.fire_and_rescue_departures.items
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,14 +18,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ChipElevation
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,7 +76,7 @@ fun DepartureCardItem(
             .fillMaxSize()
             .padding(top = 12.dp, start = 8.dp, end = 8.dp),
     ) {
-        Card(
+        OutlinedCard(
             modifier = Modifier
                 .fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
@@ -170,6 +175,7 @@ fun DepartureCardItem(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             labelColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
+                        elevation = ChipElevation(2.dp, 2.dp, 2.dp, 2.dp, 2.dp, 2.dp),
                         onClick = { handleOpenDetail() },
                     )
                 if (departure.municipality != null)
@@ -180,6 +186,7 @@ fun DepartureCardItem(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
+                        elevation = ChipElevation(2.dp, 2.dp, 2.dp, 2.dp, 2.dp, 2.dp),
                         colors = SuggestionChipDefaults.suggestionChipColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             labelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -194,6 +201,7 @@ fun DepartureCardItem(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
+                        elevation = ChipElevation(2.dp, 2.dp, 2.dp, 2.dp, 2.dp, 2.dp),
                         colors = SuggestionChipDefaults.suggestionChipColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             labelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -208,6 +216,7 @@ fun DepartureCardItem(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
+                        elevation = ChipElevation(2.dp, 2.dp, 2.dp, 2.dp, 2.dp, 2.dp),
                         colors = SuggestionChipDefaults.suggestionChipColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             labelColor = MaterialTheme.colorScheme.onPrimaryContainer

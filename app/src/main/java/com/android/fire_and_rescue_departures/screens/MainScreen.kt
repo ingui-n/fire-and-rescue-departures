@@ -20,13 +20,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.android.fire_and_rescue_departures.consts.BottomNavItem
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
-import com.android.fire_and_rescue_departures.helpers.ApiTester
 import com.android.fire_and_rescue_departures.layouts.BottomBar
 import com.android.fire_and_rescue_departures.layouts.DepartureDetailTopBar
 import com.android.fire_and_rescue_departures.layouts.DepartureListTopBar
 import com.android.fire_and_rescue_departures.layouts.TopBar
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
-import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -46,18 +44,17 @@ fun MainScreen(navController: NavHostController) {
     )
 
     val departureListViewModel: DeparturesListViewModel = koinViewModel()
-    val apiTester: ApiTester = koinViewModel()
 
     // todo when running update call only departures with the opened status
     LaunchedEffect(Unit) {
-        while (true) {
-            departureListViewModel.updateDeparturesList()
-            delay(60_000L)
-        }
+//        while (true) {
+        departureListViewModel.updateDeparturesList()
+//            delay(5 * 60_000L)
+//        }
     }
 
     LaunchedEffect(Unit) {
-        apiTester.test()
+        departureListViewModel.testApi()
     }
 
     Scaffold(

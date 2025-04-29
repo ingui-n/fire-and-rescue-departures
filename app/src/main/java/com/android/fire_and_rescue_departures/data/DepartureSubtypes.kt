@@ -64,77 +64,74 @@ sealed class DepartureSubtypes(val id: Int, val name: String) {
     object Covid19 : DepartureSubtypes(10082, "Covid-19")
     object AirAccident : DepartureSubtypes(10092, "Letecká nehoda")
     object AtNosoviceStation : DepartureSubtypes(11001, "Na stanici Nošovice")
-    object OpeningClosedSpaces : DepartureSubtypes(3525, "Otevření uzavřených prostor")
     object FullReadiness : DepartureSubtypes(10012, "Plná pohotovost")
-    object RescueOfPersons : DepartureSubtypes(3211, "Vyproštění osob")
-    object EvacuationAndProtection : DepartureSubtypes(3711, "Evakuace a ochrana obyvatel plošná")
-    object LocalReadiness : DepartureSubtypes(10011, "Místní pohotovost")
     object AtOwnStation : DepartureSubtypes(11002, "Na vlastní zbrojnici")
     object NonUrgentOpening : DepartureSubtypes(5011, "Neakutní otevření uzavřených prostor")
     object UndergroundSpaces : DepartureSubtypes(5007, "Podzemní prostory")
-    object HighRiseBuildings : DepartureSubtypes(3102, "Výškové budovy")
     object OutsideOwnStation : DepartureSubtypes(11003, "Mimo vlastní zbrojnici")
     object LocalReadinessSdl : DepartureSubtypes(9999, "Místní pohotovost k Sdl")
-    object OnWaterSurface : DepartureSubtypes(3403, "Na (do) vodní plochu(y)")
-    object OtherFormalEvent : DepartureSubtypes(3601, "Ostatní formálně založená událost")
-    object ClosedSpacesElevator : DepartureSubtypes(3523, "Uzavřené prostory, výtah")
-    object AtIvcMosnov : DepartureSubtypes(10080, "Na Ivc Mošnov")
+    object AtIvcMosnov : DepartureSubtypes(10080, "Předáno ostatní složce nebo pohotovostní službě")
     object FluidLeak : DepartureSubtypes(5004, "Únik provozních kapalin")
     object Helicopter : DepartureSubtypes(10077, "Vrtulník")
     object AgriculturalBuildings : DepartureSubtypes(10054, "Zemědělské objekty")
-    object InsectRemoval : DepartureSubtypes(3542, "Likvidace obtížného hmyzu")
     object ObjectDisturbance : DepartureSubtypes(10013, "Narušení objektu")
     object FireBrigadeVehicleAccident : DepartureSubtypes(10078, "Nehoda vozidla HZS")
     object MethaneSensorAlert : DepartureSubtypes(5005, "Signalizace metanového čidla")
-    object BuriedPersons : DepartureSubtypes(3524, "Zasypané,zavalené")
     object EmergencyInsectRemoval : DepartureSubtypes(5012, "Akutní likvidace hmyzu")
     object MosnovAirport : DepartureSubtypes(10001, "Letiště Mošnov")
     object GasSensorAlert : DepartureSubtypes(5006, "Signalizace plynového čidla")
     object KlimkoviceTunnel : DepartureSubtypes(10003, "Tunel Klimkovice")
     object FromWaterLargeArea : DepartureSubtypes(10059, "Z vody - velká plocha")
     object Highway : DepartureSubtypes(10009, "Dálnice")
-    object WasteOther : DepartureSubtypes(3111, "Odpad, ostatní")
     object LysuvkyTunnel : DepartureSubtypes(10068, "Tunel Lysůvky")
     object AnimalRescue : DepartureSubtypes(10075, "Záchrana, odchyt zvířat")
-    object Aviation : DepartureSubtypes(3241, "Letecká")
     object SearchMissingPerson : DepartureSubtypes(10064, "Pátrání po pohřešované osobě")
-    object BinContainer : DepartureSubtypes(3109, "Popelnice, kontejner")
     object PrchalovTunnel : DepartureSubtypes(10086, "Tunel Prchalov")
-    object MedicalFacilityRequest : DepartureSubtypes(3533, "Žádost zdravotnického zařízení")
-    object ForestArea : DepartureSubtypes(3110, "Lesní porost")
     object FireAssistanceRefueling : DepartureSubtypes(10018, "Požární asistence - tankování")
-    object Ppp : DepartureSubtypes(10079, "Ppp")
     object ProbesDrills : DepartureSubtypes(10090, "Sondy, vrty")
-    object KlimkoviceTunnelRescue : DepartureSubtypes(10004, "Tunel Klimkovice - vyproštění osob")
-    object FieldCropGrass : DepartureSubtypes(3106, "Polní porost, tráva")
     object FireAssistanceOther : DepartureSubtypes(10019, "Požární asistence - pož.neb.prac")
     object SuicideIntent : DepartureSubtypes(10060, "Sebevražedný úmysl")
     object KlimkoviceTunnelNoRescue :
         DepartureSubtypes(10005, "Tunel Klimkovice - bez vyproštění osob")
 
-    object ShedsShelters : DepartureSubtypes(3112, "Kůlny, přístřešky")
-    object ConcentrationMeasurement : DepartureSubtypes(3528, "Měření koncentrací")
     object LysuvkyTunnelRescue : DepartureSubtypes(10066, "Tunel Lysůvky - vyproštění osob")
     object PreMedicalAid : DepartureSubtypes(10021, "Předlékařská pomoc")
-    object IzsCooperation : DepartureSubtypes(3502, "Spolupráce se složkami IZS")
-    object LysuvkyTunnelNoRescue : DepartureSubtypes(10067, "Tunel Lysůvky - bez vyproštění osob")
     object EventAssistance : DepartureSubtypes(5010, "Asistence u sportovních a kulturních akcí")
-    object UndergroundSpaces2 : DepartureSubtypes(3105, "Podzemní prostory")
-    object PrchalovTunnelRescue : DepartureSubtypes(10084, "Tunel Prchalov - vyproštění osob")
-    object HospitalsNursingHomes : DepartureSubtypes(3115, "Nemocnice, LDN, domovy důchodců")
     object PrmAssistance : DepartureSubtypes(10023, "Prm -  asistence Prm")
     object PrchalovTunnelNoRescue : DepartureSubtypes(10085, "Tunel Prchalov - bez vyproštění osob")
-    object Substations : DepartureSubtypes(3107, "Trafostanice, rozvodny")
     object WaterShutdown : DepartureSubtypes(10057, "Uzavření tekoucí vody")
     object AssistanceNvz : DepartureSubtypes(10058, "Asistence při hledání Nvz")
     object Highway2 : DepartureSubtypes(10008, "Dálnice")
-    object FireAssistance : DepartureSubtypes(10081, "Požární asistence")
     object KlimkoviceTunnel2 : DepartureSubtypes(10002, "Tunel Klimkovice")
     object LysuvkyTunnel2 : DepartureSubtypes(10065, "Tunel Lysůvky")
     object PrchalovTunnel2 : DepartureSubtypes(10083, "Tunel Prchalov")
     object ProbesDrills2 : DepartureSubtypes(10089, "Sondy, vrty")
     object HighlyContagiousDisease : DepartureSubtypes(10053, "Vysoce nakažlivá nákaza")
 
+    object AssistanceWithProcedure :
+        DepartureSubtypes(10069, "Asistence při technologickém postupu")
+
+    object FireAtPCO : DepartureSubtypes(10046, "Požár na PCO")
+    object WaterPumping2 : DepartureSubtypes(10070, "Čerpání vody")
+    object FalseAlarmAtPCO : DepartureSubtypes(10067, "Planý poplach na PCO")
+    object SewerRoadCleaning : DepartureSubtypes(10071, "Čištění kanalizace, silnice")
+    object ToAir : DepartureSubtypes(3404, "Do ovzduší")
+    object WaterDelivery : DepartureSubtypes(10072, "Dovoz vody do provozů, technologií")
+    object FuelLeakOnRoad : DepartureSubtypes(10062, "Únik PHM na komunikaci")
+    object ElevatorPersons : DepartureSubtypes(10074, "Osoby ve výtahu")
+    object TacticalExercise : DepartureSubtypes(10081, "Taktické cvičení")
+    object SectionAlarmVerification : DepartureSubtypes(10076, "Ověření úsekového poplachu EPS")
+    object DroneCrash : DepartureSubtypes(10045, "Pád dronu")
+    object PersonInNeed : DepartureSubtypes(10061, "Osoba v nouzi")
+    object JPOVehicle : DepartureSubtypes(10084, "Vozidlo JPO")
+    object TechnologyTest2 : DepartureSubtypes(10079, "Zkouška technologie")
+    object PatientTransportHZS : DepartureSubtypes(10050, "Transport pacienta vozidlem HZS")
+    object HelicopterRescue : DepartureSubtypes(10004, "Vrtulník LZS - vyzvednutí lezce")
+    object HelicopterLandingPreparation :
+        DepartureSubtypes(10011, "Příprava plochy pro vrtulník LZS")
+
+    object Amok : DepartureSubtypes(10048, "Amok")
+    object GasConnection : DepartureSubtypes(10052, "Plyn přípojka")
 
     companion object {
         val all = listOf(
@@ -200,74 +197,67 @@ sealed class DepartureSubtypes(val id: Int, val name: String) {
             Covid19,
             AirAccident,
             AtNosoviceStation,
-            OpeningClosedSpaces,
             FullReadiness,
-            RescueOfPersons,
-            EvacuationAndProtection,
-            LocalReadiness,
             AtOwnStation,
             NonUrgentOpening,
             UndergroundSpaces,
-            HighRiseBuildings,
             OutsideOwnStation,
             LocalReadinessSdl,
-            OnWaterSurface,
-            OtherFormalEvent,
-            ClosedSpacesElevator,
             AtIvcMosnov,
             FluidLeak,
             Helicopter,
             AgriculturalBuildings,
-            InsectRemoval,
             ObjectDisturbance,
             FireBrigadeVehicleAccident,
             MethaneSensorAlert,
-            BuriedPersons,
             EmergencyInsectRemoval,
             MosnovAirport,
             GasSensorAlert,
             KlimkoviceTunnel,
             FromWaterLargeArea,
             Highway,
-            WasteOther,
             LysuvkyTunnel,
             AnimalRescue,
-            Aviation,
             SearchMissingPerson,
-            BinContainer,
             PrchalovTunnel,
-            MedicalFacilityRequest,
-            ForestArea,
             FireAssistanceRefueling,
-            Ppp,
             ProbesDrills,
-            KlimkoviceTunnelRescue,
-            FieldCropGrass,
             FireAssistanceOther,
             SuicideIntent,
             KlimkoviceTunnelNoRescue,
-            ShedsShelters,
-            ConcentrationMeasurement,
             LysuvkyTunnelRescue,
             PreMedicalAid,
-            IzsCooperation,
-            LysuvkyTunnelNoRescue,
             EventAssistance,
-            UndergroundSpaces2,
-            PrchalovTunnelRescue,
-            HospitalsNursingHomes,
             PrmAssistance,
             PrchalovTunnelNoRescue,
-            Substations,
             WaterShutdown,
             AssistanceNvz,
             Highway2,
-            FireAssistance,
             KlimkoviceTunnel2,
             LysuvkyTunnel2,
             PrchalovTunnel2,
             ProbesDrills2,
             HighlyContagiousDisease,
+            AssistanceWithProcedure,
+                    FireAtPCO,
+            WaterPumping2,
+            FalseAlarmAtPCO,
+            SewerRoadCleaning,
+            ToAir,
+            WaterDelivery,
+            FuelLeakOnRoad,
+            ElevatorPersons,
+            TacticalExercise,
+            SectionAlarmVerification,
+            DroneCrash,
+            PersonInNeed,
+            JPOVehicle,
+            TechnologyTest2,
+            PatientTransportHZS,
+            HelicopterRescue,
+            HelicopterLandingPreparation,
+            Amok,
+            GasConnection,
         )
 
         fun fromId(id: Int): DepartureSubtypes? = all.find { it.id == id }

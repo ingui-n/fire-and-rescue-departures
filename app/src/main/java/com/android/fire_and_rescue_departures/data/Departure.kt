@@ -20,5 +20,5 @@ data class Departure(
     @SerializedName("gis2") val gis2: String,
     @SerializedName("zoc") val preplanned: Boolean,
     @SerializedName("silnice") val road: String?,
-    @SerializedName("regionId") var regionId: Int?,
+    var regionId: Int?,
 )
