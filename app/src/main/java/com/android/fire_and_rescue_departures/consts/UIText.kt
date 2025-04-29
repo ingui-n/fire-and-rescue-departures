@@ -1,66 +1,109 @@
 package com.android.fire_and_rescue_departures.consts
 
 enum class UIText(val value: String) {
-    DEPARTURES_LIST_TITLE("Departures"),//Výjezdy
-    DEPARTURES_LIST_TITLE_SHORT("Departures"),//Výjezdy
-    DEPARTURES_LIST_EMPTY_LIST("No departures found"),//Nenalezeny žádné výjezdy
+    //English
+    DEPARTURES_LIST_TITLE("Departures"),
+    DEPARTURES_LIST_TITLE_SHORT("Departures"),
+    DEPARTURES_LIST_EMPTY_LIST("No departures found"),
+    DEPARTURES_MAP_TITLE("Map of Departures"),
+    DEPARTURES_MAP_TITLE_SHORT("Map"),
+    DEPARTURES_MAP_BOTTOM_SHEET_BUTTON("Open the departure detail"),
+    DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),
+    DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),
+    BOOKMARK_ADD("Add to Bookmarks"),
+    BOOKMARK_REMOVE("Remove from Bookmarks"),
+    DEPARTURE_DETAIL_TITLE("Departure detail"),
+    OK("OK"),
+    BACK("Back"),
+    RENEW("Renew"),
+    RESET("Reset"),
+    FILTER("Filter"),
+    CANCEL("Cancel"),
+    ALL("All"),
+    FILTERS("Filters"),
+    SHARE("Share"),
+    REGIONS("Regions"),
+    STATUS("Status"),
+    STATUS_ACTIVE_CHECKBOX("Active departures"),
+    STATUS_CLOSED_CHECKBOX("Closed departures"),
+    DEPARTURE_ADDRESS_SEARCH("Departure address"),
+    DEPARTURE_ADDRESS_LABEL("Address"),
+    DEPARTURE_TYPE("Departure type"),
+    DATE_AND_TIME("Date and time"),
+    DATE_FROM("From"),
+    DATE_FROM_SELECT_BUTTON("Select date"),
+    TIME_FROM_SELECT_BUTTON("Select time"),
+    DATE_TO("To"),
+    DISPATCHED_DATE("Dispatched date"),
+    DEPARTURE_STATUS_OPENED("Opened"),
+    DEPARTURE_STATUS_CLOSED("Closed"),
+    ADDRESS_REGION("Region"),
+    ADDRESS_DISTRICT("District"),
+    ADDRESS_MUNICIPALITY("Municipality"),
+    ADDRESS_MUNICIPALITY_PART("Municipality part"),
+    ADDRESS_STREET("Street"),
+    ADDRESS_ROAD("Road"),
+    DETAIL_DISPATCHED_UNITS("Dispatched units"),
+    DETAIL_DISPATCHED_UNITS_DATE("Date of dispatch"),
+    DETAIL_DISPATCHED_UNITS_COUNT("Quantity"),
+    DETAIL_DISPATCHED_UNITS_CURRENT("Currently dispatched"),
+    DETAIL_OPEN_ON_GOOGLE("Open on Google Maps"),
+    DETAIL_OPEN_ON_MAPY("Open on Mapy.com"),
+    DEPARTURE_PREPLANNED("Preplanned"),
+    QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),
+    QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),
+    NETWORK_CONNECTION_ERROR("Cannot load\nMake sure you are connected to the internet"),
 
-    DEPARTURES_MAP_TITLE("Map of Departures"),//Mapa výjezdů
-    DEPARTURES_MAP_TITLE_SHORT("Map"),//Mapa
-    DEPARTURES_MAP_BOTTOM_SHEET_BUTTON("Open the departure detail"),//Otevřít podrobnosti o výjezdu
-
-    DEPARTURES_BOOKMARKS_TITLE("Bookmarks"),//Záložky
-    DEPARTURES_BOOKMARKS_TITLE_SHORT("Bookmarks"),//Záložky
-
-    BOOKMARK_ADD("Add to Bookmarks"),//Přidat do záložek
-    BOOKMARK_REMOVE("Remove from Bookmarks"),//Odebrat ze záložek
-
-    DEPARTURE_DETAIL_TITLE("Departure detail"),//Podrobnosti o výjezdu
-
-    OK("OK"),//OK
-    BACK("Back"),//Zpět
-    RENEW("Renew"),//Obnovit
-    RESET("Reset"),//Resetovat
-    FILTER("Filter"),//Filtry
-    CANCEL("Cancel"),//Zrušit
-    ALL("All"),//Vše
-    FILTERS("Filters"),//Filtry
-    SHARE("Share"),//Sdílet
-
-    REGIONS("Regions"),//Kraje
-    STATUS("Status"),//Stav
-    STATUS_ACTIVE_CHECKBOX("Active departures"),//Aktivní výjezdy
-    STATUS_CLOSED_CHECKBOX("Closed departures"),//Uzavřené výjezdy
-    DEPARTURE_ADDRESS_SEARCH("Departure address"),//Adresa výjezdu
-    DEPARTURE_ADDRESS_LABEL("Address"),//Adresa
-    DEPARTURE_TYPE("Departure type"),//Typ výjezdu
-    DATE_AND_TIME("Date and time"),//Datum a čas
-    DATE_FROM("From"),//Od
-    DATE_FROM_SELECT_BUTTON("Select date"),//Vybrat datum
-    TIME_FROM_SELECT_BUTTON("Select time"),//Vybrat čas
-    DATE_TO("To"),//Do
-
-    DISPATCHED_DATE("Dispatched date"),//ohlášena
-    DEPARTURE_STATUS_OPENED("Opened"),//otevřená
-    DEPARTURE_STATUS_CLOSED("Closed"),//uzavřená
-
-    ADDRESS_REGION("Region"),//kraj
-    ADDRESS_DISTRICT("District"),//okres
-    ADDRESS_MUNICIPALITY("Municipality"),//obec
-    ADDRESS_MUNICIPALITY_PART("Municipality part"),//část obce
-    ADDRESS_STREET("Street"),//ulice
-    ADDRESS_ROAD("Road"),//silnice
-
-    DETAIL_DISPATCHED_UNITS("Dispatched units"),//Zasahující jednotky
-    DETAIL_DISPATCHED_UNITS_DATE("Date of dispatch"),//Čas ohlášení
-    DETAIL_DISPATCHED_UNITS_COUNT("Quantity"),//Počet
-    DETAIL_DISPATCHED_UNITS_CURRENT("Currently dispatched"),//Aktuálně zasahující
-    DETAIL_OPEN_ON_GOOGLE("Open on Google Maps"),//Otevřít na Google Maps
-    DETAIL_OPEN_ON_MAPY("Open on Mapy.com"),//Otevřít na Mapy.com
-    DEPARTURE_PREPLANNED("Preplanned"),//Předem naplánovaná
-
-    QUESTIONS_AND_ANSWERS_TITLE("Questions and Answers"),//Časté dotazy
-    QUESTIONS_AND_ANSWERS_TITLE_SHORT("Q&A"),//Časté dotazy
-
-    NETWORK_CONNECTION_ERROR("Cannot load\nMake sure you are connected to the internet"),//Nelze načíst\nOvěřte, že jste připojeni k internetu
+    //Czech
+    //DEPARTURES_LIST_TITLE("Výjezdy"),
+    //DEPARTURES_LIST_TITLE_SHORT("Výjezdy"),
+    //DEPARTURES_LIST_EMPTY_LIST("Nenalezeny žádné výjezdy"),
+    //DEPARTURES_MAP_TITLE("Mapa výjezdů"),
+    //DEPARTURES_MAP_TITLE_SHORT("Mapa"),
+    //DEPARTURES_MAP_BOTTOM_SHEET_BUTTON("Otevřít podrobnosti o výjezdu"),
+    //DEPARTURES_BOOKMARKS_TITLE("Záložky"),
+    //DEPARTURES_BOOKMARKS_TITLE_SHORT("Záložky"),
+    //BOOKMARK_ADD("Přidat do záložek"),
+    //BOOKMARK_REMOVE("Odebrat ze záložek"),
+    //DEPARTURE_DETAIL_TITLE("Podrobnosti o výjezdu"),
+    //OK("OK"),
+    //BACK("Zpět"),
+    //RENEW("Obnovit"),
+    //RESET("Resetovat"),
+    //FILTER("Filtry"),
+    //CANCEL("Zrušit"),
+    //ALL("Vše"),
+    //FILTERS("Filtry"),
+    //SHARE("Sdílet"),
+    //REGIONS("Kraje"),
+    //STATUS("Stav"),
+    //STATUS_ACTIVE_CHECKBOX("Aktivní výjezdy"),
+    //STATUS_CLOSED_CHECKBOX("Uzavřené výjezdy"),
+    //DEPARTURE_ADDRESS_SEARCH("Adresa výjezdu"),
+    //DEPARTURE_ADDRESS_LABEL("Adresa"),
+    //DEPARTURE_TYPE("Typ výjezdu"),
+    //DATE_AND_TIME("Datum a čas"),
+    //DATE_FROM("Od"),
+    //DATE_FROM_SELECT_BUTTON("Vybrat datum"),
+    //TIME_FROM_SELECT_BUTTON("Vybrat čas"),
+    //DATE_TO("Do"),
+    //DISPATCHED_DATE("ohlášena"),
+    //DEPARTURE_STATUS_OPENED("otevřená"),
+    //DEPARTURE_STATUS_CLOSED("uzavřená"),
+    //ADDRESS_REGION("kraj"),
+    //ADDRESS_DISTRICT("okres"),
+    //ADDRESS_MUNICIPALITY("obec"),
+    //ADDRESS_MUNICIPALITY_PART("část obce"),
+    //ADDRESS_STREET("ulice"),
+    //ADDRESS_ROAD("silnice"),
+    //DETAIL_DISPATCHED_UNITS("Zasahující jednotky"),
+    //DETAIL_DISPATCHED_UNITS_DATE("Čas ohlášení"),
+    //DETAIL_DISPATCHED_UNITS_COUNT("Počet"),
+    //DETAIL_DISPATCHED_UNITS_CURRENT("Aktuálně zasahující"),
+    //DETAIL_OPEN_ON_GOOGLE("Otevřít na Google Maps"),
+    //DETAIL_OPEN_ON_MAPY("Otevřít na Mapy.com"),
+    //DEPARTURE_PREPLANNED("Předem naplánovaná"),
+    //QUESTIONS_AND_ANSWERS_TITLE("Časté dotazy"),
+    //QUESTIONS_AND_ANSWERS_TITLE_SHORT("Časté dotazy"),
+    //NETWORK_CONNECTION_ERROR("Nelze načíst\nOvěřte, že jste připojeni k internetu"),
 }
