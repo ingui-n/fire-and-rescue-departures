@@ -3,42 +3,41 @@ package com.android.fire_and_rescue_departures.ui.theme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val md_theme_light_primary = Color(0xFF825500)
+val md_theme_light_background = Color(0xFFF5F7FA)
+val md_theme_light_surface = Color(0xFFFFFFFF)
+val md_theme_light_surfaceVariant = Color(0xFFC5CAE9)
+
+val md_theme_light_onBackground = Color(0xFF1E2A5A)
+val md_theme_light_onSurface = Color(0xFF1E2A5A)
+val md_theme_light_onSurfaceVariant = Color(0xFF4A5A7A)
+
+val md_theme_light_primary = Color(0xFF3F51B5)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_light_primaryContainer = Color(0xFFFFDDB3)
-val md_theme_light_onPrimaryContainer = Color(0xFF2A1800)
+val md_theme_light_primaryContainer = Color(0xFFDEE3F7)
+val md_theme_light_onPrimaryContainer = Color(0xFF222C5A)
 
-val md_theme_light_secondary = Color(0xFF775B3A)
-val md_theme_light_onSecondary = Color(0xFFFFFFFF)
-val md_theme_light_secondaryContainer = Color(0xFFFEDFBF)
-val md_theme_light_onSecondaryContainer = Color(0xFF2A1800)
+val md_theme_light_secondary = Color(0xFF7B93C8)
+val md_theme_light_onSecondary = Color(0xFF1E2A5A)
+val md_theme_light_secondaryContainer = Color(0xFFE1E7F7)
+val md_theme_light_onSecondaryContainer = Color(0xFF1E2A5A)
 
-val md_theme_light_tertiary = Color(0xFF55632D)
+val md_theme_light_tertiary = Color(0xFFD84315)
 val md_theme_light_onTertiary = Color(0xFFFFFFFF)
-val md_theme_light_tertiaryContainer = Color(0xFFD4EABB)
-val md_theme_light_onTertiaryContainer = Color(0xFF141F04)
+val md_theme_light_tertiaryContainer = Color(0xFFFFEDE6)
+val md_theme_light_onTertiaryContainer = Color(0xFFD84315)
 
-val md_theme_light_error = Color(0xFFBA1A1A)
+val md_theme_light_error = Color(0xFFB00020)
 val md_theme_light_errorContainer = Color(0xFFFFDAD6)
 val md_theme_light_onError = Color(0xFFFFFFFF)
-val md_theme_light_onErrorContainer = Color(0xFF410002)
+val md_theme_light_onErrorContainer = Color(0xFF370617)
 
-val md_theme_light_background = Color(0xFFFFFBFF)
-val md_theme_light_onBackground = Color(0xFF1F1B16)
-val md_theme_light_surface = Color(0xFFFFFBFF)
-val md_theme_light_onSurface = Color(0xFF1F1B16)
-
-val md_theme_light_surfaceVariant = Color(0xFFF5E1C9)
-val md_theme_light_onSurfaceVariant = Color(0xFF4F4539)
-val md_theme_light_outline = Color(0xFF837462)
-
-val md_theme_light_inverseOnSurface = Color(0xFFF7EFE7)
-val md_theme_light_inverseSurface = Color(0xFF35302A)
-val md_theme_light_inversePrimary = Color(0xFFFFB951)
-
-val md_theme_light_surfaceTint = Color(0xFF825500)
-val md_theme_light_outlineVariant = Color(0xFFD3C4B4)
+val md_theme_light_outline = Color(0xFFB5BED7)
+val md_theme_light_outlineVariant = Color(0xFFD1D9E6)
 val md_theme_light_scrim = Color(0xFF000000)
+val md_theme_light_inverseOnSurface = Color(0xFFF5F7FA)
+val md_theme_light_inverseSurface = Color(0xFF1E2A5A)
+val md_theme_light_inversePrimary = md_theme_light_primary
+val md_theme_light_surfaceTint = md_theme_light_primary
 
 val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
