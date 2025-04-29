@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -35,11 +34,12 @@ import com.android.fire_and_rescue_departures.consts.faqItems
 import com.composables.icons.lucide.ChevronRight
 import com.composables.icons.lucide.Lucide
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionsAndAnswersScreen() {
-
     LazyColumn {
         items(count = faqItems.size) { index ->
             val item = faqItems[index]
@@ -51,18 +51,27 @@ fun QuestionsAndAnswersScreen() {
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable { expanded = expanded.not() }
+                        .clickable { expanded = !expanded }
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    BasicText(item.title)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
                     Image(
                         Lucide.ChevronRight,
                         contentDescription = null,
-                        modifier = Modifier.rotate(degrees),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                        modifier = Modifier
+                            .rotate(degrees),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     )
                 }
+
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(
@@ -74,11 +83,15 @@ fun QuestionsAndAnswersScreen() {
                     exit = shrinkVertically()
                 ) {
                     Box(
-                        Modifier
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        BasicText(item.text)
+                        Text(
+                            text = item.text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
 
@@ -86,6 +99,7 @@ fun QuestionsAndAnswersScreen() {
                     HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(),
                         thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline
                     )
                 }
             }
