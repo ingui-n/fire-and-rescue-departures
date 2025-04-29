@@ -109,7 +109,7 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
 
                 try {
                     val response = departuresApi.getDepartures(
-                        region.url + "/api",
+                        region.url + "/api/",
                         filterFromDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
                         filterToDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
                         filterStatuses.value,
@@ -197,7 +197,7 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                 }
 
                 val response = departuresApi.getDepartures(
-                    region.url + "/api",
+                    region.url + "/api/",
                     fromDateTime,
                     toDateTime,
                     DepartureStatus.getAllIds()
