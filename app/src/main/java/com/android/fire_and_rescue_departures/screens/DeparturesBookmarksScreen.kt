@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,12 +53,16 @@ fun DeparturesBookmarksScreen(
         is ApiResult.Loading -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center).size(96.dp)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(96.dp)
                 )
             }
         }
 
-        is ApiResult.Success -> { departures = (departureBookmarks as ApiResult.Success).data }
+        is ApiResult.Success -> {
+            departures = (departureBookmarks as ApiResult.Success).data
+        }
 
         is ApiResult.Error -> {
             departures = null
@@ -84,11 +86,13 @@ fun DeparturesBookmarksScreen(
             LazyColumn(
                 state = listState,
             ) {
-                items(departures!!) { departure ->
-                    DepartureCardItem(
-                        departure = departure,
-                        navController = navController,
-                    )
+                departures?.let {
+                    items(it.size) { index ->
+                        DepartureCardItem(
+                            departure = it[index],
+                            navController = navController,
+                        )
+                    }
                 }
                 item {
                     Spacer(modifier = Modifier.height(12.dp))

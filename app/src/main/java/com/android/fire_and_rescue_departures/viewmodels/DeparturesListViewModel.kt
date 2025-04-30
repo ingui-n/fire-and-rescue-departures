@@ -146,7 +146,9 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
             }
 
             withContext(Dispatchers.Main) {
-                if (mergedResults.isNotEmpty()) {
+                if (hadError) {
+                    _departuresList.value = ApiResult.Error(errorMessage ?: "Unknown error")
+                } else {
                     mergedResults.sortWith(
                         compareByDescending<Departure> { departure ->
                             getDateTimeFromString(
@@ -155,10 +157,6 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                         }
                     )
                     _departuresList.value = ApiResult.Success(mergedResults)
-                } else if (hadError) {
-                    _departuresList.value = ApiResult.Error(errorMessage ?: "Unknown error")
-                } else {
-                    _departuresList.value = ApiResult.Error("No data found")
                 }
             }
         }
@@ -288,7 +286,8 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     withTimeout(5_000L) {
-                        departuresApi.test("${region.url}/api")
+                        departuresApi.test("${region.url}/api/")
+                        region.available = true
                     }
                 } catch (_: Exception) {
                     region.available = false

@@ -226,6 +226,16 @@ fun DepartureListTopBar(
         )
     }
 
+    LaunchedEffect(sheetState.isVisible) {
+        if (sheetState.isVisible) {
+            viewModel.testApi()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        scrollBehavior.state.heightOffset = 0f
+    }
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,

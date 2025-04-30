@@ -16,6 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,11 @@ fun DepartureDetailTopBar(
     var topBarShareText by remember { mutableStateOf("") }
     var isInBookmarks by remember { mutableStateOf(false) }
     var departure: Departure? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(Unit) {
+        scrollBehavior.state.heightOffset = 0f
+        scrollBehavior.state.contentOffset = 0f
+    }
 
     when (departureDetailResult) {
         is ApiResult.Loading -> {}

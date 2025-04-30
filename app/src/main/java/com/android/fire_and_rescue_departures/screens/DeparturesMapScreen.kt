@@ -58,7 +58,6 @@ import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
-import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import com.android.fire_and_rescue_departures.viewmodels.MarkerData
