@@ -46,6 +46,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerState
@@ -62,6 +63,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextRange
+import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.regions
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
@@ -107,6 +109,9 @@ fun DepartureListTopBar(
     var statusOpened by remember { mutableStateOf(true) }
     var statusClosed by remember { mutableStateOf(true) }
 
+    val departuresList by viewModel.departuresList.collectAsState()
+    val showSmallProgress = remember { mutableStateOf(false) }
+
     val minYear = 2005
     val minDateMillis = Instant.parse("$minYear-01-01T00:00:00Z").toEpochMilli()
     val defaultFromDateMillis =
@@ -148,6 +153,20 @@ fun DepartureListTopBar(
                 is24Hour = true
             )
         )
+    }
+
+    when (departuresList) {
+        is ApiResult.Loading -> {
+            showSmallProgress.value = true
+        }
+
+        is ApiResult.Success -> {
+            showSmallProgress.value = false
+        }
+
+        is ApiResult.Error -> {
+            showSmallProgress.value = false
+        }
     }
 
     val fromSelectableDates = object : SelectableDates {
@@ -252,6 +271,13 @@ fun DepartureListTopBar(
             )
         },
         actions = {
+            if (showSmallProgress.value) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    strokeWidth = 2.dp
+                )
+            }
             IconButton(onClick = {
                 coroutineScope.launch {
                     viewModel.updateDeparturesList()

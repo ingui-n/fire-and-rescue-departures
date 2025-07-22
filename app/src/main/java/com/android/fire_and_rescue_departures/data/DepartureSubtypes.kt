@@ -78,7 +78,6 @@ sealed class DepartureSubtypes(val id: Int, val name: String) {
     object FireBrigadeVehicleAccident : DepartureSubtypes(10078, "Nehoda vozidla HZS")
     object MethaneSensorAlert : DepartureSubtypes(5005, "Signalizace metanového čidla")
     object EmergencyInsectRemoval : DepartureSubtypes(5012, "Akutní likvidace hmyzu")
-    object MosnovAirport : DepartureSubtypes(10001, "Letiště Mošnov")
     object GasSensorAlert : DepartureSubtypes(5006, "Signalizace plynového čidla")
     object KlimkoviceTunnel : DepartureSubtypes(10003, "Tunel Klimkovice")
     object FromWaterLargeArea : DepartureSubtypes(10059, "Z vody - velká plocha")
@@ -211,7 +210,6 @@ sealed class DepartureSubtypes(val id: Int, val name: String) {
             FireBrigadeVehicleAccident,
             MethaneSensorAlert,
             EmergencyInsectRemoval,
-            MosnovAirport,
             GasSensorAlert,
             KlimkoviceTunnel,
             FromWaterLargeArea,
