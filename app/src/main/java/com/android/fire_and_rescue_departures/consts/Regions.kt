@@ -9,7 +9,7 @@ val regions = listOf(
     Region(4, "Plzeňský", true, "https://zasahy.hzspk.cz"),
     Region(5, "Ústecký", true, "https://udalosti.hzsulk.cz"),
     Region(6, "Vysočina", true, "https://webohled.hasici-vysocina.cz/udalosti"),
-    Region(7, "Zlínský", true, "https://webohledzlk.hzscr.cz/udalosti"),
+    Region(7, "Zlínský", true, "https://webohledzlk.hzscr.cz"),
 )
 
 fun getRegionById(id: Int): Region? {
