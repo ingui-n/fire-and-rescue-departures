@@ -163,19 +163,24 @@ fun DeparturesMapScreen(
                     departuresMapViewModel.resetMarkers()
 
                     departuresList.map { departure ->
-                        val coordinates =
-                            convertSjtskToWgs(departure.gis1.toDouble(), departure.gis2.toDouble())
+                        if (departure.gis1 != null && departure.gis2 != null) {
+                            val coordinates =
+                                convertSjtskToWgs(
+                                    departure.gis1.toDouble(),
+                                    departure.gis2.toDouble()
+                                )
 
-                        val icon = getTypeIcon(context, departure.type, 96)
+                            val icon = getTypeIcon(context, departure.type, 96)
 
-                        departuresMapViewModel.addMarker(
-                            MarkerData(
-                                id = departure.id.toString(),
-                                position = GeoPoint(coordinates.y, coordinates.x),
-                                icon = icon,
-                                departure = departure,
+                            departuresMapViewModel.addMarker(
+                                MarkerData(
+                                    id = departure.id.toString(),
+                                    position = GeoPoint(coordinates.y, coordinates.x),
+                                    icon = icon,
+                                    departure = departure,
+                                )
                             )
-                        )
+                        }
                     }
 
                     renderMarkers()

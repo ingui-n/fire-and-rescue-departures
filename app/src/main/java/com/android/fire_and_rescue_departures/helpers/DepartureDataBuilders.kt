@@ -68,11 +68,6 @@ fun buildDepartureShareText(departure: Departure): String {
     val departureAddress = buildDepartureAddress(departure)
     val departureStartDateTime =
         getFormattedDepartureStartDateTime(departure)
-    val coordinates = convertSjtskToWgs(
-        departure.gis1.toDouble(),
-        departure.gis2.toDouble()
-    )
-    val addressLink = buildMapyComAddressLink(coordinates)
 
     var text = "Výjezd hasičů "
 
@@ -80,7 +75,17 @@ fun buildDepartureShareText(departure: Departure): String {
         text += "na ${departureType.name} "
     }
 
-    text += "na místě: $departureAddress ($addressLink) ohlášen: $departureStartDateTime."
+    if (departure.gis1 != null && departure.gis2 != null) {
+        val coordinates = convertSjtskToWgs(
+            departure.gis1.toDouble(),
+            departure.gis2.toDouble()
+        )
+        val addressLink = buildMapyComAddressLink(coordinates)
+
+        text += "na místě: $departureAddress ($addressLink) "
+    }
+
+    text += "ohlášen: $departureStartDateTime."
     text += " Stav události: ${if (isOpened) "otevřená" else "uzavřená"}"
 
     return text

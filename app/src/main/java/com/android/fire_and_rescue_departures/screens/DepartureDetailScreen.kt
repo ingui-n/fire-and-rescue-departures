@@ -145,10 +145,13 @@ fun DepartureDetailScreen(
                         val departureSubtype = DepartureSubtypes.fromId(departure.subType)
                         val departureStartDateTime =
                             getFormattedDepartureStartDateTime(departure)
-                        val coordinates = convertSjtskToWgs(
-                            departure.gis1.toDouble(),
-                            departure.gis2.toDouble()
-                        )
+
+                        val coordinates = if (departure.gis1 != null && departure.gis2 != null) {
+                            convertSjtskToWgs(
+                                departure.gis1.toDouble(),
+                                departure.gis2.toDouble()
+                            )
+                        } else null
 
                         val departureStatusState =
                             if (DepartureStatus.getOpened().contains(departureStatus!!.id)) {
@@ -157,10 +160,12 @@ fun DepartureDetailScreen(
                                 UIText.DEPARTURE_STATUS_CLOSED.value
                             }
 
-                        val mapUrl =
+                        val mapUrl = if (coordinates != null) {
                             "https://api.mapy.cz/v1/static/map?lon=${coordinates.x}&lat=${coordinates.y}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${coordinates.x},${coordinates.y}&apikey=${BuildConfig.MAPS_COM_API}"
-                        val streetUrl =
+                        } else null
+                        val streetUrl = if (coordinates != null) {
                             "https://api.mapy.cz/v1/static/pano?width=800&height=600&lon=${coordinates.x}&lat=${coordinates.y}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
+                        } else null
 
                         val backgroundColor = MaterialTheme.colorScheme.background
 
@@ -178,24 +183,26 @@ fun DepartureDetailScreen(
                                 .fillMaxWidth()
                                 .height(300.dp)
                         ) {
-                            AsyncImage(
-                                model = mapUrl,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-                                    .drawWithContent {
-                                        drawContent()
-                                        drawRect(brush = gradient, blendMode = BlendMode.DstIn)
-                                    }
-                                    .clickable {
-                                        fullScreenImageScope.launch {
-                                            fullScreenImageUrl.value = mapUrl
-                                            fullScreenImagePreviewerState.open(index = 1)
+                            if (mapUrl != null) {
+                                AsyncImage(
+                                    model = mapUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                                        .drawWithContent {
+                                            drawContent()
+                                            drawRect(brush = gradient, blendMode = BlendMode.DstIn)
                                         }
-                                    },
-                                contentScale = ContentScale.Crop,
-                            )
+                                        .clickable {
+                                            fullScreenImageScope.launch {
+                                                fullScreenImageUrl.value = mapUrl
+                                                fullScreenImagePreviewerState.open(index = 1)
+                                            }
+                                        },
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
                         }
 
                         val departureIcon = getTypeIcon(context, departure.type)
@@ -386,155 +393,157 @@ fun DepartureDetailScreen(
                         }
 
                         // Address
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            // Section Header
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                        if (coordinates != null && streetUrl != null) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
-                                Text(
-                                    text = UIText.DEPARTURE_ADDRESS_LABEL.value,
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
+                                // Section Header
                                 Row(
-                                    modifier = Modifier.padding(end = 8.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    val googleMapsUrl =
-                                        "https://www.google.com/maps/place/${
-                                            decimalToDMS(
-                                                coordinates.x
-                                            )
-                                        }+${
-                                            decimalToDMS(
-                                                coordinates.y,
-                                                true
-                                            )
-                                        }/@${coordinates.x},${coordinates.y}"
-
-                                    val mapyCzUrl =
-                                        "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
-
-                                    IconButton(onClick = {
-                                        val intent =
-                                            Intent(Intent.ACTION_VIEW, googleMapsUrl.toUri())
-                                        context.startActivity(intent)
-                                    }) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.google_maps_icon),
-                                            contentDescription = UIText.DETAIL_OPEN_ON_GOOGLE.value
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.width(16.dp))
-
-                                    IconButton(onClick = {
-                                        val intent =
-                                            Intent(Intent.ACTION_VIEW, mapyCzUrl.toUri())
-                                        context.startActivity(intent)
-                                    }) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.mapy_com_icon),
-                                            contentDescription = UIText.DETAIL_OPEN_ON_MAPY.value
-                                        )
-                                    }
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            // Address Items
-                            val addressComponents = listOfNotNull(
-                                departure.region.name?.let {
-                                    Pair(UIText.ADDRESS_REGION.value, it)
-                                },
-                                departure.district.name?.let {
-                                    Pair(UIText.ADDRESS_DISTRICT.value, it)
-                                },
-                                departure.municipality?.let {
-                                    Pair(UIText.ADDRESS_MUNICIPALITY.value, it)
-                                },
-                                departure.municipalityPart?.takeIf { it != departure.municipality }
-                                    ?.let {
-                                        Pair(UIText.ADDRESS_MUNICIPALITY_PART.value, it)
-                                    },
-                                departure.street?.let {
-                                    Pair(UIText.ADDRESS_STREET.value, it)
-                                },
-                                departure.road?.let {
-                                    Pair(UIText.ADDRESS_ROAD.value, it)
-                                }
-                            )
-
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                shape = MaterialTheme.shapes.medium,
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                        alpha = 0.4f
+                                    Text(
+                                        text = UIText.DEPARTURE_ADDRESS_LABEL.value,
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.SemiBold,
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary,
                                     )
-                                ),
-                                onClick = {}
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    addressComponents.forEach { (label, value) ->
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.padding(vertical = 4.dp)
-                                        ) {
-                                            Text(
-                                                text = label,
-                                                style = MaterialTheme.typography.bodyLarge.copy(
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                        alpha = 0.9f
-                                                    )
-                                                ),
-                                                modifier = Modifier.widthIn(min = 140.dp)
+                                    Row(
+                                        modifier = Modifier.padding(end = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        val googleMapsUrl =
+                                            "https://www.google.com/maps/place/${
+                                                decimalToDMS(
+                                                    coordinates.x
+                                                )
+                                            }+${
+                                                decimalToDMS(
+                                                    coordinates.y,
+                                                    true
+                                                )
+                                            }/@${coordinates.x},${coordinates.y}"
+
+                                        val mapyCzUrl =
+                                            "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
+
+                                        IconButton(onClick = {
+                                            val intent =
+                                                Intent(Intent.ACTION_VIEW, googleMapsUrl.toUri())
+                                            context.startActivity(intent)
+                                        }) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.google_maps_icon),
+                                                contentDescription = UIText.DETAIL_OPEN_ON_GOOGLE.value
                                             )
-                                            Spacer(Modifier.width(8.dp))
-                                            Text(
-                                                text = value,
-                                                style = MaterialTheme.typography.bodyLarge.copy(
-                                                    fontWeight = FontWeight.SemiBold,
-                                                ),
-                                                color = MaterialTheme.colorScheme.onSurface
+                                        }
+
+                                        Spacer(modifier = Modifier.width(16.dp))
+
+                                        IconButton(onClick = {
+                                            val intent =
+                                                Intent(Intent.ACTION_VIEW, mapyCzUrl.toUri())
+                                            context.startActivity(intent)
+                                        }) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.mapy_com_icon),
+                                                contentDescription = UIText.DETAIL_OPEN_ON_MAPY.value
                                             )
                                         }
                                     }
                                 }
-                            }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
 
-                        AsyncImage(
-                            model = streetUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    fullScreenImageScope.launch {
-                                        fullScreenImageUrl.value = streetUrl
-                                        fullScreenImagePreviewerState.open(index = 1)
+                                // Address Items
+                                val addressComponents = listOfNotNull(
+                                    departure.region.name?.let {
+                                        Pair(UIText.ADDRESS_REGION.value, it)
+                                    },
+                                    departure.district.name?.let {
+                                        Pair(UIText.ADDRESS_DISTRICT.value, it)
+                                    },
+                                    departure.municipality?.let {
+                                        Pair(UIText.ADDRESS_MUNICIPALITY.value, it)
+                                    },
+                                    departure.municipalityPart?.takeIf { it != departure.municipality }
+                                        ?.let {
+                                            Pair(UIText.ADDRESS_MUNICIPALITY_PART.value, it)
+                                        },
+                                    departure.street?.let {
+                                        Pair(UIText.ADDRESS_STREET.value, it)
+                                    },
+                                    departure.road?.let {
+                                        Pair(UIText.ADDRESS_ROAD.value, it)
                                     }
-                                },
-                            contentScale = ContentScale.Crop,
-                        )
+                                )
 
-                        Spacer(modifier = Modifier.height(91.dp))
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                            alpha = 0.4f
+                                        )
+                                    ),
+                                    onClick = {}
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp)
+                                    ) {
+                                        addressComponents.forEach { (label, value) ->
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(vertical = 4.dp)
+                                            ) {
+                                                Text(
+                                                    text = label,
+                                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                            alpha = 0.9f
+                                                        )
+                                                    ),
+                                                    modifier = Modifier.widthIn(min = 140.dp)
+                                                )
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(
+                                                    text = value,
+                                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                                        fontWeight = FontWeight.SemiBold,
+                                                    ),
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            AsyncImage(
+                                model = streetUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        fullScreenImageScope.launch {
+                                            fullScreenImageUrl.value = streetUrl
+                                            fullScreenImagePreviewerState.open(index = 1)
+                                        }
+                                    },
+                                contentScale = ContentScale.Crop,
+                            )
+
+                            Spacer(modifier = Modifier.height(91.dp))
+                        }
                     }
 
                     is ApiResult.Error -> {
