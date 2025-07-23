@@ -1,5 +1,6 @@
 package com.android.fire_and_rescue_departures.viewmodels
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -24,9 +25,15 @@ import kotlinx.coroutines.withTimeout
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import androidx.core.content.edit
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 @RequiresApi(Build.VERSION_CODES.O)
-class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewModel() {
+class DeparturesListViewModel(
+    private val departuresApi: DeparturesApi,
+    context: Context
+) : ViewModel() {
     private val _departuresList = MutableStateFlow<ApiResult<List<Departure>>>(ApiResult.Loading)
     val departuresList: StateFlow<ApiResult<List<Departure>>> = _departuresList.asStateFlow()
 
@@ -37,61 +44,132 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
         MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
     val departureUnits: StateFlow<ApiResult<List<DepartureUnit>>> = _departureUnits.asStateFlow()
 
+    private val filters = context.getSharedPreferences("filters", Context.MODE_PRIVATE)
+    private val gson = Gson()
+
+    private val _statusOpened = MutableStateFlow(
+        filters.getBoolean("statusOpened", true)
+    )
+
+    val statusOpened: StateFlow<Boolean> = _statusOpened.asStateFlow()
+
+    private val _statusClosed = MutableStateFlow(
+        filters.getBoolean("statusClosed", true)
+    )
+
+    val statusClosed: StateFlow<Boolean> = _statusClosed.asStateFlow()
+
     private val _filterFromDateTime = MutableStateFlow<LocalDateTime?>(
-        LocalDateTime.now().with(LocalTime.MIDNIGHT)
+        filters.getString("filterFromDateTime", null).let {
+            LocalDateTime.parse(it)
+        }
     )
     val filterFromDateTime: StateFlow<LocalDateTime?> = _filterFromDateTime.asStateFlow()
 
     private val _filterToDateTime = MutableStateFlow<LocalDateTime?>(
-        LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT)
+        filters.getString("filterToDateTime", null).let {
+            LocalDateTime.parse(it)
+        }
     )
     val filterToDateTime: StateFlow<LocalDateTime?> = _filterToDateTime.asStateFlow()
 
-    private val _filterAddress = MutableStateFlow<String>("")
+    private val _filterAddress = MutableStateFlow(
+        filters.getString("filterAddress", "") as String
+    )
     val filterAddress: StateFlow<String> = _filterAddress.asStateFlow()
 
-    private val _filterRegions = MutableStateFlow<List<Int>>(listOf<Int>(1))//todo add to settings
+    private val _filterRegions = MutableStateFlow<List<Int>>(
+        gson.fromJson(
+            filters.getString("filterRegions", null),
+            object : TypeToken<List<Int>>() {}.type
+        )
+    )
     val filterRegions: StateFlow<List<Int>> = _filterRegions.asStateFlow()
 
-    private val _filterType = MutableStateFlow<Int?>(null)
+    private val _filterType = MutableStateFlow(
+        filters.getInt("filterType", 0).let { if (it == 0) null else it }
+    )
     val filterType: StateFlow<Int?> = _filterType.asStateFlow()
 
-    private val _filterStatuses = MutableStateFlow<List<Int>?>(DepartureStatus.getAllIds())
+    private val _filterStatuses = MutableStateFlow<List<Int>?>(null)
     val filterStatuses: StateFlow<List<Int>?> = _filterStatuses.asStateFlow()
+
+    init {
+        val filterStatusesJson = filters.getString("filterStatuses", null)
+        val filterStatusesList: List<Int>? = try {
+            filterStatusesJson?.let { gson.fromJson(it, object : TypeToken<List<Int>>() {}.type) }
+        } catch (_: Exception) {
+            null
+        }
+        _filterStatuses.value = filterStatusesList
+
+    }
+
+    fun updateStatusOpened(boolean: Boolean) {
+        _statusOpened.value = boolean
+        filters.edit { putBoolean("statusOpened", boolean) }
+    }
+
+    fun updateStatusClosed(boolean: Boolean) {
+        _statusClosed.value = boolean
+        filters.edit { putBoolean("statusClosed", boolean) }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateFilterFromDateTime(dateTime: String) {
         _filterFromDateTime.value = getDateTimeFromString(dateTime)
+        filters.edit { putString("filterFromDateTime", dateTime) }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateFilterToDateTime(dateTime: String) {
         _filterToDateTime.value = getDateTimeFromString(dateTime)
+        filters.edit { putString("filterToDateTime", dateTime) }
     }
 
     fun updateFilterAddress(address: String) {
         _filterAddress.value = address
+        filters.edit { putString("filterAddress", address) }
     }
 
     fun updateFilterRegions(regions: List<Int>) {
         _filterRegions.value = regions
+        filters.edit { putString("filterRegions", gson.toJson(regions)) }
     }
 
     fun updateFilterType(type: Int?) {
         _filterType.value = type
+        filters.edit { putInt("filterType", type ?: 0) }
     }
 
-    fun updateFilterStatuses(statuses: List<Int>?) {
+    fun updateFilterStatuses(statuses: List<Int>) {
         _filterStatuses.value = statuses
+        filters.edit { putString("filterStatuses", gson.toJson(statuses)) }
     }
 
     fun resetFilters() {
+        _statusOpened.value = true
+        _statusClosed.value = true
         _filterFromDateTime.value = LocalDateTime.now().with(LocalTime.MIDNIGHT)
         _filterToDateTime.value = LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT)
         _filterAddress.value = ""
-        _filterRegions.value = listOf<Int>()
+        _filterRegions.value = listOf()
         _filterType.value = null
         _filterStatuses.value = DepartureStatus.getAllIds()
+
+        filters.edit {
+            putBoolean("statusOpened", true)
+            putBoolean("statusClosed", true)
+            putString("filterFromDateTime", LocalDateTime.now().with(LocalTime.MIDNIGHT).toString())
+            putString(
+                "filterToDateTime",
+                LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT).toString()
+            )
+            putString("filterAddress", "")
+            putString("filterRegions", gson.toJson(listOf<Int>()))
+            putInt("filterType", 0)
+            putString("filterStatuses", gson.toJson(DepartureStatus.getAllIds()))
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -150,7 +228,7 @@ class DeparturesListViewModel(private val departuresApi: DeparturesApi) : ViewMo
                     _departuresList.value = ApiResult.Error(errorMessage ?: "Unknown error")
                 } else {
                     mergedResults.sortWith(
-                        compareByDescending<Departure> { departure ->
+                        compareByDescending { departure ->
                             getDateTimeFromString(
                                 departure.reportedDateTime ?: departure.startDateTime ?: ""
                             )

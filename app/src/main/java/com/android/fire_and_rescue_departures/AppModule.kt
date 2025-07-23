@@ -34,7 +34,7 @@ val repositoryModule = module {
 
 @RequiresApi(Build.VERSION_CODES.O)
 val viewModelModule = module {
-    viewModel { DeparturesListViewModel(get()) }
+    viewModel { DeparturesListViewModel(get(), androidContext()) }
     viewModel { DeparturesBookmarksViewModel(get(), get()) }
     viewModel { DeparturesMapViewModel() }
 }

@@ -99,15 +99,14 @@ fun DepartureListTopBar(
     var showToDatePicker by remember { mutableStateOf(false) }
     var showToTimePicker by remember { mutableStateOf(false) }
 
+    val statusOpened by viewModel.statusOpened.collectAsState()
+    val statusClosed by viewModel.statusClosed.collectAsState()
     val selectedRegions by viewModel.filterRegions.collectAsState()
     val selectedType: Int? by viewModel.filterType.collectAsState()
     val fromDateTime by viewModel.filterFromDateTime.collectAsState()
     val toDateTime by viewModel.filterToDateTime.collectAsState()
     val address by viewModel.filterAddress.collectAsState()
     val addressState = rememberTextFieldState(address, TextRange(0, 50))
-
-    var statusOpened by remember { mutableStateOf(true) }
-    var statusClosed by remember { mutableStateOf(true) }
 
     val departuresList by viewModel.departuresList.collectAsState()
     val showSmallProgress = remember { mutableStateOf(false) }
@@ -307,7 +306,7 @@ fun DepartureListTopBar(
                     if (statusOpened && statusClosed) DepartureStatus.getAllIds()
                     else if (statusOpened) DepartureStatus.getOpened()
                     else if (statusClosed) DepartureStatus.getClosed()
-                    else null
+                    else listOf()
 
                 coroutineScope.launch {
                     viewModel.updateFilterStatuses(statuses)
@@ -353,7 +352,7 @@ fun DepartureListTopBar(
                         modifier = Modifier
                             .toggleable(
                                 value = statusOpened,
-                                onValueChange = { statusOpened = it }
+                                onValueChange = { viewModel.updateStatusOpened(it) }
                             ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -364,7 +363,7 @@ fun DepartureListTopBar(
                         )
                         Checkbox(
                             checked = statusOpened,
-                            onCheckedChange = { statusOpened = it },
+                            onCheckedChange = { viewModel.updateStatusOpened(it) },
                             colors = CheckboxDefaults.colors(
                                 checkedColor = MaterialTheme.colorScheme.primary,
                                 uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -377,7 +376,7 @@ fun DepartureListTopBar(
                         modifier = Modifier
                             .toggleable(
                                 value = statusClosed,
-                                onValueChange = { statusClosed = it }
+                                onValueChange = { viewModel.updateStatusClosed(it) }
                             ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -388,7 +387,7 @@ fun DepartureListTopBar(
                         )
                         Checkbox(
                             checked = statusClosed,
-                            onCheckedChange = { statusClosed = it },
+                            onCheckedChange = { viewModel.updateStatusClosed(it) },
                             colors = CheckboxDefaults.colors(
                                 checkedColor = MaterialTheme.colorScheme.primary,
                                 uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -780,8 +779,6 @@ fun DepartureListTopBar(
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.resetFilters()
-                                statusOpened = true
-                                statusClosed = true
                                 addressState.clearText()
                                 resetFromDatePickerState()
                                 fromTimePickerState = TimePickerState(
