@@ -1,6 +1,7 @@
 package com.android.fire_and_rescue_departures.data
 
 import com.google.gson.annotations.SerializedName
+import java.security.MessageDigest
 
 data class Departure(
     @SerializedName("id") val id: Long,
@@ -21,4 +22,21 @@ data class Departure(
     @SerializedName("zoc") val preplanned: Boolean,
     @SerializedName("silnice") val road: String?,
     var regionId: Int?,
-)
+) {
+    fun contentChecksum(): String {
+        val toHash = listOf(
+            id,
+            state,
+            type,
+            subType,
+            description,
+            municipalityWithExtendedCompetence,
+            street,
+            road
+        ).joinToString("|")
+
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(toHash.toByteArray())
+        return digest.joinToString("") { "%02x".format(it) }
+    }
+}

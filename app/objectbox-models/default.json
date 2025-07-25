@@ -31,9 +31,142 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "3:6961053321686358566",
+      "lastPropertyId": "20:8140460946132010980",
+      "name": "DepartureEntity",
+      "properties": [
+        {
+          "id": "1:6022445816460688795",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6317754074669797774",
+          "name": "reportedDateTime",
+          "type": 9
+        },
+        {
+          "id": "3:4734036023545638615",
+          "name": "startDateTime",
+          "type": 9
+        },
+        {
+          "id": "4:1888156617246677621",
+          "name": "state",
+          "type": 5
+        },
+        {
+          "id": "5:4555760241323747961",
+          "name": "type",
+          "type": 5
+        },
+        {
+          "id": "6:3845515998502768104",
+          "name": "subType",
+          "type": 5
+        },
+        {
+          "id": "7:6489183260817258697",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "9:183382454496941114",
+          "name": "regionName",
+          "type": 9
+        },
+        {
+          "id": "10:2216805524964156942",
+          "name": "districtId",
+          "type": 5
+        },
+        {
+          "id": "11:9151474841773567490",
+          "name": "districtName",
+          "type": 9
+        },
+        {
+          "id": "12:4690127160601570106",
+          "name": "municipality",
+          "type": 9
+        },
+        {
+          "id": "13:6082710904288487037",
+          "name": "municipalityPart",
+          "type": 9
+        },
+        {
+          "id": "14:3610476587178312558",
+          "name": "municipalityWithExtendedCompetence",
+          "type": 9
+        },
+        {
+          "id": "15:8314645856222815168",
+          "name": "street",
+          "type": 9
+        },
+        {
+          "id": "16:4058617700747279393",
+          "name": "coordinateX",
+          "type": 8
+        },
+        {
+          "id": "17:722584761162961360",
+          "name": "coordinateY",
+          "type": 8
+        },
+        {
+          "id": "18:732064223975542858",
+          "name": "preplanned",
+          "type": 1
+        },
+        {
+          "id": "19:2422132235524241225",
+          "name": "road",
+          "type": 9
+        },
+        {
+          "id": "20:8140460946132010980",
+          "name": "regionId",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:1029079852640940991",
+      "lastPropertyId": "4:527877368220924875",
+      "name": "DateTimeIntervalEntity",
+      "properties": [
+        {
+          "id": "1:6078246717201605433",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3911993139259960881",
+          "name": "from",
+          "type": 9
+        },
+        {
+          "id": "3:6241119566754292584",
+          "name": "to",
+          "type": 9
+        },
+        {
+          "id": "4:527877368220924875",
+          "name": "region",
+          "type": 5
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "2:4959759699261513224",
+  "lastEntityId": "4:1029079852640940991",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
@@ -46,7 +179,8 @@
   "retiredPropertyUids": [
     3108699376312164572,
     5479809288460529076,
-    5886383157932750453
+    5886383157932750453,
+    5315952095596673416
   ],
   "retiredRelationUids": [],
   "version": 1

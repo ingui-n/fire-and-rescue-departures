@@ -26,12 +26,24 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import androidx.core.content.edit
+import com.android.fire_and_rescue_departures.data.DateTimeInterval
+import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity
+import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity_
+import com.android.fire_and_rescue_departures.data.DepartureEntity
+import com.android.fire_and_rescue_departures.data.DepartureEntity_
+import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
+import com.android.fire_and_rescue_departures.helpers.getDepartureStartDateTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import io.objectbox.Box
+import io.objectbox.kotlin.equal
+import io.objectbox.kotlin.query
 
 @RequiresApi(Build.VERSION_CODES.O)
 class DeparturesListViewModel(
     private val departuresApi: DeparturesApi,
+    private val departuresBox: Box<DepartureEntity>,
+    private val departureIntervalsBox: Box<DateTimeIntervalEntity>,
     context: Context
 ) : ViewModel() {
     private val _departuresList = MutableStateFlow<ApiResult<List<Departure>>>(ApiResult.Loading)
@@ -101,8 +113,8 @@ class DeparturesListViewModel(
         } catch (_: Exception) {
             null
         }
-        _filterStatuses.value = filterStatusesList
 
+        _filterStatuses.value = filterStatusesList
     }
 
     fun updateStatusOpened(boolean: Boolean) {
@@ -118,13 +130,13 @@ class DeparturesListViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateFilterFromDateTime(dateTime: String) {
         _filterFromDateTime.value = getDateTimeFromString(dateTime)
-        filters.edit { putString("filterFromDateTime", dateTime) }
+//        filters.edit { putString("filterFromDateTime", dateTime) }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateFilterToDateTime(dateTime: String) {
         _filterToDateTime.value = getDateTimeFromString(dateTime)
-        filters.edit { putString("filterToDateTime", dateTime) }
+//        filters.edit { putString("filterToDateTime", dateTime) }
     }
 
     fun updateFilterAddress(address: String) {
@@ -172,6 +184,7 @@ class DeparturesListViewModel(
         }
     }
 
+    //todo if data.size == 6000 update date range and call again
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateDeparturesList() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -199,6 +212,14 @@ class DeparturesListViewModel(
                         val data = response.body()
                         if (data != null) {
                             data.forEach { departure -> departure.regionId = regionId }
+
+                            data.forEach { departure -> storeDeparture(departure, regionId) }
+                            addAndMergeInterval(
+                                regionId,
+                                getDepartureStartDateTime(data[data.size - 1]),
+                                getDepartureStartDateTime(data[0])
+                            )
+
                             mergedResults.addAll(data)
                             Log.d(
                                 "DeparturesListViewModel",
@@ -240,6 +261,11 @@ class DeparturesListViewModel(
         }
     }
 
+    //todo po fetchi uložit do db časový rozsah stažených ukončených výjezdů
+    //todo uložit výjezdy do db
+
+    //todo před stahováním: podle db upravit čas stahování
+    //todo pokud se stáhne 6000 výjezdů: upravit čas OD na čas prvního výjezdu
     @RequiresApi(Build.VERSION_CODES.O)
     fun getDeparture(
         regionId: Int,
@@ -373,5 +399,126 @@ class DeparturesListViewModel(
                 }
             }
         }
+    }
+
+    fun storeDeparture(departure: Departure, regionId: Int) {
+        val existingEntity = departuresBox.query()
+            .equal(
+                DepartureEntity_.id,
+                departure.id
+            )
+            .build()
+            .findFirst()
+
+        if (existingEntity != null) {
+            val checksum1 = existingEntity.contentChecksum()
+            val checksum2 = departure.contentChecksum()
+
+            if (checksum1 != checksum2) {
+                existingEntity.state = departure.state
+                existingEntity.type = departure.type
+                existingEntity.subType = departure.subType
+                existingEntity.description = departure.description
+                existingEntity.municipalityWithExtendedCompetence =
+                    departure.municipalityWithExtendedCompetence
+                existingEntity.street = departure.street
+                existingEntity.road = departure.road
+
+                if (departure.gis1 != null && departure.gis2 != null) {
+                    val coordinates = convertSjtskToWgs(
+                        departure.gis1.toDouble(),
+                        departure.gis2.toDouble()
+                    )
+                    existingEntity.coordinateX = coordinates.x
+                    existingEntity.coordinateY = coordinates.y
+                }
+
+                departuresBox.put(existingEntity)
+            }
+        } else {
+            val coordinates = if (departure.gis1 != null && departure.gis2 != null) {
+                convertSjtskToWgs(
+                    departure.gis1.toDouble(),
+                    departure.gis2.toDouble()
+                )
+            } else null
+
+            val newDepartureEntity = DepartureEntity(
+                id = departure.id,
+                reportedDateTime = departure.reportedDateTime,
+                startDateTime = departure.startDateTime,
+                state = departure.state,
+                type = departure.type,
+                subType = departure.subType,
+                description = departure.description,
+                regionId = regionId,
+                regionName = departure.region.name,
+                districtId = departure.district.id,
+                districtName = departure.district.name,
+                municipality = departure.municipality,
+                municipalityPart = departure.municipalityPart,
+                municipalityWithExtendedCompetence = departure.municipalityWithExtendedCompetence,
+                street = departure.street,
+                coordinateX = coordinates?.x,
+                coordinateY = coordinates?.y,
+                preplanned = departure.preplanned,
+                road = departure.road
+            )
+
+            departuresBox.put(newDepartureEntity)
+        }
+    }
+
+    fun addAndMergeInterval(
+        region: Int,
+        newFrom: LocalDateTime,
+        newTo: LocalDateTime
+    ) {
+        val oldIntervals = departureIntervalsBox.all.map {
+            DateTimeInterval(region, LocalDateTime.parse(it.from), LocalDateTime.parse(it.to))
+        }.toMutableList()
+
+        insertInterval(oldIntervals, DateTimeInterval(region, newFrom, newTo))
+
+        departureIntervalsBox.query {
+            equal(DateTimeIntervalEntity_.region, region)
+        }.remove()
+        departureIntervalsBox.put(oldIntervals.map {
+            DateTimeIntervalEntity(
+                region = it.region,
+                from = it.from.toString(),
+                to = it.to.toString()
+            )
+        })
+    }
+
+    fun insertInterval(
+        intervals: MutableList<DateTimeInterval>,
+        newInterval: DateTimeInterval
+    ) {
+        intervals.add(newInterval)
+        intervals.sortBy { it.from }
+
+        val merged = mutableListOf<DateTimeInterval>()
+        for (interval in intervals) {
+            if (merged.isEmpty()) {
+                merged.add(interval)
+            } else {
+                val last = merged.last()
+
+                if (last.region == interval.region && !last.to.isBefore(interval.from.minusNanos(1))) {
+                    merged[merged.size - 1] = DateTimeInterval(
+                        region = last.region,
+                        from = last.from,
+                        to = maxOf(last.to, interval.to)
+                    )
+                } else {
+                    merged.add(interval)
+                }
+            }
+        }
+
+        intervals.clear()
+        intervals.addAll(merged)
     }
 }

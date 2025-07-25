@@ -34,7 +34,7 @@ val repositoryModule = module {
 
 @RequiresApi(Build.VERSION_CODES.O)
 val viewModelModule = module {
-    viewModel { DeparturesListViewModel(get(), androidContext()) }
+    viewModel { DeparturesListViewModel(get(), get(), get(), androidContext()) }
     viewModel { DeparturesBookmarksViewModel(get(), get()) }
     viewModel { DeparturesMapViewModel() }
 }
@@ -101,14 +101,20 @@ fun provideOkHttpClient(): OkHttpClient {
 
 fun getUnsafeOkHttpClient(): OkHttpClient {
     try {
-        val trustAllCerts = arrayOf<TrustManager>(@SuppressLint("CustomX509TrustManager")
-        object : X509TrustManager {
-            @SuppressLint("TrustAllX509TrustManager")
-            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-            @SuppressLint("TrustAllX509TrustManager")
-            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-        })
+        val trustAllCerts = arrayOf<TrustManager>(
+            @SuppressLint("CustomX509TrustManager")
+            object : X509TrustManager {
+                @SuppressLint("TrustAllX509TrustManager")
+                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
+                }
+
+                @SuppressLint("TrustAllX509TrustManager")
+                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
+                }
+
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            }
+        )
 
         val sslContext = SSLContext.getInstance("SSL")
         sslContext.init(null, trustAllCerts, SecureRandom())
