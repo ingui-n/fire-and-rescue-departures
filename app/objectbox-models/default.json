@@ -34,7 +34,7 @@
     },
     {
       "id": "3:6961053321686358566",
-      "lastPropertyId": "20:8140460946132010980",
+      "lastPropertyId": "21:8711250817297493793",
       "name": "DepartureEntity",
       "properties": [
         {
@@ -132,6 +132,11 @@
           "id": "20:8140460946132010980",
           "name": "regionId",
           "type": 5
+        },
+        {
+          "id": "21:8711250817297493793",
+          "name": "departureId",
+          "type": 6
         }
       ],
       "relations": []

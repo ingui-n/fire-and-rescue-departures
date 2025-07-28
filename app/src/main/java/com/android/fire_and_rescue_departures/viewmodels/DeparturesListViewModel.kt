@@ -444,7 +444,7 @@ class DeparturesListViewModel(
             } else null
 
             val newDepartureEntity = DepartureEntity(
-                id = departure.id,
+                departureId = departure.id,
                 reportedDateTime = departure.reportedDateTime,
                 startDateTime = departure.startDateTime,
                 state = departure.state,
@@ -480,7 +480,7 @@ class DeparturesListViewModel(
 
         insertInterval(oldIntervals, DateTimeInterval(region, newFrom, newTo))
 
-        departureIntervalsBox.query {
+        departureIntervalsBox.query {//todo
             equal(DateTimeIntervalEntity_.region, region)
         }.remove()
         departureIntervalsBox.put(oldIntervals.map {

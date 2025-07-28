@@ -8,7 +8,9 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
+import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity
 import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
 import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
@@ -20,6 +22,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.named
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.security.SecureRandom
@@ -34,7 +37,12 @@ val repositoryModule = module {
 
 @RequiresApi(Build.VERSION_CODES.O)
 val viewModelModule = module {
-    viewModel { DeparturesListViewModel(get(), get(), get(), androidContext()) }
+    viewModel { DeparturesListViewModel(
+        get(),
+        get(named("departuresBox")),
+        get(named("intervalsBox")),
+        androidContext()
+    ) }
     viewModel { DeparturesBookmarksViewModel(get(), get()) }
     viewModel { DeparturesMapViewModel() }
 }
@@ -50,12 +58,17 @@ val imageModule = module {
 }
 
 val objectBoxModule = module {
-    single {
-        MyObjectBox.builder()
-            .androidContext(androidContext())
-            .build()
+    single { MyObjectBox.builder().androidContext(androidContext()).build() }
+    single(named("bookmarkBox")) {
+        get<BoxStore>().boxFor(DepartureBookmarkEntity::class.java)
     }
-    single { get<BoxStore>().boxFor(DepartureBookmarkEntity::class.java) }
+    single(named("departuresBox")) {
+        get<BoxStore>().boxFor(DepartureEntity::class.java)
+    }
+    single(named("intervalsBox")) {
+        get<BoxStore>().boxFor(DateTimeIntervalEntity::class.java)
+    }
+
 }
 
 fun provideOkHttpClient(): OkHttpClient {

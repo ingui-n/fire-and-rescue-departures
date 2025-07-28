@@ -7,6 +7,7 @@ import java.security.MessageDigest
 @Entity
 data class DepartureEntity(
     @Id var id: Long = 0,
+    val departureId: Long,
     val regionId: Int,
     val reportedDateTime: String?,
     val startDateTime: String?,
@@ -28,7 +29,7 @@ data class DepartureEntity(
 ) {
     fun contentChecksum(): String {
         val toHash = listOf(
-            id,
+            departureId,
             state,
             type,
             subType,
