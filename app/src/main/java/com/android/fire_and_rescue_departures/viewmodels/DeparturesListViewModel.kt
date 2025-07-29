@@ -32,6 +32,8 @@ import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity_
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureEntity_
 import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
+import com.android.fire_and_rescue_departures.helpers.findFirstClosedDeparture
+import com.android.fire_and_rescue_departures.helpers.findLastClosedDeparture
 import com.android.fire_and_rescue_departures.helpers.getDepartureStartDateTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -115,6 +117,9 @@ class DeparturesListViewModel(
         }
 
         _filterStatuses.value = filterStatusesList
+
+//        clearIntervals()
+//        clearDeparturesStore()
     }
 
     fun updateStatusOpened(boolean: Boolean) {
@@ -216,8 +221,8 @@ class DeparturesListViewModel(
                             data.forEach { departure -> storeDeparture(departure, regionId) }
                             addAndMergeInterval(
                                 regionId,
-                                getDepartureStartDateTime(data[data.size - 1]),
-                                getDepartureStartDateTime(data[0])
+                                getDepartureStartDateTime(findLastClosedDeparture(data)),
+                                getDepartureStartDateTime(findFirstClosedDeparture(data))
                             )
 
                             mergedResults.addAll(data)
@@ -471,16 +476,23 @@ class DeparturesListViewModel(
 
     fun addAndMergeInterval(
         region: Int,
-        newFrom: LocalDateTime,
-        newTo: LocalDateTime
+        newFrom: LocalDateTime?,
+        newTo: LocalDateTime?
     ) {
+        println(newFrom)
+        println(newTo)
+        if (newFrom == null || newTo == null)
+            return
+        if (newFrom == newTo)
+            return
+
         val oldIntervals = departureIntervalsBox.all.map {
             DateTimeInterval(region, LocalDateTime.parse(it.from), LocalDateTime.parse(it.to))
         }.toMutableList()
 
         insertInterval(oldIntervals, DateTimeInterval(region, newFrom, newTo))
 
-        departureIntervalsBox.query {//todo
+        departureIntervalsBox.query() {//todo
             equal(DateTimeIntervalEntity_.region, region)
         }.remove()
         departureIntervalsBox.put(oldIntervals.map {

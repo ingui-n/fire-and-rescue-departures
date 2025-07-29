@@ -3,6 +3,7 @@ package com.android.fire_and_rescue_departures.helpers
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureStatus
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -61,14 +62,17 @@ fun getFormattedDepartureStartDateTime(departure: Departure): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun getDepartureStartDateTime(departure: Departure): LocalDateTime {
+fun getDepartureStartDateTime(departure: Departure?): LocalDateTime? {
+    if (departure == null)
+        return null
+
     if (departure.startDateTime != null) {
         return getDateTimeFromString(departure.startDateTime)
     } else if (departure.reportedDateTime != null) {
         return getDateTimeFromString(departure.reportedDateTime)
     }
 
-    return LocalDateTime.now()
+    return null
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -124,4 +128,25 @@ fun getFormattedDateTime(dateTime: Long, pattern: String = "d. MMMM HH:mm"): Str
 
     val formatter = DateTimeFormatter.ofPattern(pattern, czechLocale)
     return localDateTime.format(formatter)
+}
+
+fun findFirstClosedDeparture(departures: List<Departure>): Departure? {
+    if (departures.size >= 2) {//todo right direction
+        if (departures[0].state in DepartureStatus.getClosed())
+            return departures[0]
+    }
+
+    return null
+}
+
+fun findLastClosedDeparture(departures: List<Departure>): Departure? {
+    if (departures.size < 2)
+        return null
+
+    for ((index, departure) in departures.reversed().withIndex()) {
+        if (departure.state in DepartureStatus.getOpened())
+            return departures[index - 1]
+    }
+
+    return departures[departures.size - 1]
 }

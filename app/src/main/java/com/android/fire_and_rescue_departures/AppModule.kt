@@ -32,17 +32,19 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 val repositoryModule = module {
-    single { DepartureBookmarksRepository(get()) }
+    single { DepartureBookmarksRepository(get(named("bookmarkBox"))) }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 val viewModelModule = module {
-    viewModel { DeparturesListViewModel(
-        get(),
-        get(named("departuresBox")),
-        get(named("intervalsBox")),
-        androidContext()
-    ) }
+    viewModel {
+        DeparturesListViewModel(
+            get(),
+            get(named("departuresBox")),
+            get(named("intervalsBox")),
+            androidContext()
+        )
+    }
     viewModel { DeparturesBookmarksViewModel(get(), get()) }
     viewModel { DeparturesMapViewModel() }
 }
