@@ -98,6 +98,7 @@ fun DepartureListTopBar(
     var showToDatePicker by remember { mutableStateOf(false) }
     var showToTimePicker by remember { mutableStateOf(false) }
 
+    val isFilterChanged by viewModel.isFilterChanged.collectAsState()
     val statusOpened by viewModel.statusOpened.collectAsState()
     val statusClosed by viewModel.statusClosed.collectAsState()
     val selectedRegions by viewModel.filterRegions.collectAsState()
@@ -297,7 +298,11 @@ fun DepartureListTopBar(
                 coroutineScope.launch {
                     viewModel.updateFilterStatuses(statuses)
                     viewModel.updateFilterAddress(addressState.text.toString())
-                    viewModel.updateDeparturesList()
+
+                    if (isFilterChanged) {
+                        viewModel.updateDeparturesList()
+                        viewModel.updateIsFilterChanged(false)
+                    }
                 }
                 showBottomSheet = false
             },

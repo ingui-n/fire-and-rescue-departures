@@ -49,6 +49,9 @@ class DeparturesListViewModel(
     private val filters = context.getSharedPreferences("filters", Context.MODE_PRIVATE)
     private val gson = Gson()
 
+    private val _isFilterChanged = MutableStateFlow(false)
+    val isFilterChanged: StateFlow<Boolean> = _isFilterChanged.asStateFlow()
+
     private val _statusOpened = MutableStateFlow(
         filters.getBoolean("statusOpened", true)
     )
@@ -127,49 +130,86 @@ class DeparturesListViewModel(
 //        clearDeparturesStore()
     }
 
+    fun updateIsFilterChanged(boolean: Boolean) {
+        _isFilterChanged.value = boolean
+    }
+
     fun updateStatusOpened(boolean: Boolean) {
+        if (_statusOpened.value != boolean) {
+            _isFilterChanged.value = true
+        }
+
         _statusOpened.value = boolean
         filters.edit { putBoolean("statusOpened", boolean) }
     }
 
     fun updateStatusClosed(boolean: Boolean) {
+        if (_statusClosed.value != boolean) {
+            _isFilterChanged.value = true
+        }
+
         _statusClosed.value = boolean
         filters.edit { putBoolean("statusClosed", boolean) }
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun updateFilterFromDateTime(dateTime: String) {
+        if (_filterFromDateTime.value != getDateTimeFromString(dateTime)) {
+            _isFilterChanged.value = true
+        }
+
         _filterFromDateTime.value = getDateTimeFromString(dateTime)
 //        filters.edit { putString("filterFromDateTime", dateTime) }
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun updateFilterToDateTime(dateTime: String) {
+        if (_filterToDateTime.value != getDateTimeFromString(dateTime)) {
+            _isFilterChanged.value = true
+        }
+
         _filterToDateTime.value = getDateTimeFromString(dateTime)
 //        filters.edit { putString("filterToDateTime", dateTime) }
     }
 
     fun updateFilterAddress(address: String) {
+        if (_filterAddress.value != address) {
+            _isFilterChanged.value = true
+        }
+
         _filterAddress.value = address
         filters.edit { putString("filterAddress", address) }
     }
 
     fun updateFilterRegions(regions: List<Int>) {
+        if (_filterRegions.value != regions) {
+            _isFilterChanged.value = true
+        }
+
         _filterRegions.value = regions
         filters.edit { putString("filterRegions", gson.toJson(regions)) }
     }
 
     fun updateFilterType(type: Int?) {
+        if (_filterType.value != type) {
+            _isFilterChanged.value = true
+        }
+
         _filterType.value = type
         filters.edit { putInt("filterType", type ?: 0) }
     }
 
     fun updateFilterStatuses(statuses: List<Int>) {
+        if (_filterStatuses.value != statuses) {
+            _isFilterChanged.value = true
+        }
+
         _filterStatuses.value = statuses
         filters.edit { putString("filterStatuses", gson.toJson(statuses)) }
     }
 
     fun resetFilters() {
+        _isFilterChanged.value = true
         _statusOpened.value = true
         _statusClosed.value = true
         _filterFromDateTime.value = LocalDateTime.now().with(LocalTime.MIDNIGHT)
