@@ -327,6 +327,8 @@ class DeparturesListViewModel(
                 val departures = response.body()
 
                 if (departures != null) {
+                    departures.map { departure -> storeDeparture(departure, regionId) }
+
                     if (departures.size >= 2000) {
                         getDepartures(
                             regionId,
@@ -479,57 +481,59 @@ class DeparturesListViewModel(
                 getDateTimeLongFromString(filterFromDateTime.value.toString()),
                 getDateTimeLongFromString(filterToDateTime.value.toString())
             )
+
             if (filterAddress.value.isNotBlank()) {
-//                and()
-                or()
                 contains(
                     DepartureEntity_.districtName,
                     filterAddress.value,
                     QueryBuilder.StringOrder.CASE_INSENSITIVE
                 )
+                or()
                 contains(
                     DepartureEntity_.municipality,
                     filterAddress.value,
                     QueryBuilder.StringOrder.CASE_INSENSITIVE
                 )
+                or()
                 contains(
                     DepartureEntity_.municipalityPart,
                     filterAddress.value,
                     QueryBuilder.StringOrder.CASE_INSENSITIVE
                 )
+                or()
                 contains(
                     DepartureEntity_.municipalityWithExtendedCompetence,
                     filterAddress.value,
                     QueryBuilder.StringOrder.CASE_INSENSITIVE
                 )
+                or()
                 contains(
                     DepartureEntity_.street,
                     filterAddress.value,
                     QueryBuilder.StringOrder.CASE_INSENSITIVE
                 )
+                or()
                 contains(
                     DepartureEntity_.road,
                     filterAddress.value,
                     QueryBuilder.StringOrder.CASE_INSENSITIVE
                 )
-                or()
             }
 
             if (filterRegions.value.isNotEmpty()) {
-//                and()
+                and()
                 `in`(DepartureEntity_.regionId, filterRegions.value.toIntArray())
             }
 
             if (filterType.value != null) {
-//                and()
-                or()
+                and()
                 greaterOrEqual(DepartureEntity_.type, filterType.value!!)
+                and()
                 lessOrEqual(DepartureEntity_.type, filterType.value!!)
-                or()
             }
 
             if (filterStatuses.value != null && filterStatuses.value!!.isNotEmpty()) {
-//                and()
+                and()
                 `in`(DepartureEntity_.state, filterStatuses.value!!.toIntArray())
             }
 
