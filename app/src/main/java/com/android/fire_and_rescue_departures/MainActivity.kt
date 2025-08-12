@@ -12,7 +12,7 @@ import com.android.fire_and_rescue_departures.screens.MainScreen
 import com.android.fire_and_rescue_departures.ui.theme.BaseAppTheme
 
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {

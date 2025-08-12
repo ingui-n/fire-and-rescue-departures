@@ -38,7 +38,7 @@ import io.objectbox.kotlin.lessOrEqual
 import io.objectbox.query.QueryBuilder
 import kotlin.run
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 class DeparturesListViewModel(
     private val departuresApi: DeparturesApi,
     private val departuresBox: Box<DepartureEntity>,
@@ -137,13 +137,13 @@ class DeparturesListViewModel(
         filters.edit { putBoolean("statusClosed", boolean) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun updateFilterFromDateTime(dateTime: String) {
         _filterFromDateTime.value = getDateTimeFromString(dateTime)
 //        filters.edit { putString("filterFromDateTime", dateTime) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun updateFilterToDateTime(dateTime: String) {
         _filterToDateTime.value = getDateTimeFromString(dateTime)
 //        filters.edit { putString("filterToDateTime", dateTime) }
@@ -194,7 +194,7 @@ class DeparturesListViewModel(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun updateDeparturesList() {
         viewModelScope.launch(Dispatchers.IO) {
             isLoading.value = true
@@ -221,7 +221,7 @@ class DeparturesListViewModel(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun getDeparture(
         regionId: Int,
         id: Long,
@@ -291,7 +291,7 @@ class DeparturesListViewModel(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     suspend fun getDepartures(
         regionId: Int,
         fromDateTime: String?,

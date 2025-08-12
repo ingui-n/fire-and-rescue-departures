@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class)
 fun buildDateTimeStringFromPickers(date: DatePickerState, time: TimePickerState): String {
     val instant = Instant.ofEpochMilli(date.selectedDateMillis!!)
@@ -31,7 +31,7 @@ fun buildDateTimeStringFromPickers(date: DatePickerState, time: TimePickerState)
     return localDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class)
 fun buildDateTimeFromPickers(date: DatePickerState, time: TimePickerState): LocalDateTime {
     val instant = Instant.ofEpochMilli(date.selectedDateMillis!!)

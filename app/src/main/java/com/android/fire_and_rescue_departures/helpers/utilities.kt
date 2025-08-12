@@ -3,7 +3,6 @@ package com.android.fire_and_rescue_departures.helpers
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.android.fire_and_rescue_departures.data.Departure
-import com.android.fire_and_rescue_departures.data.DepartureStatus
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -54,19 +53,19 @@ fun capitalizeFirstLetter(string: String): String {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getFormattedDepartureStartDateTime(departure: Departure): String {
     return getFormattedDateTime(
         (departure.reportedDateTime ?: departure.startDateTime).toString()
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getDepartureStartDateTime(departure: Departure): String {
     return (departure.reportedDateTime ?: departure.startDateTime).toString()
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getDepartureStartDateTime(departure: Departure?): LocalDateTime? {
     if (departure == null)
         return null
@@ -80,9 +79,9 @@ fun getDepartureStartDateTime(departure: Departure?): LocalDateTime? {
     return null
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getFormattedDateTime(dateTime: String): String {
-    val czechLocale = Locale("cs", "CZ")//todo
+    val czechLocale = Locale("cs", "CZ")
     var pattern = "d. MMMM HH:mm"
 
     var convertedDateTime: LocalDateTime
@@ -109,7 +108,7 @@ fun getFormattedDateTime(dateTime: String): String {
         .format(convertedDateTime)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getDateTimeFromString(dateTime: String): LocalDateTime {
     val trimmedDateTime = dateTime.trim()
     try {
@@ -124,7 +123,7 @@ fun getDateTimeFromString(dateTime: String): LocalDateTime {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getFormattedDateTime(dateTime: Long, pattern: String = "d. MMMM HH:mm"): String {
     val czechLocale = Locale("cs", "CZ")
     val instant = Instant.ofEpochMilli(dateTime)
@@ -135,34 +134,13 @@ fun getFormattedDateTime(dateTime: Long, pattern: String = "d. MMMM HH:mm"): Str
     return localDateTime.format(formatter)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun longToIsoString(timestamp: Long): String {
     val instant = Instant.ofEpochMilli(timestamp)
     return DateTimeFormatter.ISO_INSTANT.format(instant)
 }
 
-fun findFirstClosedDeparture(departures: List<Departure>): Departure? {
-    if (departures.size >= 2) {//todo right direction
-        if (departures[0].state in DepartureStatus.getClosed())
-            return departures[0]
-    }
-
-    return null
-}
-
-fun findLastClosedDeparture(departures: List<Departure>): Departure? {
-    if (departures.size < 2)
-        return null
-
-    for ((index, departure) in departures.reversed().withIndex()) {
-        if (departure.state in DepartureStatus.getOpened())
-            return departures[index - 1]
-    }
-
-    return departures[departures.size - 1]
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getDateTimeLongFromString(dateTime: String): Long {
     val trimmedDateTime = dateTime.trim()
     return try {

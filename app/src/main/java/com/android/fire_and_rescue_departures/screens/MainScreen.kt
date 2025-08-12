@@ -28,7 +28,7 @@ import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -45,12 +45,8 @@ fun MainScreen(navController: NavHostController) {
 
     val departureListViewModel: DeparturesListViewModel = koinViewModel()
 
-    // todo when running update call only departures with the opened status
     LaunchedEffect(Unit) {
-//        while (true) {
         departureListViewModel.updateDeparturesList()
-//            delay(5 * 60_000L)
-//        }
     }
 
     LaunchedEffect(Unit) {

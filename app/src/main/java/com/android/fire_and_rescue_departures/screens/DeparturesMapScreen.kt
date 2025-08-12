@@ -72,7 +72,7 @@ import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
 import androidx.compose.ui.graphics.Color as ComposeColor
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeparturesMapScreen(
@@ -165,7 +165,6 @@ fun DeparturesMapScreen(
                         if (departure.coordinateX != null && departure.coordinateY != null) {
                             val icon = getTypeIcon(context, departure.type, 96)
 
-                            //todo look for marker grouping
                             departuresMapViewModel.addMarker(
                                 MarkerData(
                                     id = departure.id.toString(),

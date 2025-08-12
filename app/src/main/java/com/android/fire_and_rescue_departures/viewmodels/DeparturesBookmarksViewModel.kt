@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 class DeparturesBookmarksViewModel(
     private val departuresBox: Box<DepartureEntity>
 ) : ViewModel() {
@@ -27,7 +27,7 @@ class DeparturesBookmarksViewModel(
         loadDepartureBookmarks()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun addDepartureBookmark(departure: Departure) {
         viewModelScope.launch {
             val bookmark = departuresBox.query()
@@ -43,7 +43,7 @@ class DeparturesBookmarksViewModel(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun removeDepartureBookmark(departureId: Long) {
         viewModelScope.launch {
             val bookmark = departuresBox.query()
@@ -59,7 +59,7 @@ class DeparturesBookmarksViewModel(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun loadDepartureBookmarks() {
         val bookmarks = departuresBox.query()
             .equal(DepartureEntity_.isBookmarked, true)

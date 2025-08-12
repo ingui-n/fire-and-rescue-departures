@@ -33,7 +33,7 @@ import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksView
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import org.koin.androidx.compose.koinViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DepartureDetailTopBar(

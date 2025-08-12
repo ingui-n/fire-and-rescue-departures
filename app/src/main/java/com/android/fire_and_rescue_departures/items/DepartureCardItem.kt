@@ -32,19 +32,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
-import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
-import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
 import com.android.fire_and_rescue_departures.helpers.longToIsoString
 import com.android.fire_and_rescue_departures.screens.getTypeIcon
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DepartureCardItem(

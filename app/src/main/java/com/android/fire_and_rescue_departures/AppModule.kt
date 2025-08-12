@@ -31,7 +31,7 @@ import javax.net.ssl.X509TrustManager
 val repositoryModule = module {
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 val viewModelModule = module {
     viewModel {
         DeparturesListViewModel(

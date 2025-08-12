@@ -69,7 +69,6 @@ import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.buildDateTimeFromPickers
 import com.android.fire_and_rescue_departures.helpers.buildDateTimeStringFromPickers
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
-import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -78,7 +77,7 @@ import java.time.ZoneOffset
 import java.util.Locale
 
 @SuppressLint("DefaultLocale")
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -122,15 +121,15 @@ fun DepartureListTopBar(
         mutableStateOf(
             DatePickerState(
                 locale = Locale("cs", "CZ"),
-                initialSelectedDateMillis = fromDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
+                initialSelectedDateMillis = fromDateTime.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
             )
         )
     }
     var fromTimePickerState by remember {
         mutableStateOf(
             TimePickerState(
-                initialHour = fromDateTime?.hour ?: 0,
-                initialMinute = fromDateTime?.minute ?: 0,
+                initialHour = fromDateTime.hour,
+                initialMinute = fromDateTime.minute,
                 is24Hour = true
             )
         )
@@ -139,15 +138,15 @@ fun DepartureListTopBar(
         mutableStateOf(
             DatePickerState(
                 locale = Locale("cs", "CZ"),
-                initialSelectedDateMillis = toDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
+                initialSelectedDateMillis = toDateTime.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
             )
         )
     }
     var toTimePickerState by remember {
         mutableStateOf(
             TimePickerState(
-                initialHour = toDateTime?.hour ?: 23,
-                initialMinute = toDateTime?.minute ?: 59,
+                initialHour = toDateTime.hour,
+                initialMinute = toDateTime.minute,
                 is24Hour = true
             )
         )
@@ -172,6 +171,7 @@ fun DepartureListTopBar(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun resetFromDatePickerState(millis: Long? = defaultFromDateMillis) {
         fromDatePickerState = DatePickerState(
             locale = Locale("cs", "CZ"),
@@ -186,6 +186,7 @@ fun DepartureListTopBar(
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun resetToDatePickerState(millis: Long? = defaultToDateMillis) {
         toDatePickerState = DatePickerState(
             locale = Locale("cs", "CZ"),

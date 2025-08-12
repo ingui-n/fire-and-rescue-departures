@@ -26,13 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.UIText
-import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.items.DepartureCardItem
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import org.koin.androidx.compose.koinViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeparturesBookmarksScreen(

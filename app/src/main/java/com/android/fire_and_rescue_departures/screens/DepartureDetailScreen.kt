@@ -73,7 +73,7 @@ import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 fun DepartureDetailScreen(
     regionId: Int,

@@ -61,7 +61,7 @@ fun buildDepartureSmallAddress(departure: Departure): String {
     return listOfText.joinToString(" • ")
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun buildDepartureShareText(departure: Departure): String {
     val isOpened = DepartureStatus.getOpened().contains(departure.state)
     val departureType = DepartureTypes.fromId(departure.type)
