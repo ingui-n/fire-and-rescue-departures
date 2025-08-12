@@ -227,7 +227,6 @@ class DeparturesListViewModel(
         id: Long,
         fromDateTime: String,
         toDateTime: String? = fromDateTime,
-        yearsIteration: Long = 0,
     ) {
         if (departure.value is ApiResult.Success &&
             (departure.value as ApiResult.Success).data.id == id
@@ -261,24 +260,14 @@ class DeparturesListViewModel(
                 )
                 if (response.isSuccessful) {
                     val data = response.body()
+
                     if (data != null) {
                         val departure = data.find { it.id == id }
 
                         if (departure != null) {
                             departure.regionId = regionId
                             _departure.value = ApiResult.Success(departure)
-                            Log.d("DeparturesListViewModel", "getDeparture: ${response.body()}")
-                        } else {
-                            //todo change to get /technika and by sent date time use range
-                            getDeparture(
-                                regionId,
-                                id,
-                                LocalDateTime.now().minusYears(yearsIteration + 1)
-                                    .format(DateTimeFormatter.ISO_DATE_TIME),
-                                LocalDateTime.now().minusYears(yearsIteration)
-                                    .format(DateTimeFormatter.ISO_DATE_TIME),
-                                yearsIteration + 1
-                            )
+                            return@launch
                         }
                     } else {
                         _departure.value = ApiResult.Error("Data is null")
@@ -297,6 +286,8 @@ class DeparturesListViewModel(
                     ApiResult.Error("Exception fetching departure: ${e.message}")
                 Log.e("DeparturesListViewModel", "Exception fetching departure: ${e.message}")
             }
+
+            _departure.value = ApiResult.Error("Departure not found")
         }
     }
 

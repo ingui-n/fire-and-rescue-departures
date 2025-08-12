@@ -62,7 +62,7 @@ fun DepartureCardItem(
         navController.navigate(
             Routes.departureDetail(
                 departure.regionId,
-                departure.id,
+                departure.departureId,
                 longToIsoString(departure.reportedDateTime)
             )
         )

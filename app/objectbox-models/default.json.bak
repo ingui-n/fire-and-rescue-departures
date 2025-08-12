@@ -34,7 +34,7 @@
     },
     {
       "id": "3:6961053321686358566",
-      "lastPropertyId": "21:8711250817297493793",
+      "lastPropertyId": "22:2194794647872145803",
       "name": "DepartureEntity",
       "properties": [
         {
@@ -132,35 +132,11 @@
           "id": "21:8711250817297493793",
           "name": "departureId",
           "type": 6
-        }
-      ],
-      "relations": []
-    },
-    {
-      "id": "4:1029079852640940991",
-      "lastPropertyId": "4:527877368220924875",
-      "name": "DateTimeIntervalEntity",
-      "properties": [
-        {
-          "id": "1:6078246717201605433",
-          "name": "id",
-          "type": 6,
-          "flags": 1
         },
         {
-          "id": "2:3911993139259960881",
-          "name": "from",
-          "type": 9
-        },
-        {
-          "id": "3:6241119566754292584",
-          "name": "to",
-          "type": 9
-        },
-        {
-          "id": "4:527877368220924875",
-          "name": "region",
-          "type": 5
+          "id": "22:2194794647872145803",
+          "name": "isBookmarked",
+          "type": 1
         }
       ],
       "relations": []
@@ -173,7 +149,8 @@
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [
-    6898237962659339180
+    6898237962659339180,
+    1029079852640940991
   ],
   "retiredIndexUids": [],
   "retiredPropertyUids": [
@@ -181,7 +158,11 @@
     5479809288460529076,
     5886383157932750453,
     5315952095596673416,
-    4734036023545638615
+    4734036023545638615,
+    6078246717201605433,
+    3911993139259960881,
+    6241119566754292584,
+    527877368220924875
   ],
   "retiredRelationUids": [],
   "version": 1

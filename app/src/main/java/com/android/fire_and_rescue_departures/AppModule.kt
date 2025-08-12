@@ -8,10 +8,8 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
-import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
-import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
@@ -31,7 +29,6 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 val repositoryModule = module {
-    single { DepartureBookmarksRepository(get(named("bookmarkBox"))) }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -43,7 +40,11 @@ val viewModelModule = module {
             androidContext()
         )
     }
-    viewModel { DeparturesBookmarksViewModel(get(), get()) }
+    viewModel {
+        DeparturesBookmarksViewModel(
+            get(named("departuresBox"))
+        )
+    }
     viewModel { DeparturesMapViewModel() }
 }
 
@@ -59,9 +60,6 @@ val imageModule = module {
 
 val objectBoxModule = module {
     single { MyObjectBox.builder().androidContext(androidContext()).build() }
-    single(named("bookmarkBox")) {
-        get<BoxStore>().boxFor(DepartureBookmarkEntity::class.java)
-    }
     single(named("departuresBox")) {
         get<BoxStore>().boxFor(DepartureEntity::class.java)
     }

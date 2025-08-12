@@ -70,7 +70,7 @@ fun DepartureDetailTopBar(
 
             isInBookmarks =
                 if (departureBookmarks is ApiResult.Success) {
-                    (departureBookmarks as ApiResult.Success).data.any { it.id == localDeparture.id }
+                    (departureBookmarks as ApiResult.Success).data.any { it.isBookmarked }
                 } else {
                     false
                 }

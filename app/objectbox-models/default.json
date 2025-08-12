@@ -4,37 +4,8 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "2:4959759699261513224",
-      "lastPropertyId": "4:8264466825751590236",
-      "name": "DepartureBookmarkEntity",
-      "properties": [
-        {
-          "id": "1:6825516139452428772",
-          "name": "id",
-          "type": 6,
-          "flags": 1
-        },
-        {
-          "id": "2:9019840028540068877",
-          "name": "departureId",
-          "type": 9
-        },
-        {
-          "id": "3:4753625929170073758",
-          "name": "dateTime",
-          "type": 9
-        },
-        {
-          "id": "4:8264466825751590236",
-          "name": "regionId",
-          "type": 5
-        }
-      ],
-      "relations": []
-    },
-    {
       "id": "3:6961053321686358566",
-      "lastPropertyId": "21:8711250817297493793",
+      "lastPropertyId": "22:2194794647872145803",
       "name": "DepartureEntity",
       "properties": [
         {
@@ -132,6 +103,11 @@
           "id": "21:8711250817297493793",
           "name": "departureId",
           "type": 6
+        },
+        {
+          "id": "22:2194794647872145803",
+          "name": "isBookmarked",
+          "type": 1
         }
       ],
       "relations": []
@@ -145,7 +121,8 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [
     6898237962659339180,
-    1029079852640940991
+    1029079852640940991,
+    4959759699261513224
   ],
   "retiredIndexUids": [],
   "retiredPropertyUids": [
@@ -157,7 +134,11 @@
     6078246717201605433,
     3911993139259960881,
     6241119566754292584,
-    527877368220924875
+    527877368220924875,
+    6825516139452428772,
+    9019840028540068877,
+    4753625929170073758,
+    8264466825751590236
   ],
   "retiredRelationUids": [],
   "version": 1

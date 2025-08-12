@@ -25,7 +25,8 @@ data class DepartureEntity(
     var coordinateX: Double?,
     var coordinateY: Double?,
     val preplanned: Boolean,
-    var road: String?
+    var road: String?,
+    var isBookmarked: Boolean = false,
 ) {
     fun contentChecksum(): String {
         val toHash = listOf(
