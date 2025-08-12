@@ -2,13 +2,13 @@ package com.android.fire_and_rescue_departures.viewmodels
 
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.ViewModel
-import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.osmdroid.util.GeoPoint
 
-data class MarkerData(val id: String, val position: GeoPoint, val icon: Drawable, val departure: Departure)
+data class MarkerData(val id: String, val position: GeoPoint, val icon: Drawable, val departure: DepartureEntity)
 
 class DeparturesMapViewModel: ViewModel() {
     private val _markers = MutableStateFlow<List<MarkerData>>(listOf())

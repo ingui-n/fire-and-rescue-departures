@@ -2,7 +2,6 @@ package com.android.fire_and_rescue_departures.items
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,10 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ChipElevation
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +26,6 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,11 +33,14 @@ import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.formatDescription
+import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
 import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
+import com.android.fire_and_rescue_departures.helpers.longToIsoString
 import com.android.fire_and_rescue_departures.screens.getTypeIcon
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
@@ -49,24 +48,22 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DepartureCardItem(
-    departure: Departure,
+    departure: DepartureEntity,
     navController: NavController,
 ) {
     val context = LocalContext.current
 
     val subtype = DepartureSubtypes.fromId(departure.subType)
-    val startDateTime = getFormattedDepartureStartDateTime(departure)
+    val startDateTime = getFormattedDateTime(departure.reportedDateTime)
     val isOpened = DepartureStatus.getOpened().contains(departure.state)
     val type = DepartureTypes.fromId(departure.type)
 
     fun handleOpenDetail() {
-        if (departure.regionId == null) return
-
         navController.navigate(
             Routes.departureDetail(
-                departure.regionId!!,
+                departure.regionId,
                 departure.id,
-                (departure.reportedDateTime ?: departure.startDateTime).toString()
+                longToIsoString(departure.reportedDateTime)
             )
         )
     }
@@ -148,7 +145,7 @@ fun DepartureCardItem(
 
             if (departure.description != null) {
                 Text(
-                    text = formatDescription(departure.description),
+                    text = formatDescription(departure.description!!),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -163,11 +160,11 @@ fun DepartureCardItem(
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (departure.region.name != null)
+                if (departure.regionName != null)
                     SuggestionChip(
                         label = {
                             Text(
-                                text = departure.region.name,
+                                text = departure.regionName,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
@@ -197,7 +194,7 @@ fun DepartureCardItem(
                     SuggestionChip(
                         label = {
                             Text(
-                                text = departure.street,
+                                text = departure.street!!,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
@@ -212,7 +209,7 @@ fun DepartureCardItem(
                     SuggestionChip(
                         label = {
                             Text(
-                                text = departure.road,
+                                text = departure.road!!,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },

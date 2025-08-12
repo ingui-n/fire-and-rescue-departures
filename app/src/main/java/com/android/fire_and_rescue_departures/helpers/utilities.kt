@@ -62,6 +62,11 @@ fun getFormattedDepartureStartDateTime(departure: Departure): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
+fun getDepartureStartDateTime(departure: Departure): String {
+    return (departure.reportedDateTime ?: departure.startDateTime).toString()
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 fun getDepartureStartDateTime(departure: Departure?): LocalDateTime? {
     if (departure == null)
         return null
@@ -130,6 +135,12 @@ fun getFormattedDateTime(dateTime: Long, pattern: String = "d. MMMM HH:mm"): Str
     return localDateTime.format(formatter)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+fun longToIsoString(timestamp: Long): String {
+    val instant = Instant.ofEpochMilli(timestamp)
+    return DateTimeFormatter.ISO_INSTANT.format(instant)
+}
+
 fun findFirstClosedDeparture(departures: List<Departure>): Departure? {
     if (departures.size >= 2) {//todo right direction
         if (departures[0].state in DepartureStatus.getClosed())
@@ -149,4 +160,18 @@ fun findLastClosedDeparture(departures: List<Departure>): Departure? {
     }
 
     return departures[departures.size - 1]
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun getDateTimeLongFromString(dateTime: String): Long {
+    val trimmedDateTime = dateTime.trim()
+    return try {
+        Instant.parse(trimmedDateTime).toEpochMilli()
+    } catch (_: DateTimeParseException) {
+        try {
+            OffsetDateTime.parse(trimmedDateTime).toInstant().toEpochMilli()
+        } catch (_: DateTimeParseException) {
+            LocalDateTime.parse(trimmedDateTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        }
+    }
 }

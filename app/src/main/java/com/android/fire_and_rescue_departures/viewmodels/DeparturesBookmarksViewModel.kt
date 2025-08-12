@@ -8,7 +8,7 @@ import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.consts.getRegionById
 import com.android.fire_and_rescue_departures.data.Departure
-import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.helpers.getDateTimeFromString
 import com.android.fire_and_rescue_departures.repository.DepartureBookmarksRepository
@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.collections.reverse
 
 @RequiresApi(Build.VERSION_CODES.O)
 class DeparturesBookmarksViewModel(
@@ -26,8 +25,8 @@ class DeparturesBookmarksViewModel(
     private val departuresApi: DeparturesApi
 ) : ViewModel() {
     private val _departureBookmarks =
-        MutableStateFlow<ApiResult<List<Departure>>>(ApiResult.Loading)
-    val departureBookmarks: StateFlow<ApiResult<List<Departure>>> =
+        MutableStateFlow<ApiResult<List<DepartureEntity>>>(ApiResult.Loading)
+    val departureBookmarks: StateFlow<ApiResult<List<DepartureEntity>>> =
         _departureBookmarks.asStateFlow()
 
     init {
@@ -53,13 +52,14 @@ class DeparturesBookmarksViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     fun loadDepartureBookmarks() {
         viewModelScope.launch {
-            try {
+            //todo add flag is bookmarked to DepartureEntity
+            /*try {
                 val departureBookmarks: List<DepartureBookmarkEntity> =
                     departureBookmarksRepository.getAllDepartureBookmarks()
                 if (departureBookmarks.isEmpty()) {
                     _departureBookmarks.value = ApiResult.Success(emptyList())
                 } else {
-                    val departures = mutableListOf<Departure>()
+                    val departures = mutableListOf<DepartureEntity>()
 
                     for (departureBookmark in departureBookmarks) {
                         val departure =
@@ -81,7 +81,7 @@ class DeparturesBookmarksViewModel(
             } catch (e: Exception) {
                 _departureBookmarks.value =
                     ApiResult.Error("Exception fetching departure bookmarks: ${e.message}")
-            }
+            }*/
         }
     }
 

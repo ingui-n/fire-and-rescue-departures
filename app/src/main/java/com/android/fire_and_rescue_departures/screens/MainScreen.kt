@@ -103,7 +103,6 @@ fun MainScreen(navController: NavHostController) {
             }
             composable(Routes.DeparturesBookmarks.route) { DeparturesBookmarksScreen(navController) }
             composable(Routes.DepartureDetail.route) { navBackStackEntry ->
-                //todo offline mode
                 val regionId = navBackStackEntry.arguments?.getString("regionId")?.toIntOrNull()
                 val id = navBackStackEntry.arguments?.getString("departureId")?.toLongOrNull()
                 val date = navBackStackEntry.arguments?.getString("departureDateTime")

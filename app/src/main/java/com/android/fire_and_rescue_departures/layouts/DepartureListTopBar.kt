@@ -63,13 +63,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextRange
-import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.regions
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.buildDateTimeFromPickers
 import com.android.fire_and_rescue_departures.helpers.buildDateTimeStringFromPickers
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -108,8 +108,7 @@ fun DepartureListTopBar(
     val address by viewModel.filterAddress.collectAsState()
     val addressState = rememberTextFieldState(address, TextRange(0, 50))
 
-    val departuresList by viewModel.departuresList.collectAsState()
-    val showSmallProgress = remember { mutableStateOf(false) }
+    val showSmallProgress by viewModel.isLoading.collectAsState()
 
     val minYear = 2005
     val minDateMillis = Instant.parse("$minYear-01-01T00:00:00Z").toEpochMilli()
@@ -152,20 +151,6 @@ fun DepartureListTopBar(
                 is24Hour = true
             )
         )
-    }
-
-    when (departuresList) {
-        is ApiResult.Loading -> {
-            showSmallProgress.value = true
-        }
-
-        is ApiResult.Success -> {
-            showSmallProgress.value = false
-        }
-
-        is ApiResult.Error -> {
-            showSmallProgress.value = false
-        }
     }
 
     val fromSelectableDates = object : SelectableDates {
@@ -270,7 +255,7 @@ fun DepartureListTopBar(
             )
         },
         actions = {
-            if (showSmallProgress.value) {
+            if (showSmallProgress) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.secondary,

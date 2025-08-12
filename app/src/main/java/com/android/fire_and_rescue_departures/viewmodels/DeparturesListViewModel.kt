@@ -20,43 +20,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import androidx.core.content.edit
-import com.android.fire_and_rescue_departures.data.DateTimeInterval
-import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity
-import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity_
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureEntity_
 import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
-import com.android.fire_and_rescue_departures.helpers.findFirstClosedDeparture
-import com.android.fire_and_rescue_departures.helpers.findLastClosedDeparture
+import com.android.fire_and_rescue_departures.helpers.getDateTimeLongFromString
 import com.android.fire_and_rescue_departures.helpers.getDepartureStartDateTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.objectbox.Box
-import io.objectbox.kotlin.equal
-import io.objectbox.kotlin.query
+import io.objectbox.kotlin.greaterOrEqual
+import io.objectbox.kotlin.lessOrEqual
+import io.objectbox.query.QueryBuilder
+import kotlin.run
 
 @RequiresApi(Build.VERSION_CODES.O)
 class DeparturesListViewModel(
     private val departuresApi: DeparturesApi,
     private val departuresBox: Box<DepartureEntity>,
-    private val departureIntervalsBox: Box<DateTimeIntervalEntity>,
     context: Context
 ) : ViewModel() {
-    private val _departuresList = MutableStateFlow<ApiResult<List<Departure>>>(ApiResult.Loading)
-    val departuresList: StateFlow<ApiResult<List<Departure>>> = _departuresList.asStateFlow()
-
-    private val _departure = MutableStateFlow<ApiResult<Departure>>(ApiResult.Loading)
-    val departure: StateFlow<ApiResult<Departure>> = _departure.asStateFlow()
-
-    private val _departureUnits =
-        MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
-    val departureUnits: StateFlow<ApiResult<List<DepartureUnit>>> = _departureUnits.asStateFlow()
+    val isLoading = MutableStateFlow(false)
 
     private val filters = context.getSharedPreferences("filters", Context.MODE_PRIVATE)
     private val gson = Gson()
@@ -73,19 +61,23 @@ class DeparturesListViewModel(
 
     val statusClosed: StateFlow<Boolean> = _statusClosed.asStateFlow()
 
-    private val _filterFromDateTime = MutableStateFlow<LocalDateTime?>(
+    private val _filterFromDateTime = MutableStateFlow<LocalDateTime>(
         filters.getString("filterFromDateTime", null).let {
-            LocalDateTime.parse(it)
+            if (it != null) {
+                LocalDateTime.parse(it)
+            } else LocalDateTime.now().with(LocalTime.MIDNIGHT)
         }
     )
-    val filterFromDateTime: StateFlow<LocalDateTime?> = _filterFromDateTime.asStateFlow()
+    val filterFromDateTime: StateFlow<LocalDateTime> = _filterFromDateTime.asStateFlow()
 
-    private val _filterToDateTime = MutableStateFlow<LocalDateTime?>(
+    private val _filterToDateTime = MutableStateFlow<LocalDateTime>(
         filters.getString("filterToDateTime", null).let {
-            LocalDateTime.parse(it)
+            if (it != null) {
+                LocalDateTime.parse(it)
+            } else LocalDateTime.now().plusDays(1).with(LocalTime.MIDNIGHT)
         }
     )
-    val filterToDateTime: StateFlow<LocalDateTime?> = _filterToDateTime.asStateFlow()
+    val filterToDateTime: StateFlow<LocalDateTime> = _filterToDateTime.asStateFlow()
 
     private val _filterAddress = MutableStateFlow(
         filters.getString("filterAddress", "") as String
@@ -96,7 +88,7 @@ class DeparturesListViewModel(
         gson.fromJson(
             filters.getString("filterRegions", null),
             object : TypeToken<List<Int>>() {}.type
-        )
+        ) ?: listOf()
     )
     val filterRegions: StateFlow<List<Int>> = _filterRegions.asStateFlow()
 
@@ -107,6 +99,19 @@ class DeparturesListViewModel(
 
     private val _filterStatuses = MutableStateFlow<List<Int>?>(null)
     val filterStatuses: StateFlow<List<Int>?> = _filterStatuses.asStateFlow()
+
+    private val _departuresList = MutableStateFlow<ApiResult<List<DepartureEntity>>>(
+        ApiResult.Success(selectDeparturesWithFilters())
+    )
+    val departuresList: StateFlow<ApiResult<List<DepartureEntity>>> = _departuresList.asStateFlow()
+
+    private val _departure = MutableStateFlow<ApiResult<Departure>>(ApiResult.Loading)
+    val departure: StateFlow<ApiResult<Departure>> = _departure.asStateFlow()
+
+    private val _departureUnits =
+        MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
+    val departureUnits: StateFlow<ApiResult<List<DepartureUnit>>> = _departureUnits.asStateFlow()
+
 
     init {
         val filterStatusesJson = filters.getString("filterStatuses", null)
@@ -189,88 +194,33 @@ class DeparturesListViewModel(
         }
     }
 
-    //todo if data.size == 6000 update date range and call again
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateDeparturesList() {
         viewModelScope.launch(Dispatchers.IO) {
-            _departuresList.value = ApiResult.Loading
+            isLoading.value = true
 
-            val mergedResults = mutableListOf<Departure>()
-            var hadError = false
-            var errorMessage: String? = null
+            if (filterRegions.value.isEmpty()) {
+                _departuresList.value = ApiResult.Error("No regions selected")
+                isLoading.value = false
+                return@launch
+            }
 
             filterRegions.value.forEach { regionId ->
-                val region = getRegionById(regionId)
-                if (region == null) return@forEach
-
-                try {
-                    val response = departuresApi.getDepartures(
-                        region.url + "/api/",
-                        filterFromDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
-                        filterToDateTime.value?.format(DateTimeFormatter.ISO_DATE_TIME),
-                        filterStatuses.value,
-                        filterType.value,
-                        filterAddress.value,
-                    )
-
-                    if (response.isSuccessful) {
-                        val data = response.body()
-                        if (data != null) {
-                            data.forEach { departure -> departure.regionId = regionId }
-
-                            data.forEach { departure -> storeDeparture(departure, regionId) }
-                            addAndMergeInterval(
-                                regionId,
-                                getDepartureStartDateTime(findLastClosedDeparture(data)),
-                                getDepartureStartDateTime(findFirstClosedDeparture(data))
-                            )
-
-                            mergedResults.addAll(data)
-                            Log.d(
-                                "DeparturesListViewModel",
-                                "Fetched departures for region $regionId: $data"
-                            )
-                        } else {
-                            hadError = true
-                            errorMessage = "Data is null for region $regionId"
-                            Log.e("DeparturesListViewModel", errorMessage)
-                        }
-                    } else {
-                        hadError = true
-                        errorMessage =
-                            "Error fetching departures for region $regionId: ${response.message()}"
-                        Log.e("DeparturesListViewModel", errorMessage)
-                    }
-                } catch (e: Exception) {
-                    hadError = true
-                    errorMessage =
-                        "Exception fetching departures for region $regionId: ${e.message}"
-                    Log.e("DeparturesListViewModel", errorMessage)
-                }
+                getDepartures(
+                    regionId,
+                    filterFromDateTime.value.format(DateTimeFormatter.ISO_DATE_TIME),
+                    filterToDateTime.value.format(DateTimeFormatter.ISO_DATE_TIME),
+                    filterStatuses.value,
+                    filterType.value,
+                    filterAddress.value
+                )
             }
 
-            withContext(Dispatchers.Main) {
-                if (hadError) {
-                    _departuresList.value = ApiResult.Error(errorMessage ?: "Unknown error")
-                } else {
-                    mergedResults.sortWith(
-                        compareByDescending { departure ->
-                            getDateTimeFromString(
-                                departure.reportedDateTime ?: departure.startDateTime ?: ""
-                            )
-                        }
-                    )
-                    _departuresList.value = ApiResult.Success(mergedResults)
-                }
-            }
+            _departuresList.value = ApiResult.Success(selectDeparturesWithFilters())
+            isLoading.value = false
         }
     }
 
-    //todo po fetchi uložit do db časový rozsah stažených ukončených výjezdů
-    //todo uložit výjezdy do db
-
-    //todo před stahováním: podle db upravit čas stahování
-    //todo pokud se stáhne 6000 výjezdů: upravit čas OD na čas prvního výjezdu
     @RequiresApi(Build.VERSION_CODES.O)
     fun getDeparture(
         regionId: Int,
@@ -350,6 +300,52 @@ class DeparturesListViewModel(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun getDepartures(
+        regionId: Int,
+        fromDateTime: String?,
+        toDateTime: String? = fromDateTime,
+        statuses: List<Int>? = DepartureStatus.getAllIds(),
+        type: Int? = null,
+        address: String? = null
+    ) {
+        try {
+            val region = getRegionById(regionId)
+
+            if (region == null)
+                return
+
+            val response = departuresApi.getDepartures(
+                region.url + "/api/",
+                fromDateTime,
+                toDateTime,
+                statuses,
+                type,
+                address
+            )
+            if (response.isSuccessful) {
+                val departures = response.body()
+
+                if (departures != null) {
+                    if (departures.size >= 2000) {
+                        getDepartures(
+                            regionId,
+                            fromDateTime,
+                            getDepartureStartDateTime(departures[departures.size - 1])
+                        )
+                    }
+                }
+            } else {
+                Log.e(
+                    "DeparturesListViewModel",
+                    "Error fetching departure: ${response.message()}"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("DeparturesListViewModel", "Exception fetching departure: ${e.message}")
+        }
+    }
+
     fun getDepartureUnits(regionId: Int, id: Long) {
         viewModelScope.launch {
             _departureUnits.value = ApiResult.Loading
@@ -409,7 +405,7 @@ class DeparturesListViewModel(
     fun storeDeparture(departure: Departure, regionId: Int) {
         val existingEntity = departuresBox.query()
             .equal(
-                DepartureEntity_.id,
+                DepartureEntity_.departureId,
                 departure.id
             )
             .build()
@@ -450,8 +446,10 @@ class DeparturesListViewModel(
 
             val newDepartureEntity = DepartureEntity(
                 departureId = departure.id,
-                reportedDateTime = departure.reportedDateTime,
-                startDateTime = departure.startDateTime,
+                reportedDateTime = getDateTimeLongFromString(
+                    departure.reportedDateTime ?: departure.startDateTime ?: ""
+                ),
+//                startDateTime = departure.startDateTime,
                 state = departure.state,
                 type = departure.type,
                 subType = departure.subType,
@@ -474,63 +472,72 @@ class DeparturesListViewModel(
         }
     }
 
-    fun addAndMergeInterval(
-        region: Int,
-        newFrom: LocalDateTime?,
-        newTo: LocalDateTime?
-    ) {
-        println(newFrom)
-        println(newTo)
-        if (newFrom == null || newTo == null)
-            return
-        if (newFrom == newTo)
-            return
-
-        val oldIntervals = departureIntervalsBox.all.map {
-            DateTimeInterval(region, LocalDateTime.parse(it.from), LocalDateTime.parse(it.to))
-        }.toMutableList()
-
-        insertInterval(oldIntervals, DateTimeInterval(region, newFrom, newTo))
-
-        departureIntervalsBox.query() {//todo
-            equal(DateTimeIntervalEntity_.region, region)
-        }.remove()
-        departureIntervalsBox.put(oldIntervals.map {
-            DateTimeIntervalEntity(
-                region = it.region,
-                from = it.from.toString(),
-                to = it.to.toString()
+    fun selectDeparturesWithFilters(): List<DepartureEntity> {
+        return departuresBox.query().run {
+            between(
+                DepartureEntity_.reportedDateTime,
+                getDateTimeLongFromString(filterFromDateTime.value.toString()),
+                getDateTimeLongFromString(filterToDateTime.value.toString())
             )
-        })
-    }
-
-    fun insertInterval(
-        intervals: MutableList<DateTimeInterval>,
-        newInterval: DateTimeInterval
-    ) {
-        intervals.add(newInterval)
-        intervals.sortBy { it.from }
-
-        val merged = mutableListOf<DateTimeInterval>()
-        for (interval in intervals) {
-            if (merged.isEmpty()) {
-                merged.add(interval)
-            } else {
-                val last = merged.last()
-
-                if (last.region == interval.region && !last.to.isBefore(interval.from.minusNanos(1))) {
-                    merged[merged.size - 1] = DateTimeInterval(
-                        region = last.region,
-                        from = last.from,
-                        to = maxOf(last.to, interval.to)
-                    )
-                } else {
-                    merged.add(interval)
-                }
+            if (filterAddress.value.isNotBlank()) {
+//                and()
+                or()
+                contains(
+                    DepartureEntity_.districtName,
+                    filterAddress.value,
+                    QueryBuilder.StringOrder.CASE_INSENSITIVE
+                )
+                contains(
+                    DepartureEntity_.municipality,
+                    filterAddress.value,
+                    QueryBuilder.StringOrder.CASE_INSENSITIVE
+                )
+                contains(
+                    DepartureEntity_.municipalityPart,
+                    filterAddress.value,
+                    QueryBuilder.StringOrder.CASE_INSENSITIVE
+                )
+                contains(
+                    DepartureEntity_.municipalityWithExtendedCompetence,
+                    filterAddress.value,
+                    QueryBuilder.StringOrder.CASE_INSENSITIVE
+                )
+                contains(
+                    DepartureEntity_.street,
+                    filterAddress.value,
+                    QueryBuilder.StringOrder.CASE_INSENSITIVE
+                )
+                contains(
+                    DepartureEntity_.road,
+                    filterAddress.value,
+                    QueryBuilder.StringOrder.CASE_INSENSITIVE
+                )
+                or()
             }
-        }
 
-        intervals.clear()
-        intervals.addAll(merged)
+            if (filterRegions.value.isNotEmpty()) {
+//                and()
+                `in`(DepartureEntity_.regionId, filterRegions.value.toIntArray())
+            }
+
+            if (filterType.value != null) {
+//                and()
+                or()
+                greaterOrEqual(DepartureEntity_.type, filterType.value!!)
+                lessOrEqual(DepartureEntity_.type, filterType.value!!)
+                or()
+            }
+
+            if (filterStatuses.value != null && filterStatuses.value!!.isNotEmpty()) {
+//                and()
+                `in`(DepartureEntity_.state, filterStatuses.value!!.toIntArray())
+            }
+
+            order(
+                DepartureEntity_.reportedDateTime,
+                QueryBuilder.DESCENDING
+            )
+            build()
+        }.find()
     }
 }

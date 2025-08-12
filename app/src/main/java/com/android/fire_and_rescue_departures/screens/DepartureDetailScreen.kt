@@ -82,6 +82,7 @@ fun DepartureDetailScreen(
     viewModel: DeparturesListViewModel
 ) {
     val context = LocalContext.current
+    val isLoading by viewModel.isLoading.collectAsState()
     val departureDetailResult by viewModel.departure.collectAsState()
     val departureUnitsResult by viewModel.departureUnits.collectAsState()
 
@@ -126,17 +127,18 @@ fun DepartureDetailScreen(
                 .fillMaxSize(),
         ) {
             item {
-                when (departureDetailResult) {
-                    is ApiResult.Loading -> {
-                        Box(
-                            modifier = Modifier.fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
                     }
+                }
+                when (departureDetailResult) {
+                    is ApiResult.Loading -> {}
 
                     is ApiResult.Success -> {
                         val departure = (departureDetailResult as ApiResult.Success).data

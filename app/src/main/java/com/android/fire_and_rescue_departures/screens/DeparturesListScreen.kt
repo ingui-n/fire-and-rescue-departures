@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -47,7 +48,7 @@ fun DeparturesListScreen(
     val departuresList by viewModel.departuresList.collectAsState()
 
     var refreshing by remember { mutableStateOf(false) }
-    var departures: List<Departure>? by remember { mutableStateOf(null) }
+    var departures: List<DepartureEntity>? by remember { mutableStateOf(null) }
 
     fun refreshData() {
         scope.launch {
@@ -58,8 +59,7 @@ fun DeparturesListScreen(
     }
 
     when (departuresList) {
-        is ApiResult.Loading -> {
-        }
+        is ApiResult.Loading -> {}
 
         is ApiResult.Success -> {
             departures = (departuresList as ApiResult.Success).data

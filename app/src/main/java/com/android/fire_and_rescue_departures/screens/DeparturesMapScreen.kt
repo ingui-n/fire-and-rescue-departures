@@ -42,7 +42,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
-import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -54,11 +53,9 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
-import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
-import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import com.android.fire_and_rescue_departures.viewmodels.MarkerData
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -70,7 +67,9 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import androidx.core.graphics.createBitmap
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.helpers.formatDescription
+import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -92,7 +91,7 @@ fun DeparturesMapScreen(
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-    var departureDetail: Departure? by remember { mutableStateOf(null) }
+    var departureDetail: DepartureEntity? by remember { mutableStateOf(null) }
 
     val mapView = remember {
         MapView(context).apply {
@@ -163,19 +162,17 @@ fun DeparturesMapScreen(
                     departuresMapViewModel.resetMarkers()
 
                     departuresList.map { departure ->
-                        if (departure.gis1 != null && departure.gis2 != null) {
-                            val coordinates =
-                                convertSjtskToWgs(
-                                    departure.gis1.toDouble(),
-                                    departure.gis2.toDouble()
-                                )
-
+                        if (departure.coordinateX != null && departure.coordinateY != null) {
                             val icon = getTypeIcon(context, departure.type, 96)
 
+                            //todo look for marker grouping
                             departuresMapViewModel.addMarker(
                                 MarkerData(
                                     id = departure.id.toString(),
-                                    position = GeoPoint(coordinates.y, coordinates.x),
+                                    position = GeoPoint(
+                                        departure.coordinateY!!,
+                                        departure.coordinateX!!
+                                    ),
                                     icon = icon,
                                     departure = departure,
                                 )
@@ -219,7 +216,7 @@ fun DeparturesMapScreen(
         val departureStatus = DepartureStatus.fromId(departureDetail!!.state)
         val departureType = DepartureTypes.fromId(departureDetail!!.type)
         val departureSubtype = DepartureSubtypes.fromId(departureDetail!!.subType)
-        val departureStartDateTime = getFormattedDepartureStartDateTime(departureDetail!!)
+        val departureStartDateTime = getFormattedDateTime(departureDetail!!.reportedDateTime)
         val isOpened = DepartureStatus.getOpened().contains(departureStatus!!.id)
 
         ModalBottomSheet(
@@ -309,7 +306,7 @@ fun DeparturesMapScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                if (departureDetail!!.region.name != null) {
+                if (departureDetail!!.regionName != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row {
                         Text(
@@ -319,13 +316,13 @@ fun DeparturesMapScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = departureDetail!!.region.name!!,
+                            text = departureDetail!!.regionName!!,
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
-                if (departureDetail!!.district.name != null) {
+                if (departureDetail!!.districtName != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row {
                         Text(
@@ -335,7 +332,7 @@ fun DeparturesMapScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = departureDetail!!.district.name!!,
+                            text = departureDetail!!.districtName!!,
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -429,10 +426,9 @@ fun DeparturesMapScreen(
                             showBottomSheet = false
                             navController.navigate(
                                 Routes.departureDetail(
-                                    departureDetail!!.regionId!!,
+                                    departureDetail!!.regionId,
                                     departureDetail!!.id,
-                                    (departureDetail!!.reportedDateTime
-                                        ?: departureDetail!!.startDateTime).toString()
+                                    (departureDetail!!.reportedDateTime).toString()
                                 )
                             )
                         }

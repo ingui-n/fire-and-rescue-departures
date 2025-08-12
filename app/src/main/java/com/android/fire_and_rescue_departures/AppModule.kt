@@ -8,7 +8,6 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
-import com.android.fire_and_rescue_departures.data.DateTimeIntervalEntity
 import com.android.fire_and_rescue_departures.data.DepartureBookmarkEntity
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
@@ -41,7 +40,6 @@ val viewModelModule = module {
         DeparturesListViewModel(
             get(),
             get(named("departuresBox")),
-            get(named("intervalsBox")),
             androidContext()
         )
     }
@@ -67,10 +65,6 @@ val objectBoxModule = module {
     single(named("departuresBox")) {
         get<BoxStore>().boxFor(DepartureEntity::class.java)
     }
-    single(named("intervalsBox")) {
-        get<BoxStore>().boxFor(DateTimeIntervalEntity::class.java)
-    }
-
 }
 
 fun provideOkHttpClient(): OkHttpClient {
@@ -136,9 +130,14 @@ fun getUnsafeOkHttpClient(): OkHttpClient {
 
         val sslSocketFactory = sslContext.socketFactory
 
+//        val loggingInterceptor = HttpLoggingInterceptor().apply {
+//            level = HttpLoggingInterceptor.Level.BODY
+//        }
+
         return OkHttpClient.Builder()
             .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
             .hostnameVerifier { _, _ -> true }
+//            .addInterceptor(loggingInterceptor)
             .build()
 
     } catch (e: Exception) {

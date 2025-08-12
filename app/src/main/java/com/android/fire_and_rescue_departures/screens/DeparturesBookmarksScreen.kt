@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.items.DepartureCardItem
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -41,15 +42,14 @@ fun DeparturesBookmarksScreen(
     val departureBookmarks by viewModel.departureBookmarks.collectAsState()
     val listState = rememberLazyListState()
 
-    var departures: List<Departure>? by remember { mutableStateOf(null) }
+    var departures: List<DepartureEntity>? by remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadDepartureBookmarks()
     }
 
     when (departureBookmarks) {
-        is ApiResult.Loading -> {
-        }
+        is ApiResult.Loading -> {}
 
         is ApiResult.Success -> {
             departures = (departureBookmarks as ApiResult.Success).data
