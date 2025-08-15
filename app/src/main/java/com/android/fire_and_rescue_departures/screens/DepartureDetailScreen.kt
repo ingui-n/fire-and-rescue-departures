@@ -42,11 +42,8 @@ import com.android.fire_and_rescue_departures.BuildConfig
 import com.android.fire_and_rescue_departures.R
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.data.DepartureStatus
-import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
-import com.android.fire_and_rescue_departures.helpers.getFormattedDepartureStartDateTime
-import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
 import com.android.fire_and_rescue_departures.helpers.decimalToDMS
 import com.android.fire_and_rescue_departures.items.FullScreenAsyncImage
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
@@ -68,6 +65,7 @@ import coil.compose.AsyncImage
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.DepartureUnit
 import com.android.fire_and_rescue_departures.helpers.formatDescription
+import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import kotlinx.coroutines.launch
@@ -144,16 +142,8 @@ fun DepartureDetailScreen(
                         val departure = (departureDetailResult as ApiResult.Success).data
                         val departureStatus = DepartureStatus.fromId(departure.state)
                         val departureType = DepartureTypes.fromId(departure.type)
-                        val departureSubtype = DepartureSubtypes.fromId(departure.subType)
                         val departureStartDateTime =
-                            getFormattedDepartureStartDateTime(departure)
-
-                        val coordinates = if (departure.gis1 != null && departure.gis2 != null) {
-                            convertSjtskToWgs(
-                                departure.gis1.toDouble(),
-                                departure.gis2.toDouble()
-                            )
-                        } else null
+                            getFormattedDateTime(departure.reportedDateTime)
 
                         val departureStatusState =
                             if (DepartureStatus.getOpened().contains(departureStatus!!.id)) {
@@ -162,12 +152,14 @@ fun DepartureDetailScreen(
                                 UIText.DEPARTURE_STATUS_CLOSED.value
                             }
 
-                        val mapUrl = if (coordinates != null) {
-                            "https://api.mapy.cz/v1/static/map?lon=${coordinates.x}&lat=${coordinates.y}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${coordinates.x},${coordinates.y}&apikey=${BuildConfig.MAPS_COM_API}"
-                        } else null
-                        val streetUrl = if (coordinates != null) {
-                            "https://api.mapy.cz/v1/static/pano?width=800&height=600&lon=${coordinates.x}&lat=${coordinates.y}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
-                        } else null
+                        val mapUrl =
+                            if (departure.coordinateX != null && departure.coordinateY != null) {
+                                "https://api.mapy.cz/v1/static/map?lon=${departure.coordinateX}&lat=${departure.coordinateY}&zoom=14&width=800&height=600&scale=2&mapset=outdoor&markers=color:red;size:normal;${departure.coordinateX},${departure.coordinateY}&apikey=${BuildConfig.MAPS_COM_API}"
+                            } else null
+                        val streetUrl =
+                            if (departure.coordinateX != null && departure.coordinateY != null) {
+                                "https://api.mapy.cz/v1/static/pano?width=800&height=600&lon=${departure.coordinateX}&lat=${departure.coordinateY}&yaw=point&fov=1.5&apikey=${BuildConfig.MAPS_COM_API}"
+                            } else null
 
                         val backgroundColor = MaterialTheme.colorScheme.background
 
@@ -231,9 +223,9 @@ fun DepartureDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
-                            if (departureSubtype != null) {
+                            if (departure.subtypeName != null) {
                                 Text(
-                                    text = departureSubtype.name,
+                                    text = departure.subtypeName!!,
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
@@ -260,7 +252,7 @@ fun DepartureDetailScreen(
                             if (departure.description != null) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = formatDescription(departure.description),
+                                    text = formatDescription(departure.description!!),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
@@ -281,6 +273,7 @@ fun DepartureDetailScreen(
                             }
                         }
 
+                        //dispatched units
                         if (departureUnits.isNotEmpty()) {
                             Column(
                                 modifier = Modifier
@@ -395,7 +388,7 @@ fun DepartureDetailScreen(
                         }
 
                         // Address
-                        if (coordinates != null && streetUrl != null) {
+                        if (departure.coordinateX != null && departure.coordinateY != null && streetUrl != null) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -421,17 +414,17 @@ fun DepartureDetailScreen(
                                         val googleMapsUrl =
                                             "https://www.google.com/maps/place/${
                                                 decimalToDMS(
-                                                    coordinates.x
+                                                    departure.coordinateX!!
                                                 )
                                             }+${
                                                 decimalToDMS(
-                                                    coordinates.y,
+                                                    departure.coordinateY!!,
                                                     true
                                                 )
-                                            }/@${coordinates.x},${coordinates.y}"
+                                            }/@${departure.coordinateX},${departure.coordinateY}"
 
                                         val mapyCzUrl =
-                                            "https://mapy.com/turisticka?q=${coordinates.y},${coordinates.x}"
+                                            "https://mapy.com/turisticka?q=${departure.coordinateY},${departure.coordinateX}"
 
                                         IconButton(onClick = {
                                             val intent =
@@ -463,10 +456,10 @@ fun DepartureDetailScreen(
 
                                 // Address Items
                                 val addressComponents = listOfNotNull(
-                                    departure.region.name?.let {
+                                    departure.regionName?.let {
                                         Pair(UIText.ADDRESS_REGION.value, it)
                                     },
-                                    departure.district.name?.let {
+                                    departure.districtName?.let {
                                         Pair(UIText.ADDRESS_DISTRICT.value, it)
                                     },
                                     departure.municipality?.let {
@@ -544,7 +537,7 @@ fun DepartureDetailScreen(
                                 contentScale = ContentScale.Crop,
                             )
 
-                            Spacer(modifier = Modifier.height(91.dp))
+                            Spacer(modifier = Modifier.height(65.dp))
                         }
                     }
 

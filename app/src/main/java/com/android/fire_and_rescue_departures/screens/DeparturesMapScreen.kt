@@ -54,7 +54,6 @@ import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.DepartureStatus
-import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import com.android.fire_and_rescue_departures.viewmodels.MarkerData
@@ -214,7 +213,6 @@ fun DeparturesMapScreen(
     if (showBottomSheet && departureDetail != null) {
         val departureStatus = DepartureStatus.fromId(departureDetail!!.state)
         val departureType = DepartureTypes.fromId(departureDetail!!.type)
-        val departureSubtype = DepartureSubtypes.fromId(departureDetail!!.subType)
         val departureStartDateTime = getFormattedDateTime(departureDetail!!.reportedDateTime)
         val isOpened = DepartureStatus.getOpened().contains(departureStatus!!.id)
 
@@ -244,9 +242,9 @@ fun DeparturesMapScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    if (departureSubtype != null) {
+                    if (departureDetail?.subtypeName != null) {
                         Text(
-                            text = departureSubtype.name,
+                            text = departureDetail!!.subtypeName!!,
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.secondary
                         )

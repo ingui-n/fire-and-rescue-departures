@@ -9,7 +9,9 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
 import com.android.fire_and_rescue_departures.data.DepartureEntity
+import com.android.fire_and_rescue_departures.data.DepartureSubtypeEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
+import com.android.fire_and_rescue_departures.repository.DepartureSubtypesRepository
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
@@ -29,6 +31,12 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 val repositoryModule = module {
+    single {
+        DepartureSubtypesRepository(
+            get(),
+            get(named("departureSubtypesBox"))
+        )
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
@@ -37,6 +45,7 @@ val viewModelModule = module {
         DeparturesListViewModel(
             get(),
             get(named("departuresBox")),
+            get(),
             androidContext()
         )
     }
@@ -62,6 +71,9 @@ val objectBoxModule = module {
     single { MyObjectBox.builder().androidContext(androidContext()).build() }
     single(named("departuresBox")) {
         get<BoxStore>().boxFor(DepartureEntity::class.java)
+    }
+    single(named("departureSubtypesBox")) {
+        get<BoxStore>().boxFor(DepartureSubtypeEntity::class.java)
     }
 }
 

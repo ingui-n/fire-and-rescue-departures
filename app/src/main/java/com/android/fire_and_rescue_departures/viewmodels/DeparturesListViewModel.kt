@@ -30,6 +30,7 @@ import com.android.fire_and_rescue_departures.data.DepartureEntity_
 import com.android.fire_and_rescue_departures.helpers.convertSjtskToWgs
 import com.android.fire_and_rescue_departures.helpers.getDateTimeLongFromString
 import com.android.fire_and_rescue_departures.helpers.getDepartureStartDateTime
+import com.android.fire_and_rescue_departures.repository.DepartureSubtypesRepository
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.objectbox.Box
@@ -42,6 +43,7 @@ import kotlin.run
 class DeparturesListViewModel(
     private val departuresApi: DeparturesApi,
     private val departuresBox: Box<DepartureEntity>,
+    private val departureSubtypesRepository: DepartureSubtypesRepository,
     context: Context
 ) : ViewModel() {
     val isLoading = MutableStateFlow(false)
@@ -108,8 +110,8 @@ class DeparturesListViewModel(
     )
     val departuresList: StateFlow<ApiResult<List<DepartureEntity>>> = _departuresList.asStateFlow()
 
-    private val _departure = MutableStateFlow<ApiResult<Departure>>(ApiResult.Loading)
-    val departure: StateFlow<ApiResult<Departure>> = _departure.asStateFlow()
+    private val _departure = MutableStateFlow<ApiResult<DepartureEntity>>(ApiResult.Loading)
+    val departure: StateFlow<ApiResult<DepartureEntity>> = _departure.asStateFlow()
 
     private val _departureUnits =
         MutableStateFlow<ApiResult<List<DepartureUnit>>>(ApiResult.Loading)
@@ -305,8 +307,16 @@ class DeparturesListViewModel(
                         val departure = data.find { it.id == id }
 
                         if (departure != null) {
-                            departure.regionId = regionId
-                            _departure.value = ApiResult.Success(departure)
+                            storeDeparture(departure, regionId)
+                            val departureEntity = getDepartureFromStore(departure.id)
+
+                            if (departureEntity == null) {
+                                _departure.value = ApiResult.Error("Departure not found in store")
+                                Log.e("DeparturesListViewModel", "Departure not found in store")
+                                return@launch
+                            }
+
+                            _departure.value = ApiResult.Success(departureEntity)
                             return@launch
                         }
                     } else {
@@ -425,6 +435,7 @@ class DeparturesListViewModel(
                 try {
                     withTimeout(5_000L) {
                         departuresApi.test("${region.url}/api/")
+                        departureSubtypesRepository.checkoutSubtypes(region.id)
                         region.available = true
                     }
                 } catch (_: Exception) {
@@ -451,7 +462,7 @@ class DeparturesListViewModel(
             if (checksum1 != checksum2) {
                 existingEntity.state = departure.state
                 existingEntity.type = departure.type
-                existingEntity.subType = departure.subType
+                existingEntity.subtypeId = departure.subtypeId
                 existingEntity.description = departure.description
                 existingEntity.municipalityWithExtendedCompetence =
                     departure.municipalityWithExtendedCompetence
@@ -485,7 +496,11 @@ class DeparturesListViewModel(
 //                startDateTime = departure.startDateTime,
                 state = departure.state,
                 type = departure.type,
-                subType = departure.subType,
+                subtypeId = departure.subtypeId,
+                subtypeName = departureSubtypesRepository.getDepartureSubtype(
+                    departure.subtypeId,
+                    regionId
+                ),
                 description = departure.description,
                 regionId = regionId,
                 regionName = departure.region.name,
@@ -574,5 +589,12 @@ class DeparturesListViewModel(
             )
             build()
         }.find()
+    }
+
+    fun getDepartureFromStore(departureId: Long): DepartureEntity? {
+        return departuresBox.query()
+            .equal(DepartureEntity_.departureId, departureId)
+            .build()
+            .findFirst()
     }
 }

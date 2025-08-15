@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.fire_and_rescue_departures.api.ApiResult
-import com.android.fire_and_rescue_departures.data.Departure
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureEntity_
 import io.objectbox.Box
@@ -28,10 +27,10 @@ class DeparturesBookmarksViewModel(
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    fun addDepartureBookmark(departure: Departure) {
+    fun addDepartureBookmark(departure: DepartureEntity) {
         viewModelScope.launch {
             val bookmark = departuresBox.query()
-                .equal(DepartureEntity_.departureId, departure.id)
+                .equal(DepartureEntity_.departureId, departure.departureId)
                 .build()
                 .findFirst()
 

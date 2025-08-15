@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.consts.UIText
-import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.buildDepartureShareText
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
@@ -49,7 +49,7 @@ fun DepartureDetailTopBar(
     var topBarTitle by remember { mutableStateOf("") }
     var topBarShareText by remember { mutableStateOf("") }
     var isInBookmarks by remember { mutableStateOf(false) }
-    var departure: Departure? by remember { mutableStateOf(null) }
+    var departure: DepartureEntity? by remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = 0f

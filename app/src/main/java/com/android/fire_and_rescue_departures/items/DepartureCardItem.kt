@@ -34,7 +34,6 @@ import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureStatus
-import com.android.fire_and_rescue_departures.data.DepartureSubtypes
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
@@ -51,7 +50,6 @@ fun DepartureCardItem(
 ) {
     val context = LocalContext.current
 
-    val subtype = DepartureSubtypes.fromId(departure.subType)
     val startDateTime = getFormattedDateTime(departure.reportedDateTime)
     val isOpened = DepartureStatus.getOpened().contains(departure.state)
     val type = DepartureTypes.fromId(departure.type)
@@ -99,9 +97,9 @@ fun DepartureCardItem(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    if (subtype != null) {
+                    departure.subtypeName?.let {
                         Text(
-                            text = subtype.name,
+                            text = it,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )

@@ -1,6 +1,7 @@
 package com.android.fire_and_rescue_departures.api
 
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureSubtype
 import com.android.fire_and_rescue_departures.data.DepartureUnit
 import retrofit2.Response
 import retrofit2.http.GET
@@ -8,6 +9,11 @@ import retrofit2.http.Query
 import retrofit2.http.Url
 
 interface DeparturesApi {
+    @GET
+    suspend fun getSubtypes(
+        @Url url: String
+    ): Response<List<DepartureSubtype>>
+
     @GET
     suspend fun getDepartures(
         @Url url: String,

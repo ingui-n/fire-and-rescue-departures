@@ -3,10 +3,10 @@ package com.android.fire_and_rescue_departures.helpers
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.android.fire_and_rescue_departures.data.Departure
+import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.locationtech.proj4j.ProjCoordinate
 
 fun buildDeparturesUrl(
     baseUrl: String,
@@ -22,11 +22,11 @@ fun buildDeparturesUrl(
     return urlBuilder.build().toString()
 }
 
-fun buildMapyComAddressLink(coordinates: ProjCoordinate): String {
-    return "https://mapy.cz/turisticka?q=${coordinates.y},${coordinates.x}"
+fun buildMapyComAddressLink(x: Double, y: Double): String {
+    return "https://mapy.cz/turisticka?q=$y,$x"
 }
 
-fun buildDepartureAddress(departure: Departure): String {
+fun buildDepartureAddress(departure: DepartureEntity): String {
     var text = ""
 
     if (departure.municipality != null) {
@@ -62,12 +62,11 @@ fun buildDepartureSmallAddress(departure: Departure): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-fun buildDepartureShareText(departure: Departure): String {
+fun buildDepartureShareText(departure: DepartureEntity): String {
     val isOpened = DepartureStatus.getOpened().contains(departure.state)
     val departureType = DepartureTypes.fromId(departure.type)
     val departureAddress = buildDepartureAddress(departure)
-    val departureStartDateTime =
-        getFormattedDepartureStartDateTime(departure)
+    val departureStartDateTime = getFormattedDateTime(departure.reportedDateTime)
 
     var text = "Výjezd hasičů "
 
@@ -75,12 +74,8 @@ fun buildDepartureShareText(departure: Departure): String {
         text += "na ${departureType.name} "
     }
 
-    if (departure.gis1 != null && departure.gis2 != null) {
-        val coordinates = convertSjtskToWgs(
-            departure.gis1.toDouble(),
-            departure.gis2.toDouble()
-        )
-        val addressLink = buildMapyComAddressLink(coordinates)
+    if (departure.coordinateX != null && departure.coordinateY != null) {
+        val addressLink = buildMapyComAddressLink(departure.coordinateX!!, departure.coordinateY!!)
 
         text += "na místě: $departureAddress ($addressLink) "
     }
