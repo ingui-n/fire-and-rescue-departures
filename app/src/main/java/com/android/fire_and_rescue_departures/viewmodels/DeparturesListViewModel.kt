@@ -271,7 +271,7 @@ class DeparturesListViewModel(
         toDateTime: String? = fromDateTime,
     ) {
         if (departure.value is ApiResult.Success &&
-            (departure.value as ApiResult.Success).data.id == id
+            (departure.value as ApiResult.Success).data.departureId == id
         ) {
             return
         }
@@ -300,6 +300,7 @@ class DeparturesListViewModel(
                     toDateTime,
                     DepartureStatus.getAllIds()
                 )
+
                 if (response.isSuccessful) {
                     val data = response.body()
 

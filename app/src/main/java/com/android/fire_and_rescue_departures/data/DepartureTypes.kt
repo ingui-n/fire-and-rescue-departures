@@ -20,10 +20,10 @@ sealed class DepartureTypes(val id: Int, val name: String) {
             TechnicalHelp,
             RescueOfPersonsAndAnimals,
             OtherEvent,
-            FormallyCreatedEvent,
-            TechnologicalTest,
             FalseAlarm,
-            EventOnObject
+            FormallyCreatedEvent,
+            EventOnObject,
+            TechnologicalTest
         )
 
         fun fromId(id: Int): DepartureTypes? = all.find { it.id == id }

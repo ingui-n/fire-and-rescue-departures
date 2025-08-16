@@ -69,6 +69,7 @@ import androidx.core.graphics.createBitmap
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
+import com.android.fire_and_rescue_departures.helpers.longToIsoString
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
@@ -166,7 +167,7 @@ fun DeparturesMapScreen(
 
                             departuresMapViewModel.addMarker(
                                 MarkerData(
-                                    id = departure.id.toString(),
+                                    id = departure.departureId.toString(),
                                     position = GeoPoint(
                                         departure.coordinateY!!,
                                         departure.coordinateX!!
@@ -424,8 +425,8 @@ fun DeparturesMapScreen(
                             navController.navigate(
                                 Routes.departureDetail(
                                     departureDetail!!.regionId,
-                                    departureDetail!!.id,
-                                    (departureDetail!!.reportedDateTime).toString()
+                                    departureDetail!!.departureId,
+                                    longToIsoString(departureDetail!!.reportedDateTime)
                                 )
                             )
                         }

@@ -124,7 +124,7 @@ fun DepartureDetailTopBar(
 
             if (departure != null) {
                 if (isInBookmarks) {
-                    IconButton(onClick = { bookmarksViewModel.removeDepartureBookmark(departure!!.id) }) {
+                    IconButton(onClick = { bookmarksViewModel.removeDepartureBookmark(departure!!.departureId) }) {
                         Icon(
                             imageVector = Icons.Filled.Bookmark,
                             contentDescription = UIText.BOOKMARK_REMOVE.value,
