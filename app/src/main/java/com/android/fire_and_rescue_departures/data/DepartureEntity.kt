@@ -28,6 +28,7 @@ data class DepartureEntity(
     val preplanned: Boolean,
     var road: String?,
     var isBookmarked: Boolean = false,
+    var wasReported: Boolean = false,
 ) {
     fun contentChecksum(): String {
         val toHash = listOf(

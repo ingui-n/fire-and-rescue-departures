@@ -17,7 +17,8 @@ class MainApplication : Application() {
                 repositoryModule,
                 viewModelModule,
                 networkModule,
-                imageModule
+                imageModule,
+                helperModule
             )
         }
     }

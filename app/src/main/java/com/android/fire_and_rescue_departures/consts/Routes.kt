@@ -25,13 +25,18 @@ object Routes {
         route = "questionsAndAnswers",
         topBarTitle = UIText.QUESTIONS_AND_ANSWERS_TITLE.value
     )
+    val DeparturesReport = AppRoute(
+        route = "departuresReport",
+        topBarTitle = UIText.DEPARTURES_REPORT_TITLE.value
+    )
 
     val all = listOf(
         DepartureMap,
         DeparturesList,
         DeparturesBookmarks,
         DepartureDetail,
-        QuestionsAndAnswers
+        QuestionsAndAnswers,
+        DeparturesReport
     )
 
     fun departureDetail(regionId: Int, departureId: Long, departureDateTime: String): String {

@@ -3,10 +3,12 @@ package com.android.fire_and_rescue_departures.consts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,5 +45,12 @@ sealed class BottomNavItem(
         Icons.Filled.QuestionMark,
         Icons.Outlined.QuestionMark,
         Routes.QuestionsAndAnswers.route
+    )
+
+    object Report : BottomNavItem(
+        UIText.DEPARTURES_REPORT_TITLE_SHORT.value,
+        Icons.Filled.Notifications,
+        Icons.Outlined.Notifications,
+        Routes.DeparturesReport.route
     )
 }

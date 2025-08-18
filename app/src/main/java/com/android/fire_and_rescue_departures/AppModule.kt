@@ -8,13 +8,20 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.android.fire_and_rescue_departures.api.DeparturesApi
+import com.android.fire_and_rescue_departures.api.OSMApi
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.data.DepartureSubtypeEntity
 import com.android.fire_and_rescue_departures.data.MyObjectBox
+import com.android.fire_and_rescue_departures.data.ReportEntity
+import com.android.fire_and_rescue_departures.helpers.NotificationHelper
+import com.android.fire_and_rescue_departures.helpers.ScheduleAlarmHelper
+import com.android.fire_and_rescue_departures.repository.AlarmReportRepository
+import com.android.fire_and_rescue_departures.repository.DepartureRepository
 import com.android.fire_and_rescue_departures.repository.DepartureSubtypesRepository
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesBookmarksViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesReportViewModel
 import io.objectbox.BoxStore
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -37,6 +44,23 @@ val repositoryModule = module {
             get(named("departureSubtypesBox"))
         )
     }
+    single {
+        AlarmReportRepository(
+            get(named("reportBox")),
+            get(named("departuresBox")),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
+    single {
+        DepartureRepository(
+            get(),
+            get(named("departuresBox")),
+            get()
+        )
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
@@ -45,6 +69,7 @@ val viewModelModule = module {
         DeparturesListViewModel(
             get(),
             get(named("departuresBox")),
+            get(),
             get(),
             androidContext()
         )
@@ -55,12 +80,14 @@ val viewModelModule = module {
         )
     }
     viewModel { DeparturesMapViewModel() }
+    viewModel { DeparturesReportViewModel(get()) }
 }
 
 val networkModule = module {
     single { provideOkHttpClient() }
     single { provideRetrofit() }
     single { provideDeparturesApi(get()) }
+    single { provideOSMApi(get()) }
 }
 
 val imageModule = module {
@@ -75,6 +102,15 @@ val objectBoxModule = module {
     single(named("departureSubtypesBox")) {
         get<BoxStore>().boxFor(DepartureSubtypeEntity::class.java)
     }
+    single(named("reportBox")) {
+        get<BoxStore>().boxFor(ReportEntity::class.java)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+val helperModule = module {
+    single { NotificationHelper(androidContext()) }
+    single { ScheduleAlarmHelper(androidContext()) }
 }
 
 fun provideOkHttpClient(): OkHttpClient {
@@ -167,6 +203,10 @@ fun provideRetrofit(): Retrofit {
 
 fun provideDeparturesApi(retrofit: Retrofit): DeparturesApi {
     return retrofit.create(DeparturesApi::class.java)
+}
+
+fun provideOSMApi(retrofit: Retrofit): OSMApi {
+    return retrofit.create(OSMApi::class.java)
 }
 
 fun provideImageLoader(androidContext: Context): ImageLoader {

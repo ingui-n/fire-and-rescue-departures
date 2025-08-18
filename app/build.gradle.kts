@@ -31,10 +31,14 @@ android {
 
             val localProperties = gradleLocalProperties(rootDir, providers)
             buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+            buildConfigField("String", "OPEN_STREET_MAP_API_URL", localProperties.getProperty("OPEN_STREET_MAP_API_URL"))
+            buildConfigField("String", "REPORT_INTERVAL_MINUTES", localProperties.getProperty("REPORT_INTERVAL_MINUTES"))
         }
         debug {
             val localProperties = gradleLocalProperties(rootDir, providers)
             buildConfigField("String", "MAPS_COM_API", localProperties.getProperty("MAPS_COM_API"))
+            buildConfigField("String", "OPEN_STREET_MAP_API_URL", localProperties.getProperty("OPEN_STREET_MAP_API_URL"))
+            buildConfigField("String", "REPORT_INTERVAL_MINUTES", localProperties.getProperty("REPORT_INTERVAL_MINUTES"))
         }
     }
     compileOptions {
