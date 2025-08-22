@@ -1,8 +1,14 @@
 [versions]
+accompanistDrawablepainter = "0.37.3"
 agp = "8.12.1"
+coilCompose = "2.7.0"
+datastorePreferences = "1.1.7"
+iconsLucideAndroid = "1.1.0"
+imageViewer = "1.1.0-alpha.7"
 kotlin = "2.2.10"
 junit = "4.13.2"
 appcompat = "1.7.1"
+mapcompose = "3.2.0"
 material = "1.12.0"
 constraintlayout = "2.2.1"
 lifecycleLivedataKtx = "2.9.2"
@@ -28,19 +34,34 @@ googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 loggingInterceptor = "5.1.0"
 navigationRuntimeKtx = "2.9.3"
 navigationCompose = "2.9.3"
+objectboxAndroid = "4.3.1"
+objectboxGradlePlugin = "4.3.1"
+objectboxKotlin = "4.3.1"
+objectboxProcessor = "4.3.1"
 okhttp = "5.1.0"
+osmdroidAndroid = "6.1.20"
+proj4j = "1.4.1"
+proj4jEpsg = "1.4.1"
 retrofit = "3.0.0"
+workRuntimeKtx = "2.10.3"
 
 [libraries]
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanistDrawablepainter" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsCore" }
 androidx-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
 androidx-material3-window-size-class1 = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClass" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+icons-lucide-android = { module = "com.composables:icons-lucide-android", version.ref = "iconsLucideAndroid" }
+image-viewer = { module = "com.jvziyaoyao.scale:image-viewer", version.ref = "imageViewer" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+mapcompose = { module = "ovh.plrapps:mapcompose", version.ref = "mapcompose" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
@@ -66,7 +87,14 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndr
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+objectbox-android = { module = "io.objectbox:objectbox-android", version.ref = "objectboxAndroid" }
+objectbox-gradle-plugin = { module = "io.objectbox:objectbox-gradle-plugin", version.ref = "objectboxGradlePlugin" }
+objectbox-processor = { module = "io.objectbox:objectbox-processor", version.ref = "objectboxProcessor" }
+objectbox-kotlin = { module = "io.objectbox:objectbox-kotlin", version.ref = "objectboxKotlin" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
+proj4j = { module = "org.locationtech.proj4j:proj4j", version.ref = "proj4j" }
+proj4j-epsg = { module = "org.locationtech.proj4j:proj4j-epsg", version.ref = "proj4jEpsg" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 
 [plugins]

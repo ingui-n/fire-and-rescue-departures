@@ -15,6 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.android.fire_and_rescue_departures"
         minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -23,7 +24,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -42,11 +43,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
     buildFeatures {
         compose = true
@@ -54,7 +57,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.1"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
 }
 
@@ -104,15 +107,15 @@ dependencies {
     implementation(libs.logging.interceptor)
 
     //objectbox (nosql) pro datovou persistenci (vektorová DB)
-    implementation("io.objectbox:objectbox-android:4.3.1")
+    implementation(libs.objectbox.android)
 
     //datastore (náhrada za shared preferences) pro ukládání dat typu klíč hodnota
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("androidx.work:work-runtime-ktx:2.10.3")
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // MapCompose
-    implementation("ovh.plrapps:mapcompose:3.2.0")
+    implementation(libs.mapcompose)
 
     implementation(libs.material3)
     implementation(libs.androidx.material3.window.size.class1)
@@ -121,13 +124,13 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
 //    implementation(libs.proj4j.epsg)
-    implementation("org.locationtech.proj4j:proj4j:1.4.1")
-    implementation("org.locationtech.proj4j:proj4j-epsg:1.4.1")
-    implementation("io.objectbox:objectbox-kotlin:4.3.1")
-    kapt("io.objectbox:objectbox-processor:4.3.1")
-    implementation("com.composables:icons-lucide-android:1.1.0")
+    implementation(libs.proj4j)
+    implementation(libs.proj4j.epsg)
+    implementation(libs.objectbox.kotlin)
+    kapt(libs.objectbox.processor)
+    implementation(libs.icons.lucide.android)
 
-    implementation("org.osmdroid:osmdroid-android:6.1.20")
-    implementation("com.google.accompanist:accompanist-drawablepainter:0.37.3")
-    implementation("com.jvziyaoyao.scale:image-viewer:1.1.0-alpha.7")
+    implementation(libs.osmdroid.android)
+    implementation(libs.accompanist.drawablepainter)
+    implementation(libs.image.viewer)
 }
