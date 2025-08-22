@@ -43,21 +43,30 @@ class NotificationHelper(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun showNotification(title: String, message: String) {
+    fun showNotification(
+        title: String,
+        message: String,
+        openRoute: String? = null,
+        icon: Int? = null
+    ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            if (openRoute != null) {
+                putExtra("nav_route", openRoute)
+            }
         }
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            System.currentTimeMillis().toInt(),
             intent,
-            /*PendingIntent.FLAG_UPDATE_CURRENT or */ PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val builder =
             NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(icon ?: R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

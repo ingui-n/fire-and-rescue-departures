@@ -3,16 +3,23 @@ package com.android.fire_and_rescue_departures.items
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ChipElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,14 +29,17 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.data.ReportEntity
-import com.android.fire_and_rescue_departures.screens.getTypeIcon
+import com.android.fire_and_rescue_departures.helpers.getIconByType
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesReportViewModel
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
@@ -42,7 +52,9 @@ fun ReportCardItem(
 ) {
     val context = LocalContext.current
 
-    val type = DepartureTypes.fromId(report.typeId)
+    val type = DepartureTypes.getDepartureTypeFromId(report.typeId)
+
+    val openRemoveDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -51,20 +63,26 @@ fun ReportCardItem(
     ) {
         OutlinedCard(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable { }
+                .combinedClickable(
+                    onLongClick = { openRemoveDialog.value = true },
+                    onClick = { viewModel.toggleEnableReport(report.id) },
+                    indication = LocalIndication.current,
+                    interactionSource = remember { MutableInteractionSource() }
+                ),
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
                     alpha = 0.4f
                 )
             ),
-            onClick = { viewModel.toggleEnableReport(report.id) }
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column {
                     if (type != null) {
@@ -74,11 +92,19 @@ fun ReportCardItem(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = if (report.isEnabled) "Enabled" else "Disabled",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 }
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val icon = getTypeIcon(context, report.typeId)
+                    val icon = getIconByType(context, report.typeId, grayed = !report.isEnabled)
 
                     Image(
                         painter = rememberDrawablePainter(icon),
@@ -138,9 +164,29 @@ fun ReportCardItem(
                     )
                 }
             }
+        }
+    }
 
-            //todo add toggle button
-            //todo add remove button with confirmation dialog
+    when {
+        openRemoveDialog.value -> {
+            AlertDialog(
+                title = { Text("Remove report") },
+                text = { Text("Are you sure you want to remove this report?") },
+                onDismissRequest = { openRemoveDialog.value = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.removeReport(report.id)
+                            openRemoveDialog.value = false
+                        }
+                    ) { Text("Remove") }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { openRemoveDialog.value = false }
+                    ) { Text("Cancel") }
+                }
+            )
         }
     }
 }

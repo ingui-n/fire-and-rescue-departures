@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,12 +43,11 @@ import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.capitalizeFirstLetter
-import com.android.fire_and_rescue_departures.helpers.decimalToDMS
 import com.android.fire_and_rescue_departures.items.FullScreenAsyncImage
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import androidx.core.net.toUri
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.drawWithContent
@@ -64,13 +62,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.fire_and_rescue_departures.consts.UIText
 import com.android.fire_and_rescue_departures.data.DepartureUnit
+import com.android.fire_and_rescue_departures.helpers.buildGoogleMapsAddressLink
+import com.android.fire_and_rescue_departures.helpers.buildMapyComAddressLink
 import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
+import com.android.fire_and_rescue_departures.helpers.getIconByType
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 fun DepartureDetailScreen(
@@ -131,7 +132,9 @@ fun DepartureDetailScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(70.dp)
                         )
                     }
                 }
@@ -141,7 +144,7 @@ fun DepartureDetailScreen(
                     is ApiResult.Success -> {
                         val departure = (departureDetailResult as ApiResult.Success).data
                         val departureStatus = DepartureStatus.fromId(departure.state)
-                        val departureType = DepartureTypes.fromId(departure.type)
+                        val departureType = DepartureTypes.getDepartureTypeFromId(departure.type)
                         val departureStartDateTime =
                             getFormattedDateTime(departure.reportedDateTime)
 
@@ -199,7 +202,7 @@ fun DepartureDetailScreen(
                             }
                         }
 
-                        val departureIcon = getTypeIcon(context, departure.type)
+                        val departureIcon = getIconByType(context, departure.type)
 
                         Column(
                             modifier = Modifier
@@ -411,20 +414,8 @@ fun DepartureDetailScreen(
                                         modifier = Modifier.padding(end = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        val googleMapsUrl =
-                                            "https://www.google.com/maps/place/${
-                                                decimalToDMS(
-                                                    departure.coordinateX!!
-                                                )
-                                            }+${
-                                                decimalToDMS(
-                                                    departure.coordinateY!!,
-                                                    true
-                                                )
-                                            }/@${departure.coordinateX},${departure.coordinateY}"
-
-                                        val mapyCzUrl =
-                                            "https://mapy.com/turisticka?q=${departure.coordinateY},${departure.coordinateX}"
+                                        val googleMapsUrl = buildGoogleMapsAddressLink(departure.coordinateX!!, departure.coordinateY!!)
+                                        val mapyCzUrl = buildMapyComAddressLink(departure.coordinateX!!, departure.coordinateY!!)
 
                                         IconButton(onClick = {
                                             val intent =
@@ -537,7 +528,7 @@ fun DepartureDetailScreen(
                                 contentScale = ContentScale.Crop,
                             )
 
-                            Spacer(modifier = Modifier.height(65.dp))
+                            Spacer(modifier = Modifier.height(100.dp))
                         }
                     }
 

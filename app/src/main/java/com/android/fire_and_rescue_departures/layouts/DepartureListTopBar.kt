@@ -1,6 +1,8 @@
 package com.android.fire_and_rescue_departures.layouts
 
 import android.annotation.SuppressLint
+import  androidx.compose.ui.input.InputMode.Companion.Keyboard
+import  androidx.compose.ui.input.InputMode.Companion.Touch
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -46,13 +48,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SelectableDates
@@ -62,6 +63,9 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.text.TextRange
 import com.android.fire_and_rescue_departures.consts.regions
 import com.android.fire_and_rescue_departures.data.DepartureStatus
@@ -80,7 +84,6 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
 )
 @Composable
 fun DepartureListTopBar(
@@ -88,7 +91,7 @@ fun DepartureListTopBar(
     viewModel: DeparturesListViewModel,
     title: String,
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
+    val showBottomSheet by viewModel.isFiltersSheetOpen.collectAsState()
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetScrollState = rememberScrollState()
@@ -109,6 +112,7 @@ fun DepartureListTopBar(
     val addressState = rememberTextFieldState(address, TextRange(0, 50))
 
     val showSmallProgress by viewModel.isLoading.collectAsState()
+    val inputModeManager = LocalInputModeManager.current
 
     val minYear = 2005
     val minDateMillis = Instant.parse("$minYear-01-01T00:00:00Z").toEpochMilli()
@@ -259,9 +263,7 @@ fun DepartureListTopBar(
         actions = {
             if (showSmallProgress) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    strokeWidth = 2.dp
+                    modifier = Modifier.size(30.dp)
                 )
             }
             IconButton(onClick = {
@@ -275,7 +277,7 @@ fun DepartureListTopBar(
                 )
             }
             IconButton(onClick = {
-                showBottomSheet = true
+                viewModel.updateIsFiltersSheetOpen(true)
             }) {
                 Icon(
                     imageVector = Icons.Outlined.FilterAlt,
@@ -304,7 +306,7 @@ fun DepartureListTopBar(
                         viewModel.updateIsFilterChanged(false)
                     }
                 }
-                showBottomSheet = false
+                viewModel.updateIsFiltersSheetOpen(false)
             },
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -678,7 +680,13 @@ fun DepartureListTopBar(
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                             focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        ),
+                        modifier = Modifier
+                            .focusProperties {
+                                canFocus =
+                                    inputModeManager.inputMode == Keyboard || inputModeManager.inputMode == Touch
+                            }
+                            .focusTarget()
                     )
                 }
 

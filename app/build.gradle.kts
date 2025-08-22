@@ -104,15 +104,15 @@ dependencies {
     implementation(libs.logging.interceptor)
 
     //objectbox (nosql) pro datovou persistenci (vektorová DB)
-    implementation("io.objectbox:objectbox-android:4.3.0")
+    implementation("io.objectbox:objectbox-android:4.3.1")
 
     //datastore (náhrada za shared preferences) pro ukládání dat typu klíč hodnota
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("androidx.work:work-runtime-ktx:2.10.2")
+    implementation("androidx.work:work-runtime-ktx:2.10.3")
 
     // MapCompose
-    implementation("ovh.plrapps:mapcompose:3.1.0")
+    implementation("ovh.plrapps:mapcompose:3.2.0")
 
     implementation(libs.material3)
     implementation(libs.androidx.material3.window.size.class1)
@@ -123,8 +123,8 @@ dependencies {
 //    implementation(libs.proj4j.epsg)
     implementation("org.locationtech.proj4j:proj4j:1.4.1")
     implementation("org.locationtech.proj4j:proj4j-epsg:1.4.1")
-    implementation("io.objectbox:objectbox-kotlin:4.3.0")
-    kapt("io.objectbox:objectbox-processor:4.3.0")
+    implementation("io.objectbox:objectbox-kotlin:4.3.1")
+    kapt("io.objectbox:objectbox-processor:4.3.1")
     implementation("com.composables:icons-lucide-android:1.1.0")
 
     implementation("org.osmdroid:osmdroid-android:6.1.20")

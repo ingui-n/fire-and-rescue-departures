@@ -1,6 +1,7 @@
 package com.android.fire_and_rescue_departures.data
 
 sealed class DepartureTypes(val id: Int, val name: String) {
+    object All : DepartureTypes(0, "Všechny události")
     object Fire : DepartureTypes(3100, "Požár")
     object CarAccident : DepartureTypes(3200, "Dopravní nehoda")
     object LeakageOfDangerousSubstances : DepartureTypes(3400, "Únik nebezpečných látek")
@@ -14,6 +15,7 @@ sealed class DepartureTypes(val id: Int, val name: String) {
 
     companion object {
         val all = listOf(
+            All,
             Fire,
             CarAccident,
             LeakageOfDangerousSubstances,
@@ -26,7 +28,7 @@ sealed class DepartureTypes(val id: Int, val name: String) {
             TechnologicalTest
         )
 
-        fun fromId(id: Int): DepartureTypes? = all.find { it.id == id }
+        fun getDepartureTypeFromId(id: Int): DepartureTypes? = all.find { it.id == id }
         fun getAllIds(): List<Int> = all.map { it.id }
     }
 }

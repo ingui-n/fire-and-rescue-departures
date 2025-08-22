@@ -15,3 +15,7 @@ val regions = listOf(
 fun getRegionById(id: Int): Region? {
     return regions.find { id == it.id }
 }
+
+fun getRegionByName(name: String): Int? {
+    return regions.find { it.name == name }?.id
+}

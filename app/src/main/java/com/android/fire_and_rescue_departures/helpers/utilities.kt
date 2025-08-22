@@ -1,7 +1,15 @@
 package com.android.fire_and_rescue_departures.helpers
 
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
+import com.android.fire_and_rescue_departures.R
 import com.android.fire_and_rescue_departures.data.Departure
 import java.time.Instant
 import java.time.LocalDateTime
@@ -151,5 +159,56 @@ fun getDateTimeLongFromString(dateTime: String): Long {
         } catch (_: DateTimeParseException) {
             LocalDateTime.parse(trimmedDateTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         }
+    }
+}
+
+fun trimRegionFromString(region: String): String {
+    return region.lowercase()
+        .replace("kraj", "")
+        .trim()
+        .replaceFirstChar { it.uppercase() }
+}
+
+fun getIconByType(context: Context, type: Int, size: Int = 48, grayed: Boolean = false): Drawable {
+    data class DrawableIcon(val drawable: Int, val tint: Int)
+
+    val icon = when (type) {
+        3100 -> DrawableIcon(R.drawable.fire, Color.RED)
+        3200 -> DrawableIcon(R.drawable.car, Color.BLUE)
+        3400 -> DrawableIcon(R.drawable.water, Color.GREEN)
+        3500 -> DrawableIcon(R.drawable.axe, Color.rgb(139, 69, 19))
+        3550 -> DrawableIcon(R.drawable.person_standing, Color.rgb(191, 143, 17))
+        3700 -> DrawableIcon(R.drawable.circle_alert, Color.MAGENTA)
+        3600 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
+        3900 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
+        3800 -> DrawableIcon(R.drawable.bell_off, Color.rgb(102, 102, 0))
+        5000 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
+        else -> DrawableIcon(R.drawable.siren, Color.RED)
+    }
+
+    val drawable = ContextCompat.getDrawable(context, icon.drawable)?.mutate()
+    val bitmap = createBitmap(size, size)
+    val canvas = Canvas(bitmap)
+
+    drawable?.setTint(if (grayed) Color.GRAY else icon.tint)
+    drawable?.setBounds(0, 0, size, size)
+    drawable?.draw(canvas)
+
+    return bitmap.toDrawable(context.resources)
+}
+
+fun getDrawableByType(type: Int): Int {
+    return when (type) {
+        3100 -> R.drawable.fire
+        3200 -> R.drawable.car
+        3400 -> R.drawable.water
+        3500 -> R.drawable.axe
+        3550 -> R.drawable.person_standing
+        3700 -> R.drawable.circle_alert
+        3600 -> R.drawable.circle_alert
+        3900 -> R.drawable.circle_alert
+        3800 -> R.drawable.bell_off
+        5000 -> R.drawable.circle_alert
+        else -> R.drawable.siren
     }
 }

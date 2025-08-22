@@ -37,8 +37,8 @@ import com.android.fire_and_rescue_departures.data.DepartureStatus
 import com.android.fire_and_rescue_departures.data.DepartureTypes
 import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
+import com.android.fire_and_rescue_departures.helpers.getIconByType
 import com.android.fire_and_rescue_departures.helpers.longToIsoString
-import com.android.fire_and_rescue_departures.screens.getTypeIcon
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
@@ -52,7 +52,7 @@ fun DepartureCardItem(
 
     val startDateTime = getFormattedDateTime(departure.reportedDateTime)
     val isOpened = DepartureStatus.getOpened().contains(departure.state)
-    val type = DepartureTypes.fromId(departure.type)
+    val type = DepartureTypes.getDepartureTypeFromId(departure.type)
 
     fun handleOpenDetail() {
         navController.navigate(
@@ -108,7 +108,7 @@ fun DepartureCardItem(
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val icon = getTypeIcon(context, departure.type)
+                    val icon = getIconByType(context, departure.type)
 
                     Image(
                         painter = rememberDrawablePainter(icon),

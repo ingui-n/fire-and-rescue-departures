@@ -26,6 +26,7 @@ import com.android.fire_and_rescue_departures.layouts.DepartureListTopBar
 import com.android.fire_and_rescue_departures.layouts.DepartureReportTopBar
 import com.android.fire_and_rescue_departures.layouts.TopBar
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
+import com.android.fire_and_rescue_departures.viewmodels.DeparturesReportViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -40,12 +41,13 @@ fun MainScreen(navController: NavHostController) {
     val items = listOf(
         BottomNavItem.Departures,
         BottomNavItem.Map,
+        BottomNavItem.Report,
         BottomNavItem.Bookmarks,
-        BottomNavItem.QuestionsAndAnswers,
-        BottomNavItem.Report
+        BottomNavItem.QuestionsAndAnswers
     )
 
     val departureListViewModel: DeparturesListViewModel = koinViewModel()
+    val departureReportViewModel: DeparturesReportViewModel = koinViewModel()
 
     LaunchedEffect(Unit) {
         departureListViewModel.updateDeparturesList()
@@ -74,7 +76,7 @@ fun MainScreen(navController: NavHostController) {
                         UIText.DEPARTURES_LIST_TITLE.value
                     )
                 } else if (currentRoute == Routes.DeparturesReport.route) {
-                    DepartureReportTopBar(scrollBehavior)
+                    DepartureReportTopBar(departureReportViewModel, scrollBehavior)
                 } else {
                     TopBar(navController, scrollBehavior, currentRoute)
                 }
@@ -118,7 +120,11 @@ fun MainScreen(navController: NavHostController) {
                 }
             }
             composable(Routes.QuestionsAndAnswers.route) { QuestionsAndAnswersScreen() }
-            composable(Routes.DeparturesReport.route) { DeparturesReportScreen() }
+            composable(Routes.DeparturesReport.route) {
+                DeparturesReportScreen(
+                    departureReportViewModel
+                )
+            }
         }
     }
 }

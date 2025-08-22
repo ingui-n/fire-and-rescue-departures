@@ -47,6 +47,9 @@ class DeparturesListViewModel(
 ) : ViewModel() {
     val isLoading = MutableStateFlow(false)
 
+    private val _isFiltersSheetOpen = MutableStateFlow(false)
+    val isFiltersSheetOpen: StateFlow<Boolean> = _isFiltersSheetOpen.asStateFlow()
+
     private val filters = context.getSharedPreferences("filters", Context.MODE_PRIVATE)
     private val gson = Gson()
 
@@ -133,6 +136,10 @@ class DeparturesListViewModel(
 
     fun updateIsFilterChanged(boolean: Boolean) {
         _isFilterChanged.value = boolean
+    }
+
+    fun updateIsFiltersSheetOpen(boolean: Boolean) {
+        _isFiltersSheetOpen.value = boolean
     }
 
     fun updateStatusOpened(boolean: Boolean) {

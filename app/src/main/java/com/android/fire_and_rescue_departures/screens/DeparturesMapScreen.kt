@@ -1,9 +1,5 @@
 package com.android.fire_and_rescue_departures.screens
 
-import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -39,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.android.fire_and_rescue_departures.api.ApiResult
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
@@ -48,8 +43,6 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.config.Configuration
 import org.osmdroid.views.overlay.Marker
-import com.android.fire_and_rescue_departures.R
-import androidx.core.graphics.drawable.toDrawable
 import androidx.navigation.NavController
 import com.android.fire_and_rescue_departures.consts.Routes
 import com.android.fire_and_rescue_departures.consts.UIText
@@ -65,10 +58,10 @@ import org.koin.androidx.compose.koinViewModel
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import androidx.core.graphics.createBitmap
 import com.android.fire_and_rescue_departures.data.DepartureEntity
 import com.android.fire_and_rescue_departures.helpers.formatDescription
 import com.android.fire_and_rescue_departures.helpers.getFormattedDateTime
+import com.android.fire_and_rescue_departures.helpers.getIconByType
 import com.android.fire_and_rescue_departures.helpers.longToIsoString
 import androidx.compose.ui.graphics.Color as ComposeColor
 
@@ -163,7 +156,7 @@ fun DeparturesMapScreen(
 
                     departuresList.map { departure ->
                         if (departure.coordinateX != null && departure.coordinateY != null) {
-                            val icon = getTypeIcon(context, departure.type, 96)
+                            val icon = getIconByType(context, departure.type, 96)
 
                             departuresMapViewModel.addMarker(
                                 MarkerData(
@@ -213,7 +206,7 @@ fun DeparturesMapScreen(
 
     if (showBottomSheet && departureDetail != null) {
         val departureStatus = DepartureStatus.fromId(departureDetail!!.state)
-        val departureType = DepartureTypes.fromId(departureDetail!!.type)
+        val departureType = DepartureTypes.getDepartureTypeFromId(departureDetail!!.type)
         val departureStartDateTime = getFormattedDateTime(departureDetail!!.reportedDateTime)
         val isOpened = DepartureStatus.getOpened().contains(departureStatus!!.id)
 
@@ -254,7 +247,7 @@ fun DeparturesMapScreen(
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val icon = getTypeIcon(context, departureDetail!!.type)
+                    val icon = getIconByType(context, departureDetail!!.type)
 
                     Image(
                         painter = rememberDrawablePainter(icon),
@@ -441,32 +434,3 @@ fun DeparturesMapScreen(
         }
     }
 }
-
-fun getTypeIcon(context: Context, type: Int, size: Int = 48): Drawable {
-    data class DrawableIcon(val drawable: Int, val tint: Int)
-
-    val icon = when (type) {
-        3100 -> DrawableIcon(R.drawable.fire, Color.RED)
-        3200 -> DrawableIcon(R.drawable.car, Color.BLUE)
-        3400 -> DrawableIcon(R.drawable.water, Color.GREEN)
-        3500 -> DrawableIcon(R.drawable.axe, Color.rgb(139, 69, 19))
-        3550 -> DrawableIcon(R.drawable.person_standing, Color.rgb(191, 143, 17))
-        3700 -> DrawableIcon(R.drawable.circle_alert, Color.MAGENTA)
-        3600 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
-        3900 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
-        3800 -> DrawableIcon(R.drawable.bell_off, Color.rgb(102, 102, 0))
-        5000 -> DrawableIcon(R.drawable.circle_alert, Color.GRAY)
-        else -> DrawableIcon(R.drawable.siren, Color.RED)
-    }
-
-    val drawable = ContextCompat.getDrawable(context, icon.drawable)?.mutate()
-    val bitmap = createBitmap(size, size)
-    val canvas = Canvas(bitmap)
-
-    drawable?.setTint(icon.tint)
-    drawable?.setBounds(0, 0, size, size)
-    drawable?.draw(canvas)
-
-    return bitmap.toDrawable(context.resources)
-}
-

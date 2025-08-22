@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.android.fire_and_rescue_departures.helpers.PermissionHelper
@@ -21,11 +22,20 @@ class MainActivity : ComponentActivity() {
         val permissionHelper = PermissionHelper(this)
         permissionHelper.requestNotificationPermission()
 
+        val route = intent?.getStringExtra("nav_route")
+
         enableEdgeToEdge()
 
         setContent {
             BaseAppTheme {
                 val navController = rememberNavController()
+
+                LaunchedEffect(route) {
+                    route?.let {
+                        navController.navigate(it)
+                    }
+                }
+
                 MainScreen(navController)
             }
         }

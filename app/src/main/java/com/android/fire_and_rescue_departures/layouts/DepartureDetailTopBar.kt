@@ -62,7 +62,7 @@ fun DepartureDetailTopBar(
             val localDeparture = (departureDetailResult as ApiResult.Success).data
             departure = localDeparture
 
-            val departureType = DepartureTypes.fromId(localDeparture.type)
+            val departureType = DepartureTypes.getDepartureTypeFromId(localDeparture.type)
 
             if (departureType != null)
                 topBarTitle = departureType.name

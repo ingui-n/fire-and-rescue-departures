@@ -15,6 +15,7 @@ import com.android.fire_and_rescue_departures.data.MyObjectBox
 import com.android.fire_and_rescue_departures.data.ReportEntity
 import com.android.fire_and_rescue_departures.helpers.NotificationHelper
 import com.android.fire_and_rescue_departures.helpers.ScheduleAlarmHelper
+import com.android.fire_and_rescue_departures.helpers.ToastHelper
 import com.android.fire_and_rescue_departures.repository.AlarmReportRepository
 import com.android.fire_and_rescue_departures.repository.DepartureRepository
 import com.android.fire_and_rescue_departures.repository.DepartureSubtypesRepository
@@ -23,8 +24,9 @@ import com.android.fire_and_rescue_departures.viewmodels.DeparturesListViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesMapViewModel
 import com.android.fire_and_rescue_departures.viewmodels.DeparturesReportViewModel
 import io.objectbox.BoxStore
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.Response
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import org.koin.core.module.dsl.viewModel
@@ -48,6 +50,8 @@ val repositoryModule = module {
         AlarmReportRepository(
             get(named("reportBox")),
             get(named("departuresBox")),
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -80,11 +84,11 @@ val viewModelModule = module {
         )
     }
     viewModel { DeparturesMapViewModel() }
-    viewModel { DeparturesReportViewModel(get()) }
+    viewModel { DeparturesReportViewModel(get(), get()) }
 }
 
 val networkModule = module {
-    single { provideOkHttpClient() }
+    single { getUnsafeOkHttpClient() }
     single { provideRetrofit() }
     single { provideDeparturesApi(get()) }
     single { provideOSMApi(get()) }
@@ -111,47 +115,16 @@ val objectBoxModule = module {
 val helperModule = module {
     single { NotificationHelper(androidContext()) }
     single { ScheduleAlarmHelper(androidContext()) }
+    single { ToastHelper(androidContext()) }
 }
 
-fun provideOkHttpClient(): OkHttpClient {
-    val trustAllCerts = arrayOf<TrustManager>(
-        @SuppressLint("CustomX509TrustManager")
-        object : X509TrustManager {
-            @SuppressLint("TrustAllX509TrustManager")
-            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
-            }
-
-            @SuppressLint("TrustAllX509TrustManager")
-            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
-            }
-
-            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-        }
-    )
-
-    val sslContext = SSLContext.getInstance("SSL").apply {
-        init(null, trustAllCerts, SecureRandom())
+class UserAgentInterceptor(private val userAgent: String) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request().newBuilder()
+            .header("User-Agent", userAgent)
+            .build()
+        return chain.proceed(request)
     }
-
-    val sslSocketFactory = sslContext.socketFactory
-
-    val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
-    return OkHttpClient.Builder()
-        .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
-        .hostnameVerifier { _, _ -> true }
-        .addInterceptor(loggingInterceptor)
-        .build()
-
-
-    /*val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-    return OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)
-        .build()*/
 }
 
 fun getUnsafeOkHttpClient(): OkHttpClient {
@@ -180,10 +153,13 @@ fun getUnsafeOkHttpClient(): OkHttpClient {
 //            level = HttpLoggingInterceptor.Level.BODY
 //        }
 
+        val userAgent = "FireAndRescueDepartures/0.0.3 (https://github.com/ingui-n/fire-and-rescue-departures)"
+
         return OkHttpClient.Builder()
             .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
             .hostnameVerifier { _, _ -> true }
 //            .addInterceptor(loggingInterceptor)
+            .addInterceptor(UserAgentInterceptor(userAgent))
             .build()
 
     } catch (e: Exception) {

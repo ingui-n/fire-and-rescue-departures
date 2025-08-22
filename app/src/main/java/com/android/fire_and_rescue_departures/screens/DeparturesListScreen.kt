@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,18 +68,6 @@ fun DeparturesListScreen(
 
         is ApiResult.Error -> {
             departures = null
-
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = UIText.DEPARTURES_LIST_EMPTY_LIST.value,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-            }
         }
     }
 
@@ -88,7 +77,7 @@ fun DeparturesListScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            if (departures != null) {
+            if (departures != null && departures!!.isNotEmpty()) {
                 LazyColumn(
                     state = listState,
                 ) {
@@ -102,6 +91,36 @@ fun DeparturesListScreen(
                     }
                     item {
                         Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = UIText.DEPARTURES_LIST_EMPTY_LIST.value,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Try to tweak the filters or refresh.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.updateIsFiltersSheetOpen(true) }
+                        ) {
+                            Text("Edit filters")
+                        }
                     }
                 }
             }

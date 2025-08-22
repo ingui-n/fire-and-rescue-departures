@@ -23,7 +23,11 @@ fun buildDeparturesUrl(
 }
 
 fun buildMapyComAddressLink(x: Double, y: Double): String {
-    return "https://mapy.cz/turisticka?q=$y,$x"
+    return "https://mapy.com/fnc/v1/showmap?center=$x,$y&zoom=18&marker=true"
+}
+
+fun buildGoogleMapsAddressLink(x: Double, y: Double): String {
+    return "https://www.google.com/maps/search/?api=1&query=$y,$x"
 }
 
 fun buildDepartureAddress(departure: DepartureEntity): String {
@@ -64,7 +68,7 @@ fun buildDepartureSmallAddress(departure: Departure): String {
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun buildDepartureShareText(departure: DepartureEntity): String {
     val isOpened = DepartureStatus.getOpened().contains(departure.state)
-    val departureType = DepartureTypes.fromId(departure.type)
+    val departureType = DepartureTypes.getDepartureTypeFromId(departure.type)
     val departureAddress = buildDepartureAddress(departure)
     val departureStartDateTime = getFormattedDateTime(departure.reportedDateTime)
 
