@@ -125,7 +125,7 @@ fun DepartureListTopBar(
     var fromDatePickerState by remember {
         mutableStateOf(
             DatePickerState(
-                locale = Locale("cs", "CZ"),
+                locale = Locale.forLanguageTag("cs-CZ"),
                 initialSelectedDateMillis = fromDateTime.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
             )
         )
@@ -142,7 +142,7 @@ fun DepartureListTopBar(
     var toDatePickerState by remember {
         mutableStateOf(
             DatePickerState(
-                locale = Locale("cs", "CZ"),
+                locale = Locale.forLanguageTag("cs-CZ"),
                 initialSelectedDateMillis = toDateTime.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
             )
         )
@@ -179,7 +179,7 @@ fun DepartureListTopBar(
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun resetFromDatePickerState(millis: Long? = defaultFromDateMillis) {
         fromDatePickerState = DatePickerState(
-            locale = Locale("cs", "CZ"),
+            locale = Locale.forLanguageTag("cs-CZ"),
             initialSelectedDateMillis = millis,
             yearRange =
                 IntRange(
@@ -194,7 +194,7 @@ fun DepartureListTopBar(
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun resetToDatePickerState(millis: Long? = defaultToDateMillis) {
         toDatePickerState = DatePickerState(
-            locale = Locale("cs", "CZ"),
+            locale = Locale.forLanguageTag("cs-CZ"),
             initialSelectedDateMillis = millis,
             yearRange =
                 IntRange(

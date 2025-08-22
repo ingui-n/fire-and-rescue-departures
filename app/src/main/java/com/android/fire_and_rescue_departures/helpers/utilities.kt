@@ -89,7 +89,7 @@ fun getDepartureStartDateTime(departure: Departure?): LocalDateTime? {
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getFormattedDateTime(dateTime: String): String {
-    val czechLocale = Locale("cs", "CZ")
+    val czechLocale = Locale.forLanguageTag("cs-CZ")
     var pattern = "d. MMMM HH:mm"
 
     var convertedDateTime: LocalDateTime
@@ -133,7 +133,7 @@ fun getDateTimeFromString(dateTime: String): LocalDateTime {
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 fun getFormattedDateTime(dateTime: Long, pattern: String = "d. MMMM HH:mm"): String {
-    val czechLocale = Locale("cs", "CZ")
+    val czechLocale = Locale.forLanguageTag("cs-CZ")
     val instant = Instant.ofEpochMilli(dateTime)
     val zoneId = ZoneId.of("Europe/Prague")
     val localDateTime = LocalDateTime.ofInstant(instant, zoneId)
